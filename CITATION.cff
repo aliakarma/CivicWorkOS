@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+message: >-
+  If you use this repository, please cite the source manuscript it
+  implements. This repository is an author reference implementation
+  developed by Ali Akarma (co-author of the manuscript).
+title: >-
+  CivicWorkOS: A Capability-Preserving, Policy-Aware Multi-Agent
+  Framework for Human-AI-Robot Work Allocation and Distributional
+  Accountability in the AI City (reference implementation)
+type: software
+version: 0.1.0
+date-released: "2026-09-03"
+license: MIT
+preferred-citation:
+  type: article
+  title: >-
+    CivicWorkOS: A Capability-Preserving, Policy-Aware Multi-Agent
+    Framework for Human-AI-Robot Work Allocation and Distributional
+    Accountability in the AI City
+  authors:
+    - family-names: Syed
+      given-names: Toqeer Ali
+    - family-names: Akarma
+      given-names: Ali
+    - family-names: Kamal
+      given-names: Shahid
+    - family-names: Jan
+      given-names: Salman
+    - family-names: Alkhodre
+      given-names: Ahmad B.
+    - family-names: Jamal
+      given-names: Arshad
+  journal: Frontiers (Hypothesis and Theory article)
+  notes: >-
+    Submitted to the Frontiers Research Topic "Robots at Work: Who Wins,
+    Who Loses in the AI City." Corresponding author: Shahid Kamal
+    (shahid.kamal@mmu.edu.my). See CivicWorkOS.tex / CivicWorkOS.pdf in
+    the parent directory of this repository for the manuscript itself.

@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "civicworkos"
+version = "0.1.0"
+description = "Reference implementation of the CivicWorkOS formalism: a capability-preserving, policy-aware multi-agent framework for human-AI-robot work allocation (Frontiers Hypothesis and Theory article)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "CivicWorkOS repository maintainers" }]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "pydantic>=2.0,<3",
+    "PyYAML>=6.0,<7",
+    "PuLP>=2.7,<4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.4",
+    "mypy>=1.8",
+]
+
+[tool.setuptools.package-dir]
+"" = "src"
+sim = "sim"
+
+[tool.setuptools.packages.find]
+where = ["src", "."]
+include = ["civicworkos*", "sim*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+# Scripts intentionally insert the repo's src/ onto sys.path before
+# importing civicworkos, since they are meant to run standalone without
+# requiring an editable install first.
+"scripts/*.py" = ["E402"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
