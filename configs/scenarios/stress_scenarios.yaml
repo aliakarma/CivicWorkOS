@@ -1,0 +1,76 @@
+# The seven stress scenarios of Paper Sec. 6.6 / Suppl. Table S2.
+# This is a DESIGN ARTIFACT reproduced from the paper's protocol
+# specification, not a used or executed study. civicworkos.sim.stress
+# reads this file to parameterize the scenario injectors it implements;
+# the simulation testbed itself runs on synthetic demo data, clearly
+# labeled non-paper data (see docs/reproducibility.md).
+#
+# Acute scenarios (i-iv) are injected independently in separate runs to
+# avoid confounding; chronic (v-vii) run the full horizon.
+scenarios:
+  - id: i
+    name: ai_service_outage
+    kind: acute
+    description: 100% of AI-agent capacity removed for 72 simulated hours at year 5.
+    capacity_removed_fraction: 1.0
+    affected_channel: ai
+    duration_hours: 72
+    at_year: 5
+    evaluated_by: "hours to restore kappa_s * D_peak_s"
+
+  - id: ii
+    name: cyberattack_on_fleet_c2
+    kind: acute
+    description: >
+      100% of robot-fleet capacity removed for 168 hours; Policy Twin
+      raises affected classes to Zone Z3.
+    capacity_removed_fraction: 1.0
+    affected_channel: robot
+    duration_hours: 168
+    at_year: 5
+    evaluated_by: "recovery hours; zone transitions"
+
+  - id: iii
+    name: robot_fleet_mechanical_failure
+    kind: acute
+    description: 40% of one fleet class removed for 30 days.
+    capacity_removed_fraction: 0.4
+    affected_channel: robot
+    duration_hours: 720
+    at_year: 5
+    evaluated_by: "recovery hours"
+
+  - id: iv
+    name: emergency_demand_surge
+    kind: acute
+    description: Arrival rate x3 for 14 days in emergency-logistics and facility sectors.
+    arrival_rate_multiplier: 3.0
+    duration_hours: 336
+    at_year: 5
+    affected_sectors: [emergency_logistics, municipal_facility_management]
+    evaluated_by: "recovery hours"
+
+  - id: v
+    name: retirement_wave
+    kind: chronic
+    description: r_k raised from baseline to 0.25 for two consecutive budget periods.
+    r_k_override: 0.25
+    duration_budget_periods: 2
+    evaluated_by: "trajectories of B_k, lambda_k, Lambda_k, human-mode share; oscillation check (P7)"
+
+  - id: vi
+    name: rapid_ai_capability_improvement
+    kind: chronic
+    description: AI-agent Q and Tr raised 20% over 3 years.
+    quality_trust_uplift: 0.20
+    duration_years: 3
+    evaluated_by: "Z2 -> Z1 transition counts"
+
+  - id: vii
+    name: new_municipal_regulation
+    kind: chronic
+    description: >
+      A new "prohibit" rule added to the Policy Twin at year 6, without
+      redeploying the market.
+    at_year: 6
+    evaluated_by: "constraint-update latency; allocation shift"

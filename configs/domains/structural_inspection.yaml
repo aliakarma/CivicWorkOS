@@ -1,0 +1,42 @@
+# Governance artifact: per-domain HCPB / access / transition parameters
+# for the "structural_inspection" capability domain -- the domain of the
+# worked bridge-inspection example (Paper Sec. 5.3).
+#
+# N_k, r_k, h_k, eta_k, B_k_min, theta_kg (0.68/0.32) reproduce the
+# worked example's stated inputs exactly, so this file doubles as a
+# fixture for tests/smoke/test_worked_example.py. hybrid_phi values are
+# the worked example's illustrative phi_m for H+A, H+R, H+A+R.
+domain: structural_inspection
+version: "v2026-09-01"
+effective_date: 2026-09-01
+
+N_k: 24          # practising inspectors (Paper Sec. 5.3)
+r_k: 0.12        # annual attrition
+h_k: 600         # hours to independent competence
+eta_k: 1.2       # replacement-generation factor
+B_k_min: 1200    # hours/year floor
+
+hybrid_phi:
+  H+A: 0.75
+  H+R: 0.70
+  H+A+R: 0.55
+
+groups: [men, women]
+
+# theta_kg: TARGET composition from the qualified local labour pool
+# (0.68/0.32), explicitly NOT the incumbent share (0.875/0.125) -- Paper
+# Sec. 5.3's "who receives the protected work" example.
+theta_kg:
+  men: 0.68
+  women: 0.32
+epsilon_k: 0.05
+
+# tau_g (Just Transition displacement ceiling, Eq. 12) is NOT given
+# anywhere in the worked example -- the paper never assigns it a value
+# for this domain. Left UNSET rather than defaulted, per Paper Sec. 5.1:
+# an unset parameter must be unbound and FLAGGED for the panel, not
+# silently assumed. See DomainConfig.unset_parameters().
+tau_g:
+  men: UNSET
+  women: UNSET
+chi_min: 0.0

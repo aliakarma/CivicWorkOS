@@ -1,0 +1,25 @@
+# Worker group taxonomy: Paper Sec. 3.1.
+#
+# g in G is defined as the CROSS PRODUCT of four dimensions:
+#   occupational_class x gender x contract_status x district_of_residence
+#
+# contract_status distinguishes payroll from non-payroll workers
+# (permanent / fixed_term / contracted / platform_mediated). This
+# distinction is what makes report Sec. 20's "excluded workforce"
+# limitation visible: N_k(t) (Eq. 9) is drawn from municipal workforce
+# records and structurally does not see `contracted` or
+# `platform_mediated` workers, so they are ineligible assignees under
+# Eq. 10 and unprotected by Eq. 12 -- "the framework's most consequential
+# distributional limitation" (Paper Sec. 5.3, Sec. 8.1).
+#
+# This file documents the taxonomy; it is not consumed by a typed loader
+# in this repository (see docs/assumptions.md A5) -- per-domain group
+# lists and targets are configured directly in configs/domains/*.yaml.
+dimensions:
+  occupational_class: ["inspector", "technician", "administrator", "operator"]
+  gender: ["men", "women", "nonbinary_or_unspecified"]
+  contract_status: ["permanent", "fixed_term", "contracted", "platform_mediated"]
+  district_of_residence: []  # municipality-specific; not enumerated here
+
+payroll_contract_statuses: ["permanent", "fixed_term"]
+non_payroll_contract_statuses: ["contracted", "platform_mediated"]
