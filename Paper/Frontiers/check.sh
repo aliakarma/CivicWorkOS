@@ -64,6 +64,12 @@ echo "======================================================================"
 echo
 echo "Build"
 if (( DO_BUILD )); then
+  # The two documents cross-reference each other through xr, so on a clean
+  # tree each needs the other's .aux before its references can resolve. A
+  # silent warm-up pass of both makes the reported pass below converge.
+  for doc in $SUPP $MAIN; do
+    latexmk -pdf -interaction=nonstopmode "$doc" > /dev/null 2>&1 || true
+  done
   for doc in $MAIN $SUPP; do
     if latexmk -pdf -interaction=nonstopmode -halt-on-error "$doc" \
          > "/tmp/latexmk-$doc.out" 2>&1; then

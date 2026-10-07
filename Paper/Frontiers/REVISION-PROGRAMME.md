@@ -380,11 +380,11 @@ That lands at the line. Build in margin by taking a further ~300 words out of §
 
 **Success criteria**
 
-- ☐ `texcount -inc -total -q CivicWorkOS.tex` ≤ **11,800** (margin below the 12,000 ceiling).
-- ☐ `\extraAuth` word/figure/table counts match the measured values exactly.
-- ☐ Supplementary builds cleanly and `grep -ci undefined` on **both** logs returns 0.
-- ☐ Page count ≤ ~30 (sanity check that the reduction is real and not absorbed by float reflow).
-- ☐ A co-author who did not do the cutting reads the compressed §2 and §3 and confirms no argument was lost. This gate needs a human; nothing mechanical catches a deleted premise.
+- ☑ `texcount -inc -total -q CivicWorkOS.tex` ≤ **11,800** (margin below the 12,000 ceiling). 11,596, from 19,636 at the start of the phase. Per section: §1 644, §2 1,257, §3 1,948, §4 1,806, §5 1,388, §6 2,068, §9 1,539, §10 432. Margin for Phase 6 is only ~200 words; its GCC and CMDP additions (~1,000) will have to be paid for from §3/§4 as item 5 of Phase 6 anticipates.
+- ☑ `\extraAuth` word/figure/table counts match the measured values exactly. 11,319 words on Frontiers' basis (texcount total less the abstract, 238, acknowledgment, 20, and funding, 20, which the author guidelines exclude; section titles and captions are already outside texcount's text total), 3 figures, 10 tables. Recompute in Phase 8.
+- ☑ Supplementary builds cleanly and `grep -ci undefined` on **both** logs returns 0, from a clean tree. A cold build first exposed 24 undefined cross-document references because `check.sh` built each document once; it now runs a silent warm-up pass of both. The supplement gained a bibliography and six sections: S6 Extended Related Work, S7 Framework Specification Detail, S8 Proofs, Normalization Anchors and Notation, S9 Data Protection Impact Assessment Measures, S10 Two Parameter Shocks in Full.
+- ◐ Page count ≤ ~30 (sanity check that the reduction is real and not absorbed by float reflow). 34 pages in total, but the body ends on page 30 and pages 30–34 are the reference list; the body ended on page 46 before this phase. The reduction is real; the literal threshold is not met.
+- ☐ A co-author who did not do the cutting reads the compressed §2 and §3 and confirms no argument was lost. This gate needs a human; nothing mechanical catches a deleted premise. **Open.** All 78 citation keys cited before Phase 4 are still cited in the main text, and Appendix S6 repeats the uncompressed survey; and four merged-citation sentences were checked for misattribution during compression (Mentges, Frey–Osborne/Arntz, HAT2026, the just-transition bundle).
 
 **Effort:** 24–32 hours (3–4 days). This is the single largest phase. Compression is slower than writing.
 **Compute:** `texcount` after each section ≈ 2 s × ~20 runs; 10–15 full builds of main + supplement ≈ **20 minutes** total.

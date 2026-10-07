@@ -336,4 +336,253 @@ Ratings are collected in two rounds on a Delphi pattern. Round one is independen
 
 The protocol involves human participants giving professional judgments about their own work and their colleagues' development, so it requires institutional ethics approval and written informed consent before any data collection. Ratings are held pseudonymously, group-level results only are reported, and no rating is disclosable to a participant's employer in a form that identifies the rater. Because the ratings concern developmental progression, which affects the participants' own access to protected work, the consent form must state that participation is voluntary and that a refusal has no effect on the participant's allocation under any deployed system.
 
+\section{Extended Related Work}
+\label{app:rw}
+
+This appendix gives the full survey that Section~\ref{sec:relatedwork} condenses. The main text states the positioning; what follows states it work by work, so that a reader checking whether a particular literature has been engaged, and on what terms, can do so without reconstructing it from the compressed account.
+
+\subsection{Human--Robot and Human--AI Task Allocation}
+\label{app:rw-hrta}
+
+Ranz et al.~\cite{Ranz2017} proposed capability-based task allocation by matching task requirements to human and robot capabilities, establishing that allocation should depend on task--agent fit rather than on automation for its own sake, and Dorri et al.~\cite{Dorri2018} situate this within multi-agent systems theory, surveying the coordination and negotiation mechanisms that later allocation-market designs, including ours, build upon. Subsequent work expanded the criteria. El Makrini et al.~\cite{Makrini2019} considered ergonomics in collaborative assembly. Merlo et al.~\cite{Merlo2023} proposed dynamic role allocation using AND/OR graphs and ergonomic risk estimation, redirecting high-risk actions away from humans. Noormohammadi-Asl et al.~\cite{Noormohammadi2025} incorporated human leading and following preferences into adaptive robot planning, and Ali et al.~\cite{Ali2022} model artificial trust explicitly, re-optimizing allocation as measured trust evolves. Meseguer-Valenzuela and Blanes Noguera~\cite{MeseguerValenzuela2025} review allocation for mobile robot fleets, close to the sanitation, inspection, and logistics fleets a city must coordinate, and Hady et al.~\cite{Hady2025} survey multi-agent reinforcement learning for resource allocation. At city scale, Zhao et al.~\cite{Zhao2023} allocate spatio-temporal sensing tasks across a mobile crowd using a knowledge graph, which is the closest published treatment of municipal task allocation as a graph-structured assignment problem.
+
+These contributions target an operational team and optimize performance, productivity, ergonomics, preferences, or trust. They do not ask whether repeated local decisions erode the human experience needed to sustain future expertise, emergency substitution capacity, or resilience, nor, when that erosion occurs, whose expertise is eroded first.
+
+\subsection{Workforce Scheduling with Skill and Training Constraints}
+\label{app:rw-sched}
+
+The operations-research literature has treated constrained training-hour allocation for fifty years, and the capability budget of Section~\ref{sec:hcpb} is a member of that family rather than a departure from it. Burke et al.~\cite{Burke2004} survey nurse rostering, where skill mix, supervision ratios, and qualification maintenance appear as hard constraints on a staffing decision, and Van den Bergh et al.~\cite{VandenBergh2013} review personnel scheduling more broadly, including the cross-training and skill-acquisition variants that decide how many staff reach a given competence by a given date.
+
+Two differences matter for a municipal allocation mechanism. Rostering assumes the work exists and asks who covers it. Our decision is prior: whether the work is performed by a human at all, and therefore whether the developmental content exists to be allocated. And rostering optimizes coverage subject to skill constraints, whereas the objective here prices the future value of the practice itself. What we take from this literature is its discipline about supervision ratios and qualification accounting, which is exactly what Section~\ref{sec:hcpb} repairs relative to earlier presentations of this framework.
+
+\subsection{Automation, Skill Erosion, and Capability Formation}
+\label{app:rw-skill}
+
+The concern at the center of this paper is not new, and we want its lineage on the record before claiming anything. Bainbridge~\cite{Bainbridge1983} identified the ironies of automation: automating the easy parts of a task degrades operator skill through disuse and leaves the human unable to intervene competently at exactly the moment intervention is required. Endsley and Kiris~\cite{EndsleyKiris1995} formalized the resulting out-of-the-loop performance problem, and Parasuraman and Riley~\cite{ParasuramanRiley1997} organized the failure modes into use, misuse, disuse, and abuse. Sheridan and Verplank~\cite{SheridanVerplank1978} supplied the levels-of-automation scale, generalized by Parasuraman et al.~\cite{Parasuraman2000} across information acquisition, analysis, decision, and action. Shneiderman~\cite{Shneiderman2020} recasts the trade-off as two independent axes of automation and human control, and Zuboff~\cite{Zuboff1988} draws the organizational distinction between automating and informating work, which is the distinction between a task that displaces a practitioner and one that develops them.
+
+The quantitative basis for calibrating skill loss also exists. Arthur et al.~\cite{Arthur1998} meta-analyzed skill decay over non-use intervals across task types, and Tatel and Ackerman~\cite{TatelAckerman2025} update that estimate for procedural skills specifically, reporting retention as a function of retention interval, task closed-loop character, and rehearsal. These are the instruments a city would use to calibrate $D^{skill}$ against observed practice gaps rather than against expert judgment alone.
+
+Three consequences follow. The mechanism of skill erosion is established, so CivicWorkOS must not claim to have discovered it. That literature is written at the scale of the individual operator, whereas the municipal question, whether a city's whole expertise pipeline is drawn down across thousands of independent decisions in dozens of services, is what we address. And it warrants treating fallback capacity as distinct from present competence, which is why $D^{fall}$ is separated from $D^{skill}$ in Section~\ref{sec:problem}.
+
+The debt framing likewise has a source. Cunningham~\cite{Cunningham1992} introduced technical debt as the deferred cost of an expedient implementation choice, and Sculley et al.~\cite{Sculley2015} extended it to machine-learning systems, where the accumulating liability is configuration, data dependency, and entanglement rather than code. Civic Automation Debt is the same accounting move applied to a public workforce: a locally optimal allocation creates a liability settled later, by someone else, invisible on the ledger that authorized it. Rashidi~\cite{Rashidi2026} carries the concern into the agentic-AI era, arguing that AI is the first technology capable of automating the entry-level cognitive work through which expertise and professional judgment are formed.
+
+\subsection{Fair Division and the Distribution of Scarce Opportunities}
+\label{app:rw-fair}
+
+Protected developmental practice is a scarce, valuable, and unequally distributed good, which places the Capability Access Constraint of Section~\ref{sec:access} inside the fair-division literature. Bouveret et al.~\cite{Bouveret2016} survey fair allocation of indivisible goods and the standard solution concepts, proportionality, envy-freeness, and their relaxations, and Caragiannis et al.~\cite{Caragiannis2019} show that maximizing Nash social welfare achieves envy-freeness up to one good together with Pareto optimality.
+
+We use a share constraint against a policy-set target rather than an envy-based criterion, and the reason is institutional rather than technical. Envy-freeness is defined over agents' own valuations of the bundles they receive, whereas a municipal panel must defend a distribution against a statutory equality duty and a published labor-pool composition, which are external standards. A Nash-welfare objective over practitioner valuations would also make the allocation depend on elicited worker preferences that no city currently records and that would be strategically reported if it did. The cost of this choice is that our constraint offers no envy guarantee, which we state plainly in Section~\ref{sec:limitations}.
+
+\subsection{Contestability and Algorithmic Due Process}
+\label{app:rw-contest}
+
+A framework that prices civic costs must show its working, or the pricing is unfalsifiable in the way Eubanks~\cite{Eubanks2018} documents for opaque public-sector scoring. Citron~\cite{Citron2008} established the technological-due-process argument that automated administrative decisions require notice, a record, and a route to challenge, and Citron and Pasquale~\cite{CitronPasquale2014} extended it to scoring systems whose inputs the subject cannot inspect. Almada~\cite{Almada2019} shows that a right to human intervention is empty unless the system is designed so a human can actually alter the outcome, and Vaccaro et al.~\cite{Vaccaro2019} document how contestability functions in deployed systems. Alfrink et al.~\cite{Alfrink2023} synthesize this into a design framework of five system features and six development practices, of which the evidentiary record, the intervention request, and the ability to challenge the system's rules rather than one decision are the ones Section~\ref{sec:contest} implements. Moon and Guha~\cite{MoonGuha2026} show that formally fair public-sector prioritization rules can still produce outcomes citizens and caseworkers experience as unjust, which is why the procedure includes a systemic trigger and not only an individual remedy. Article 22 of the General Data Protection Regulation~\cite{GDPR2016} gives the legal floor in EU jurisdictions: a right to obtain human intervention, to express a point of view, and to contest a decision based solely on automated processing.
+
+\subsection{Human--AI Teams, Algorithmic Management, and Ethics}
+\label{app:rw-hat}
+
+AI is increasingly a collaborator and a manager rather than an analytical tool. A systematic review of human--AI teams identifies task allocation, communication, interaction, and cognitive augmentation as the major enablers of effective collaboration~\cite{HAT2026}, and algorithmic management already allocates work, issues instructions, monitors performance, and supports managerial decisions~\cite{syed2026fedagent,OECDAM2025}. The OECD notes benefits in consistency, productivity, and decision support alongside concerns about autonomy, privacy, transparency, accountability, discrimination, and safety~\cite{OECD2026Policy}, and Wischnewski et al.~\cite{Wischnewski2023} show these persist even where automation performs well, because miscalibrated operator trust degrades team performance independently of system accuracy. Lipsky~\cite{Lipsky2010} supplies the reason a municipal setting differs: public services are constituted in practice by the discretionary judgments of street-level bureaucrats, so a mechanism that removes discretion does not merely change throughput, it changes what the service is.
+
+Callari et al.~\cite{Callari2024} developed an ethical framework for human--robot collaboration emphasizing autonomy, decision authority, dignity, liability, safety, privacy, and worker resilience. Binding regulation is beginning to formalize parts of this agenda. The EU AI Act~\cite{EUAIAct2024} requires high-risk systems to allow meaningful human oversight by competent, authorized personnel, and the revised ISO~10218 series specifies safety requirements wherever a robot shares space or a task with a human, with Part~1 covering the robot itself~\cite{ISO2025} and Part~2 covering integration, applications, and cells~\cite{ISO2025b}, which is the level at which municipal fleet middleware operates. Such frameworks specify principles or hard physical constraints for designers to respect. They do not supply a computational mechanism translating those principles into real-time decisions about who performs a task.
+
+\subsection{AI, Employment, and Who Bears the Cost}
+\label{app:rw-labor}
+
+The employment effect of AI mixes automation, augmentation, task transformation, and organizational change. Autor et al.~\cite{AutorLevyMurnane2003} established the task-based framework on which most estimates rest, and Autor~\cite{Autor2015} argues that displacement is routinely overstated because it ignores the complementarities that create new work. Frey and Osborne~\cite{FreyOsborne2017} estimate occupation-level computerization susceptibility from task composition, and Arntz et al.~\cite{Arntz2016} show that the same evidence analyzed at task rather than occupation level cuts the headline exposure figure by roughly a factor of five. We cite the two together deliberately, because the distance between them is the distance between a policy of pre-emptive displacement management and one of task redesign, and only the second is actionable by an allocation mechanism. Eloundou et al.~\cite{Eloundou2024} extend the task-based approach to large language models, finding far more occupations with at least half their tasks exposed to LLM-enabled automation than to robotics alone, and Acemoglu and Restrepo~\cite{AcemogluRestrepo2020} provide causal rather than exposure-based evidence that robot adoption reduces employment and wages in the most exposed US commuting zones, concentrated among lower-skilled workers.
+
+Exposure is not only occupational. Wood et al.~\cite{Wood2019} document how algorithmic control in the gig economy produces autonomy and precarity simultaneously and unevenly. De Stefano~\cite{DeStefano2016} shows that on-demand and crowdwork arrangements sit largely outside the labor protections municipal employment presumes, and Eubanks~\cite{Eubanks2018} documents how automated public-service decision systems concentrate their errors on the poorest residents. The ILO just-transition guidelines~\cite{ILO2015} set out what an institutional response must contain, namely social dialogue, active labor-market policy, skills anticipation, and social protection, while the OECD~\cite{OECD2026Policy} organizes the same agenda for AI, the World Economic Forum~\cite{WEF2025} finds most employers expecting substantial reskilling needs within five years, and the ILO alongside the United Nations Economic and Social Commission for Western Asia (ESCWA)~\cite{ILOESCWA2026} model Arab-region labor-market transformation to 2035.
+
+Two normative literatures supply our vocabulary for what is preserved. Sen~\cite{Sen1999} and Nussbaum~\cite{Nussbaum2011} define capability as the real freedom to do and to be, which is what a developmental task confers and an automated one withholds. We use the word in that sense, not as a synonym for skill inventory. Ostrom~\cite{Ostrom1990} shows that renewable but depletable shared resources are sustained by monitored, boundary-defined, locally governed appropriation rules rather than by privatization or prohibition, which is the institutional form the budget of Section~\ref{sec:hcpb} takes. What none of these supplies is a decision procedure a city can run on Tuesday morning, for one task, that prices exposure before the allocation is made rather than compensating for it afterwards.
+
+\subsection{Robots, Public Space, and Agentic-City Governance}
+\label{app:rw-govern}
+
+Mintrom et al.~\cite{Mintrom2025} find that policies for public-space robots concentrate on safety and privacy while broader social and economic wellbeing receives less attention, motivating anticipatory governance and citizen co-design. Phothong et al.~\cite{Phothong2026} and Nechesov and Ruponen~\cite{NechesovRuponen2024} provide early evidence that structured co-creation and transparent civic-intelligence platforms raise measured trust in AI-enabled municipal decisions, and Aldhi et al.~\cite{Aldhi2025} show that the managerial digital readiness of the municipal workforce itself mediates whether smart-city governance reforms take effect, which is a workforce precondition our framework assumes rather than establishes.
+
+Digital twins are the emerging technical substrate. Temple et al.~\cite{Temple2024} review how city digital twins already assist policy decisions, and D\'iaz-Sarachaga~\cite{DiazSarachaga2025} proposes a governance-assessment framework for them, arguing that institutional and accountability questions have received less attention than technical ones. That is the closest antecedent to the Policy Digital Twin of Section~\ref{sec:policytwin}, and the relationship is worth stating precisely: D\'iaz-Sarachaga~\cite{DiazSarachaga2025} asks whether a deployed urban digital twin is well governed and supplies criteria for assessing it, whereas we ask the converse, whether governance can itself be represented inside the twin as an executable constraint on the decisions the twin makes. Those criteria apply to our Policy Digital Twin as forcefully as to any other component. Ben-Daya et al.~\cite{BenDaya2026} press the same point for critical infrastructure, arguing that a twin used in governance must be able to challenge the assumptions of its own model. Qanazi et al.~\cite{Qanazi2025} review the social dimensions urban twins omit, and the Civic Capability Ledger of Section~\ref{sec:layer2} is one such dimension made computable. On the standards side, the ISO~23247 series supplies a reference architecture for digital twins of production systems and the observable-element modeling it depends on~\cite{Shao2023}, which is the closest published standard for the Urban Task Digital Twin, though it does not cover the policy or workforce elements.
+
+Resilience is related but distinct. Mentges et al.~\cite{Mentges2023} show the term is used inconsistently across the critical-infrastructure literature, while Lian et al.~\cite{Lian2025} show that emergency-response networks recover faster when reassignment after a failure is planned in advance.
+
+
+\section{Framework Specification Detail}
+\label{app:framework}
+
+This appendix holds the specification detail that Section~\ref{sec:framework} states in summary. Nothing here is required to follow the optimization program of Section~\ref{sec:math} or the worked allocation of Section~\ref{sec:worked}; it is the material a municipality implementing the framework would need, and a reviewer checking that each declared quantity is in fact defined.
+
+\subsection{Worker-Group Construction}
+\label{app:framework-groups}
+
+Worker groups $\mathcal{G}$ are not the Cartesian product of the protected attributes. That construction yields hundreds of intersectional cells for a mid-size city, nearly all of them empty in a single domain, each carrying a constraint. Instead the Weight Review Panel of Section~\ref{sec:feedback} declares an attribute set $\mathcal{J}$ (occupational class, gender, contract status, district of residence) and a \textit{coarsening} that produces $\mathcal{G}$ subject to a minimum cell size $n^{min}$, with a default of $n^{min}=30$ practitioners per cell per domain. Where the full intersection does not meet $n^{min}$, the panel declares marginal groups, one partition per attribute, which yields $\sum_{j\in\mathcal{J}}|A_j|$ constraints rather than $\prod_{j\in\mathcal{J}}|A_j|$. Attributes may be intersected only where the resulting cells meet $n^{min}$ in the domain concerned.
+
+Cells below $n^{min}$ are reported descriptively with their sample size and are not the subject of a binding constraint. The reason is twofold: a target computed over a handful of practitioners is statistically meaningless, and disclosing per-cell allocation statistics for a handful of identifiable people is itself a data-protection harm, which Section~\ref{sec:dpia} treats. The worked example of Section~\ref{sec:worked} therefore uses a single marginal partition, which is the correct treatment for a domain of 24 practitioners rather than a simplification of a richer one.
+
+\subsection{The Four Remaining Debt Components}
+\label{app:framework-dterms}
+
+Section~\ref{sec:framework} states $D^{skill}$ in full as equation~\eqref{eq:dskill}. The remaining four components of equation~\eqref{eq:cad} are each normalized to $[0,1]$ and defined over observables the Civic Capability Ledger and the accountability register already carry.
+
+$D^{fall}_{i,m}$ is the fractional reduction in the fallback capacity $F_{\kappa(i)}$ of equation~\eqref{eq:fallback} that mode $m$ would cause if generalized across the domain. $D^{acct}_{i,m}$ is the share of decision steps lacking a designated accountable human, weighted by the task criticality $crit_i$. $D^{dep}_{i,m}$ is the share of automated inputs drawn from a single vendor with no qualified alternative, following the reasoning by which Sculley et al.~\cite{Sculley2015} treat undeclared dependencies as the dominant hidden liability of deployed machine-learning systems. $D^{trans}_{i,m}$ is the evaluated share of affected workers without an identified reskilling pathway, computed per group before aggregation.
+
+\subsection{Populating the Task Vector}
+\label{app:framework-task}
+
+The nine dimensions of equation~\eqref{eq:task} are normalized to $[0,1]$ and populated from sources already used in human--robot collaboration task profiling. Cognitive, physical, and empathy demand ($cog_i$, $phy_i$, $emp_i$) come from standardized task-demand instruments or expert ergonomic rating~\cite{Makrini2019,Merlo2023}. Safety risk $risk_i$ comes from incident history or hazard classification. The legal-authority requirement $auth_i$ and privacy sensitivity $priv_i$ come from the Policy Digital Twin's rule encoding for the sector. Urgency $urg_i$ comes from service-level targets. Human learning value $learn_i$ comes from a structured judgment of developmental value for a junior practitioner, elicited by the protocol of Appendix~\ref{app:elicit}. Criticality $crit_i$ comes from the service's criticality tier in continuity planning.
+
+\subsection{A Worked Policy Encoding}
+\label{app:framework-policy}
+
+Article~14 of the EU AI Act~\cite{EUAIAct2024} requires that high-risk systems be effectively overseen by natural persons with the competence, training, and authority to intervene. For a municipal structural-inspection determination the encoding under equation~\eqref{eq:rule} is as follows.
+
+\begin{center}
+	\small
+	\begin{tabularx}{\textwidth}{@{}lX@{}}
+		\toprule
+		\textbf{Field} & \textbf{Value}\\
+		\midrule
+		scope & $\sigma(i)=\textit{structural-inspection} \ \wedge\ m \in \{A,R,A{+}R,H{+}A,H{+}A{+}R\}$\\
+		guard & $auth_i \geq 0.8 \ \wedge\ crit_i \geq 0.7$\\
+		status & \textit{restrict}, with roster guard $\exists w\in a:\ \mathrm{stage}_k(w,t)=\textit{competent} \wedge \mathrm{license}(w)$\\
+		authority & regulation (EU AI Act Art.~14) with national implementing instrument\\
+		validity & $[\,2026\text{-}08\text{-}02,\ \infty\,)$\\
+		provenance & Panel decision WRP-2026-014 (Workforce Review Panel), encoding reference AIA-14-STRUCT-01 (EU AI Act Art.~14)\\
+		\bottomrule
+	\end{tabularx}
+\end{center}
+
+Under this rule a fully autonomous mode is not prohibited outright. It is restricted to rosters carrying a licensed competent practitioner, which is exactly the difference between a prohibition and an oversight obligation, and is why the two intermediate statuses are kept distinct.
+
+\subsection{The Reskilling Gating Predicate}
+\label{app:framework-gating}
+
+Earlier presentations of this framework paired the Just Transition Constraint~\eqref{eq:justtransition} with a reskilling-coverage requirement $\chi_g \geq \chi^{min}$ placed inside the optimization program. That was a category error. The quantity $\chi_g$, the share of affected workers in group $g$ with a funded reskilling or redeployment pathway, is a municipal budget fact and not a function of the allocation $\mathbf{x}$: the optimizer can neither satisfy nor violate it, so stating it as a constraint on $\mathbf{x}$ misrepresents where the obligation sits.
+
+It belongs in the governance layer, and is enforced there as a \textit{gating predicate} evaluated by the Policy Digital Twin. Any staffed mode whose adoption would increase $\Delta_g$ for a group with $\chi_g < \chi^{min}$ receives status \textit{prohibit} until the pathway is funded. Displacement is thereby conditioned on transition support without pretending that the allocator controls the training budget.
+
+\subsection{Policy Conflict Order and Consistency Check}
+\label{app:framework-conflict}
+
+Taking the join in equation~\eqref{eq:policy} means the most restrictive applicable rule wins, which is the correct default for a public body. Two rules conflict only when a municipality wishes a lower-ranked rule to \textit{relax} a higher-ranked one, which the twin refuses: a rule may be overridden only by a rule of strictly higher $\mathrm{authority}$, and among equal authority by the later $\mathrm{validity}$ start, with any remaining tie raised to the panel rather than resolved silently. A nightly consistency check reports every scope for which the join is \textit{prohibit} across all modes, since such a scope has no executable allocation and must resolve to Zone~Z4 human-reserved execution or be corrected.
+
+The two intermediate statuses are executable rather than descriptive. \textit{allow-with-oversight} binds the staffed mode to a named reviewer, adds that reviewer's time to $Cost_{i,m,a}$, and raises $\phi_m$ by the reviewer's assessed share of retained judgment. \textit{restrict} narrows the roster set $\mathcal{A}_{i,m}$ to rosters meeting the guard's stated minimum human share or stage requirement. Under the encoding of Appendix~\ref{app:framework-policy}, a fully autonomous mode is therefore restricted to rosters carrying a licensed competent practitioner rather than prohibited outright, which is the difference between a prohibition and an oversight obligation and the reason the two statuses are kept distinct. Algorithm~\ref{alg:scv} implements both.
+
+\subsection{The Four Channels of Developmental Content}
+\label{app:framework-channels}
+
+Separating flows from stocks removes double-counting between the objective's terms. It does not mean that developmental content reaches the decision only once. It arrives through four distinct channels: the priced term $w_9\alpha D^{skill}$ in equation~\eqref{eq:scv}, the hard budget~\eqref{eq:hcpb}, the capability dual $\lambda_k$ in equation~\eqref{eq:aug}, and the access dual $\nu_{k,g}$ in the same equation. These are not redundant, because they answer different questions: how much developmental practice is worth, how much must be delivered, what the marginal hour costs, and who receives it. They are nonetheless four channels and not one, and the Lagrangian channel is numerically the largest. Section~\ref{sec:pricediag} makes that comparison explicit through the flip threshold $w_9^\star$, and Section~\ref{sec:pricing} evaluates it for the worked case.
+
+\subsection{The Allocation Market}
+\label{app:framework-market}
+
+Ten specialized agents propose and price candidate staffed modes. Five are \textit{capability agents} estimating what a staffed mode can do: the Human Workforce Agent, the AI Capability Broker, the Robot Fleet Agent, the Safety Agent, and the Fiscal and Energy Agent. Five are \textit{civic agents} estimating what it costs the city in stocks it must later replenish: the Workforce Development Agent ($\phi_m$, $\psi_a$, $D^{skill}$), the Equity and Inclusion Agent ($Eq^{srv}$, $D^{trans}$, and the group shares in~\eqref{eq:accessshare}), the Privacy and Rights Agent ($Pr$), the Resilience Agent ($D^{fall}$, $Res^{(n_s)}_s$), and the Policy Guardian Agent, which executes~\eqref{eq:policy} and holds veto authority.
+
+The market protocol is a single-round sealed-bid call. The Policy Guardian Agent publishes the task and the surviving roster set. Each agent returns its terms for every surviving staffed mode within a fixed deadline, with a declared default used where an agent does not answer in time. The auctioneer computes~\eqref{eq:scv} and~\eqref{eq:aug}, applies the admissibility test~\eqref{eq:admis}, and awards. No agent sees another's bid before submitting, so there is no bidding dynamic to converge, and the per-task decision terminates in one round with a bounded number of queries. The terms most vulnerable to strategic reporting are cross-validated against independently observed outcomes, which is a partial response to the principal--agent exposure recorded in Section~\ref{sec:threats}.
+
+\section{Proofs, Normalization Anchors, and Notation}
+\label{app:proofs}
+
+This appendix holds the proofs of the four propositions of Section~\ref{sec:architecture}, the anchored normalization of the debt components, the construction of the duals, and the notation table. The proposition statements remain in the main text.
+
+\subsection{Proofs of the Propositions}
+\label{app:proofs-props}
+
+\paragraph{Proof of Proposition~\ref{prop:feasibility}.}
+	Every term of the left side of~\eqref{eq:hcpb} is bounded above by $\ell_i\bar\zeta_k$, and~\eqref{eq:prog-assign} selects exactly one staffed mode per task, so $\Lambda_k \leq \bar\zeta_k\sum_i \ell_i = \Phi_k\bar\zeta_k$. Substituting~\eqref{eq:hcpb-estimator} and solving for $r_k$ gives~\eqref{eq:rcrit}.
+
+\paragraph{Proof of Proposition~\ref{prop:intake}.}
+	A developing practitioner accrues $\ell_i\phi_m\omega_{a,w}=learn_i\,d_i\,\phi_m\,\omega_{a,w}$ qualified-practice hours per task while present for $d_i$ clock hours, hence $\overline{learn}_k\bar\phi_k\bar\omega_k$ hours per clock hour, hence $\Theta_k\overline{learn}_k\bar\phi_k\bar\omega_k$ per period. Dividing $h_k=\overline{learn}_k h^{raw}_k$ from~\eqref{eq:hconv} by that rate cancels $\overline{learn}_k$ and gives~\eqref{eq:tau}. The domain completes $B_k/h_k=\eta_k N_k r_k$ practitioners per period, and by Little's law a queue with that completion rate and residence time $\tau_k$ holds $\eta_k N_k r_k \tau_k$ members.
+
+\paragraph{Proof of Proposition~\ref{prop:price}.}
+	Immediate from the definition of the infimum and the continuity of~\eqref{eq:scv} in $w_9$.
+
+\paragraph{Proof of Proposition~\ref{prop:violation}.}
+	The resource bracket of~\eqref{eq:admis} rejects any staffed mode whose consumption exceeds the remaining availability, so the running total never exceeds $U_r$ and the bound is exact. For displacement the bracket tests $\Delta_g(t^+)\leq\tau_g$ on the post-execution state, so no accepted task can leave $\Delta_g$ above $\tau_g$, and the tightest bound on the final value is therefore $\tau_g$ itself. Where the estimate $\delta^{disp}_g$ used at decision time is revised after execution by at most $\bar\delta_g$, the realized value can exceed $\tau_g$ by at most that revision, which is one task's worth and does not accumulate because every subsequent task is tested against the updated state.
+
+\subsection{Anchored Normalization of the Debt Components}
+\label{app:proofs-anchors}
+
+The five debt components carry no windowed normalization. Each is constructed as a ratio whose denominator is fixed externally, which places each debt term in $[0,1]$ as defined in equation~\eqref{eq:anchors}:
+\begin{equation}
+	\begin{aligned}
+		D^{skill}_{i,m,a} &= 1-\phi_m\psi_a &&\text{against the task's own full developmental content } \ell_i,\\
+		D^{fall}_{i,m} &= \min\!\Big(1,\ \Delta F_{\kappa(i)}(m)\,/\,\rho_{\sigma(i)}\Big) &&\text{against the statutory reserve } \rho_s=\kappa_s D^{peak}_s,\\
+		D^{acct}_{i,m} &= crit_i \cdot n^{unacct}_{i,m}/n^{steps}_{i,m} &&\text{against the decision-step count of the task},\\
+		D^{dep}_{i,m} &= n^{single}_{i,m}/n^{auto}_{i,m} &&\text{against the automated-input count of the mode},\\
+		D^{trans}_{i,m} &= \textstyle\sum_{g}\varpi_{g}(i,m)\,\bigl(1-\chi_g\bigr) &&\text{against funded transition coverage } \chi_g,
+	\end{aligned}
+	\label{eq:anchors}
+\end{equation}
+where $\Delta F_k(m)$ is the fallback reduction mode $m$ would cause if generalized across the domain and $\varpi_g(i,m)$ is group $g$'s share of the workers whose allocated hours the mode reduces. All five denominators are external to observed performance, so a decade of decline registers as a decade of decline. Note that $D^{trans}$ is anchored to the reskilling coverage $\chi_g$ and not to the displacement ceiling $\tau_g$: the ceiling is a hard constraint on $\Delta_g$, and the priced quantity is the unfunded share of the burden.
+
+\subsection{Duals from a Binary Program}
+\label{app:proofs-duals}
+
+Program~\eqref{eq:program} is integral, and integer programs have no exact duals. We take $\lambda,\mu,\nu,\varrho,\upsilon$ from the LP relaxation solved at the root node, which is a valid subgradient of the relaxed value function and the standard construction for Lagrangian decomposition of assignment problems. The consequence is that~\eqref{eq:aug} approximates the relaxed rather than the integral program, and the approximation error is bounded by the integrality gap, which the solver reports at each rebalance and which the protocol of Appendix~\ref{app:protocol} requires to be tabulated at every cadence. In the worked case of Section~\ref{sec:worked} that gap is $7.8\times10^{-6}$ objective units per task, because a single coupling constraint plus the simplex constraint admits at most two active staffed modes at an LP vertex and the domain's task count is large enough that rounding costs almost nothing. We do not claim this holds at every scale, and the reported gap is the diagnostic that says when it stops holding.
+
+\subsection{Notation}
+\label{app:proofs-notation}
+
+Table~\ref{tab:notation} summarizes the symbols of Sections~\ref{sec:problem} through~\ref{sec:zones}. Two collisions present in earlier presentations have been removed: the resilience \textit{contribution} term formerly written $Res_{i,m}$ no longer exists, since resilience enters only through $D^{fall}$ and constraint~\eqref{eq:res3r}, leaving $Res^{(n)}_s(t)$ as the unique bearer of that symbol, and safety is written $S_{i,m,a}$ throughout with no separate $Safety$. The single-assignee function of earlier presentations, written inconsistently as $\mathrm{assignee}(i,m)$ and $g(i,m)$, is replaced throughout by the roster group shares $\pi_{a,g}$ of~\eqref{eq:groupshare}.
+
+\begin{table}[!htbp]
+	\caption{Notation. Indices: $i$ task, $m$ execution mode, $a$ roster, $w$ practitioner, $k$ capability domain, $s$ critical service, $g$ worker group, $r$ resource, $t$ time.}
+	\label{tab:notation}
+	\footnotesize
+	\begin{tabularx}{\textwidth}{lX}
+		\toprule
+		\textbf{Symbol} & \textbf{Meaning}\\
+		\midrule
+		$x_{i,m,a}$ & Binary decision variable: task $i$ executed in mode $m$ with roster $a$, Equation~\eqref{eq:decisionvar}\\
+		$\mathcal{M}$; $\mathcal{A}_{i,m}$; $\mathcal{A}(i,t)$ & Mode set; feasible rosters; admissible staffed modes after test~\eqref{eq:admis}\\
+		$T_i$; $d_i$ & Task requirement vector and expected duration in hours, Equation~\eqref{eq:task}\\
+		$\ell_i$ & Developmental content $learn_i d_i$ in qualified-practice hours, Equation~\eqref{eq:ell}\\
+		$c_w(t)$; $\mathrm{stage}_k(w,t)$ & Practitioner $w$'s accrued practice and career stage, Equation~\eqref{eq:stage}\\
+		$\omega_{a,w}$; $\psi_a$; $\pi_{a,g}$, $\pi^{dev}_{a,g}$ & Roster work split; developmental eligibility~\eqref{eq:psi}; group shares~\eqref{eq:groupshare}\\
+		$\phi_m$ & Share of $\ell_i$ experienced by a human under mode $m$, Equation~\eqref{eq:phi}\\
+		$\sigma(i)$, $\kappa(i)$ & Maps from task $i$ to its critical service and capability domain\\
+		$L_k(t)$; $F_k(t)$; $E_{k,g}$ & Ledger entry~\eqref{eq:ledger}; fallback capacity~\eqref{eq:fallback}; pipeline by group\\
+		$\rho$; $\mathcal{P}(T_i,m,a,t)$ & Policy rule~\eqref{eq:rule}; status join over firing rules~\eqref{eq:policy}\\
+		$B_k(t)$; $\Lambda_k(t)$; $\bar B_k(t)$; $\delta_k(t)$ & Budget, accrued practice, pro-rated trajectory, catch-up increment~\eqref{eq:catchup}\\
+		$\eta_k, r_k, N_k, N^{dev}_k, h_k, h^{raw}_k, B^{min}_k$ & Replacement factor, attrition, competent and developing headcount, competence hours (weighted and raw), budget floor\\
+		$\Phi_k$; $\bar\zeta_k$; $r^{crit}_k$; $\tau_k$; $\hat n_k$ & Developmental content supply, maximum credit, critical attrition~\eqref{eq:rcrit}, formation time~\eqref{eq:tau}, intake requirement~\eqref{eq:intake}\\
+		$\Pi_{k,g}$, $\theta_{k,g}$, $\varepsilon_k$, $n^{min}$ & Realized share, target share, tolerance, minimum group cell size\\
+		$\Delta_g$, $\tau_g$, $\chi_g$, $\chi^{min}$ & Group displacement, ceiling, funded reskilling coverage and its floor\\
+		$Res^{(n)}_s$, $\rho_s$, $\kappa_s$, $D^{peak}_s$, $n_s$, $\xi_{s,k}$ & Surviving capacity~\eqref{eq:res-def}, threshold, demand share, peak demand, contingency order, domain draw share\\
+		$Q,S,P,Eq^{srv},Tr,Cost,En,Pr$ & Flow terms of $SCV$, all in $[0,1]$, Equation~\eqref{eq:scv}\\
+		$D^{skill},D^{fall},D^{acct},D^{dep},D^{trans}$ & Stock-change components of $CAD$, all in $[0,1]$, Equations~\eqref{eq:cad} and~\eqref{eq:anchors}\\
+		$w_1,\ldots,w_9$; $\alpha,\ldots,\epsilon$; $w_9^\star$ & Objective weights, debt weights, and the flip threshold of Proposition~\ref{prop:price}\\
+		$\lambda_k,\mu_s,\nu_{k,g},\varrho_g,\upsilon_r$ & Dual prices of~\eqref{eq:prog-hcpb},~\eqref{eq:prog-res},~\eqref{eq:prog-access},~\eqref{eq:prog-just},~\eqref{eq:prog-cap}\\
+		$u_{i,m,a,r}$, $U_r$; $S^{min}_i$ & Resource consumption and availability; safety floor $risk_i\,crit_i$\\
+		\bottomrule
+	\end{tabularx}
+\end{table}
+
+\section{Data Protection Impact Assessment Measures}
+\label{app:dpia}
+
+Section~\ref{sec:dpia} establishes that the Civic Capability Ledger is high-risk processing under the GDPR~\cite{GDPR2016} and that an Article~35 impact assessment is mandatory before deployment. This appendix sets out the four measures the design assumes that assessment will contain.
+
+\textit{Minimization by aggregation.} The constraints need $\Pi_{k,g}$ and $\Lambda_k$, which are aggregates. Only the career-stage test~\eqref{eq:stage} and the roster construction need per-practitioner data, and both need only the boolean $c_w(t) < h_k$ and the practitioner's availability, not the full practice history. The ledger therefore stores $c_w$ at the granularity certification already requires and exposes only the boolean to the allocator.
+
+\textit{Separation of the protected attribute from the allocator.} Group membership is held by the Equity and Inclusion Agent and returned to the market only as the aggregate share $\pi^{dev}_{a,g}$ for a candidate roster. The optimizer never receives an individual's protected attributes.
+
+\textit{Small-cell suppression.} The $n^{min}$ rule of Section~\ref{sec:problem} is a disclosure control as much as a statistical one. Publishing per-cell practice shares for a cell of three people identifies those three people, which is why cells below $n^{min}$ are reported descriptively with sample sizes and are not the subject of a binding constraint.
+
+\textit{Article 22 and the human decision.} An allocation decided by~\eqref{eq:argmax} without human involvement is a decision based solely on automated processing where it significantly affects the worker, which developmental access and displacement do. The contestability procedure of Section~\ref{sec:contest} supplies the Article 22(3) safeguards, namely the right to obtain human intervention, to express a point of view, and to contest the decision, and the Z3 re-decision remedy is that human intervention in operational form. Zone assignment is therefore not only a safety mechanism but a data-protection one, and a city that places worker-affecting classes in Z1 should expect to defend that under Article 22 rather than only under the AI Act.
+
+\section{Two Parameter Shocks in Full}
+\label{app:shocks}
+
+This appendix carries the two parameter shocks of Section~\ref{sec:shocks} through every step of the arithmetic. Every quantity is exact arithmetic on the model of Section~\ref{sec:worked} at the stated parameter values; none is a simulation output.
+
+The sweep of Section~\ref{sec:sensitivity} varies one parameter at a time around the operating point. Two particular displacements are worth carrying through in full, because they are the two regimes Proposition~\ref{prop:feasibility} separates and because a city will meet both. Everything in this subsection is exact arithmetic on the model at the stated parameter values. Nothing here is a simulation output, and the behaviour of an implementation under stochastic arrivals is a separate question that Section~\ref{sec:protocol} specifies and this article does not answer.
+
+\textit{Shock one: a retirement wave inside the feasible region.} Raise attrition from $r_k = 0.12$ to $0.14$, which is inside the critical rate of $0.1418$ at which Proposition~\ref{prop:feasibility} fails for this domain. Equation~\eqref{eq:hcpb-estimator} expands the budget from 4{,}976.64 to $1.2 \times 24 \times 0.14 \times 1440 = 5{,}806.08$ hours, so the required mean credited share rises from 0.2962 to 0.3456. The two active staffed modes are unchanged, so the tie condition of~\eqref{eq:lambdaworked} is unchanged and $\lambda_k$ remains 0.0454: the price of an hour does not move, because the same pair of modes still brackets the requirement. What moves is the mix. The optimum shifts from 28.3\% to 94.1\% robot-assisted human work, since $H{+}R/a_1$ is the only admissible mode whose credited share exceeds the new requirement, and the cost of preservation rises from 4.34\% to 9.56\%. The domain is then operating at $5806.08/5880 = 98.7\%$ of the ceiling Proposition~\ref{prop:feasibility} sets. This is the stabilizing direction the capability feedback is designed to have, and it is worth naming what the arithmetic does \textit{not} establish: that an implementation updating duals at a finite rebalance cadence converges to this point rather than oscillating around it. Proposition~\ref{prop:violation} bounds the drift between rebalances by one task's worth; it does not bound the trajectory, and no result in this article does.
+
+\textit{Shock two: a retirement wave outside it.} Raise attrition to $r_k = 0.25$. The budget becomes $B_k = 10{,}368$ hours against the domain ceiling $\Phi_k\bar\zeta_k = 5{,}880$, so the deficit is 4{,}488 hours, or $4488/1440 = 3.12$ competent-equivalents a year that cannot be formed under \textit{any} allocation of this task stream. The required mean credited share of $10368/16800 = 0.6171$ exceeds both the roster-guard ceiling $\bar\zeta_k = 0.35$ for the admissible modes and the absolute supervision ratio of 0.50 that one developing practitioner per lead implies. Proposition~\ref{prop:feasibility} is violated by arithmetic before any dynamics arise, and the escalation of Section~\ref{sec:feasibility} is what the framework has to offer. Its four options are computable and we state each with its magnitude: permitting two developing practitioners per lead raises $\bar\zeta_k$ to $0.70 \times 2/3 = 0.467$ and leaves a residual deficit of 2{,}528 hours; expanding the supervised stream to $10368/(8 \times 0.35) = 3{,}703$ inspections a year closes it; lowering $\eta_k$ to $5880/(24 \times 0.25 \times 1440) = 0.68$ closes it by deciding not to replace the full cadre, which is a structural contraction and should be recorded as one; and accepting the deficit logs a 3.12-practitioner annual shortfall against a named decision-maker.
+
+The second shock carries the more useful lesson, and it is a lesson about task structure rather than about recruitment. The binding quantity is $\Phi_k\bar\zeta_k$, the practice the task stream can carry, not the number of people a city is willing to hire. A municipality facing this attrition shock could recruit thirty trainees and still fail to avert the shortfall, because the inspection stream supports at most $21{,}000/1{,}500 = 14$ supervised trainee posts at the prevailing automation level. When a capability budget becomes infeasible, the remedy is in the allocation or in the scope of the cadre the city intends to replace. It is not in the intake alone, and a workforce plan that treats it as a hiring problem will spend a recruitment budget and still lose the capability.
+
+\bibliographystyle{Frontiers-Harvard}
+\bibliography{references}
+
 \end{document}
