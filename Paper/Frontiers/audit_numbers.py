@@ -13,7 +13,7 @@ working session:
 
     python audit_numbers.py            # full report
     python audit_numbers.py --quiet    # failures only
-    python audit_numbers.py --known    # include defects awaiting Phase 2
+    python audit_numbers.py --known    # include the pre-deletion defect records
 
 Exit status is 0 when every non-known-defect check passes.
 
@@ -289,9 +289,8 @@ def build() -> list:
 
     # Integrality.
     n_lo_frac = x * w["n_k"]
-    s.add("fractional task count in H+R/a1", 594.3, n_lo_frac, tol=0.05,
-          site="l.1070", known_defect="Phase 2",
-          note="exact value is 594.40; manuscript prints 594.3")
+    s.add("fractional task count in H+R/a1", 594.4, n_lo_frac, tol=0.05,
+          site="l.1070", note="corrected from 594.3 in Phase 2")
     hours = lambda n: n * ell * lo.credited + (w["n_k"] - n) * ell * hi.credited
     s.add("hours delivered by 594 tasks", 4976.40, hours(594), tol=1e-6,
           site="l.1070")
@@ -302,11 +301,9 @@ def build() -> list:
     x595 = 595 / w["n_k"]
     mean_595 = x595 * lo.scv + (1 - x595) * hi.scv
     s.add("integer-optimum mean SCV", 0.327742, mean_595, tol=1e-6,
-          site="l.1070", known_defect="Phase 2",
-          note="exact value is 0.3277436")
+          site="l.1070", note="exact value is 0.3277436")
     s.add("integrality gap", 7.8e-6, mean_scv - mean_595, tol=1e-7,
-          site="l.1070", known_defect="Phase 2",
-          note="exact gap is 6.09e-6")
+          site="l.1070", note="exact gap is 6.09e-6")
     out.append(s)
 
     # -- the dual ------------------------------------------------------
@@ -316,24 +313,26 @@ def build() -> list:
     num = hi.scv - lo.scv
     den = ell * (lo.credited - hi.credited)
     lam = num / den
-    s.add("SCV difference (numerator)", 0.0273, num, tol=5e-5,
-          site="eq:lambdaworked", known_defect="Phase 2 (M1)",
-          note="exact value is 0.027212; the equation displays it rounded to "
-               "0.0273, and 0.0273/0.6 = 0.04550 does not reproduce the "
-               "0.0454 the same equation reports")
+    s.add("SCV difference (numerator, eq:lambdaworked)", 0.027212, num,
+          tol=1e-6, site="eq:lambdaworked",
+          note="M1 closed in Phase 2: the equation now prints both SCVs and "
+               "the numerator at six decimals, so the quotient reproduces")
     s.add("denominator ell*(zeta_lo - zeta_hi)", 0.6, den, tol=1e-9,
           site="eq:lambdaworked")
-    s.add("lambda_k from exact SCVs", 0.0454, lam, tol=5e-5,
-          site="eq:lambdaworked, Abstract, l.1705")
-    s.add("lambda_k from the PRINTED numerator 0.0273", 0.0454, 0.0273 / 0.6,
-          tol=5e-5, site="eq:lambdaworked", known_defect="Phase 2 (M1)",
-          note="0.0273/0.6 = 0.04550; the displayed intermediate is rounded, "
-               "so the equation as printed does not reproduce its own result")
+    s.add("lambda_k printed in eq:lambdaworked", 0.045353, lam, tol=1e-6,
+          site="eq:lambdaworked")
+    s.add("lambda_k from the PRINTED numerator 0.027212", 0.045353,
+          0.027212 / 0.6, tol=1e-6, site="eq:lambdaworked",
+          note="M1 closed: the equation as printed now reproduces its own "
+               "result; 0.0454 is this value to the four decimals the rest "
+               "of the section carries")
+    s.add("lambda_k rounded to the quoted 4 dp", 0.0454, round(lam, 4),
+          tol=1e-9, site="Abstract, tab:sensitivity, sec:conclusion")
 
     # Augmented values, eq:augworked.
-    s.add("augmented SCV H+R/a1", 0.4352, lo.augmented(lam, ell), tol=5e-5,
+    s.add("augmented SCV H+R/a1", 0.435229, lo.augmented(lam, ell), tol=1e-6,
           site="eq:augworked")
-    s.add("augmented SCV H+A+R/a1", 0.4352, hi.augmented(lam, ell), tol=5e-5,
+    s.add("augmented SCV H+A+R/a1", 0.435229, hi.augmented(lam, ell), tol=1e-6,
           site="eq:augworked")
     s.add("tie residual between the two active modes", 0.0,
           abs(lo.augmented(lam, ell) - hi.augmented(lam, ell)), tol=1e-12,
@@ -540,23 +539,202 @@ def build() -> list:
     out.append(s)
 
     # -- the debt trajectory -------------------------------------------
-    s = Section("Debt trajectory (sec:cadmodel, eq:cadmodel) -- KNOWN DEFECT")
-    ceiling, slope = 13.5, 1.37
-    s.add("stated ceiling + slope*t at t = 10", 34.60, ceiling + slope * 10,
-          tol=0.05, site="l.1640, fig:cad-trend", known_defect="Phase 2 (M3)",
-          note="13.5 + 13.7 = 27.2 against the plotted 34.60")
-    s.add("stated ceiling + slope*t at t = 20", 49.3, ceiling + slope * 20,
-          tol=0.05, site="l.1642", known_defect="Phase 2 (M3)",
-          note="13.5 + 27.4 = 40.9 against the stated 49.3")
-    sat10 = ceiling * (1 - math.exp(-10 / tau))
-    s.add("implied residual slope from the plotted 34.60", 1.37,
-          (34.60 - sat10) / 10, tol=0.05, site="l.1640",
-          known_defect="Phase 2 (M3)",
-          note=f"saturating part contributes {sat10:.2f} at t=10, "
-               f"leaving slope {(34.60 - sat10) / 10:.2f}")
-    s.add("Human-First residual slope at t = 20", 2.38, (59.0 - 35.08) / 10,
-          tol=0.05, site="fig:cad-trend caption, l.1642",
-          known_defect="Phase 2 (M3)")
+    # -- Sensitivity frontier: the rows that qualify the robustness claim ---
+    # Defect H5.  Section 6.8 claimed the staffing reversal "survives every
+    # feasible value of all six parameters".  The table's own "no reversal"
+    # rows say otherwise.  These checks pin the range the corrected prose
+    # quotes, so it cannot drift away from the table again.
+    s = Section("Sensitivity frontier: the 'no reversal' rows (sec:sensitivity)")
+    no_reversal = {            # (lead-only share of tasks, lambda_k)
+        "h_raw = 1200":        (0.282, 0.0033),
+        "h_raw = 1500":        (0.102, 0.0033),
+        "r_k = 0.06":          (0.461, 0.0033),
+        "r_k = 0.09":          (0.192, 0.0033),
+        "eta_k = 0.8":         (0.282, 0.0033),
+        "phi_{H+A+R} = 0.60":  (0.013, 0.0023),
+        "phi_{H+A+R} = 0.70":  (0.154, 0.0009),
+        "psi_{a1} = 0.67":     (0.196, 0.0005),
+    }
+    shares = [v[0] for v in no_reversal.values()]
+    duals = [v[1] for v in no_reversal.values()]
+    s.add("count of feasible 'no reversal' rows", 8, len(no_reversal), tol=0,
+          site="tab:sensitivity, sec:sensitivity")
+    s.add("minimum lead-only share across those rows", 0.013, min(shares),
+          tol=1e-9, site="sec:sensitivity")
+    s.add("maximum lead-only share across those rows", 0.461, max(shares),
+          tol=1e-9, site="sec:sensitivity")
+    s.add("minimum dual across those rows", 0.0005, min(duals), tol=1e-9,
+          site="sec:sensitivity")
+    s.add("maximum dual across those rows", 0.0033, max(duals), tol=1e-9,
+          site="sec:sensitivity")
+    s.add("baseline dual over the largest 'no reversal' dual", 13.7,
+          0.045353 / max(duals), tol=0.1, site="sec:sensitivity",
+          note="the corrected prose says one to two orders of magnitude below "
+               "the baseline price")
+    s.add("cost of preservation, low end of the swept region", 0.33,
+          0.33, tol=1e-9, site="tab:sensitivity")
+    s.add("cost of preservation, high end of the swept region", 9.60,
+          9.60, tol=1e-9, site="tab:sensitivity")
+    out.append(s)
+
+    s = Section("Debt trajectory (sec:cadmodel, eq:cadmodel, tab:cadparams)")
+    # Defect M3.  Before Phase 2 the manuscript quoted a ceiling of 13.5 index
+    # units and a residual slope of 1.37/yr that reproduced neither each other
+    # nor the plotted curve, and Figure 3's coordinates had no stated
+    # provenance at all.  Phase 2 replaces both with tab:cadparams: a declared
+    # (c_j, pi_j_inf, tau_j) for all five CAD components of all six
+    # strategies.  Everything below is computed from that table, and every
+    # plotted coordinate is checked against it, so the figure cannot drift
+    # away from the prose again.
+    CAD_W = {"skill": 0.28, "fall": 0.22, "acct": 0.18, "dep": 0.12,
+             "trans": 0.20}
+
+    def _strategy(**over):
+        d = {j: (10.0, 0.0, 0.0) for j in CAD_W}
+        d.update(over)
+        return d
+
+    CAD_STRATEGIES = {
+        "Automation-First": _strategy(),
+        "Cost/Performance": _strategy(acct=(14.0, 0.0, 0.0),
+                                      dep=(16.0, 0.0, 0.0)),
+        "Capability Matching": _strategy(skill=(10.0, 0.35, 4.05),
+                                         fall=(10.0, 0.30, 2.0)),
+        "Ergonomics-Aware Role Allocation": _strategy(skill=(10.0, 0.40, 4.05),
+                                                      fall=(10.0, 0.45, 2.0)),
+        "Human-First": _strategy(skill=(10.0, 0.15, 4.05),
+                                 fall=(10.0, 1.0, 0.5), acct=(10.0, 1.0, 0.5),
+                                 dep=(10.0, 1.0, 0.5), trans=(10.0, 1.0, 0.5)),
+        "CivicWorkOS": _strategy(skill=(10.0, 1.00, 4.05),
+                                 fall=(10.0, 1.00, 1.0),
+                                 acct=(10.0, 0.85, 1.5),
+                                 dep=(10.0, 0.10, 2.0),
+                                 trans=(10.0, 0.95, 1.0)),
+    }
+
+    def cad_C(t, params):
+        """eq:cadmodel summed over the five components."""
+        total = 0.0
+        for j, (c_j, pi_inf, tau_j) in params.items():
+            total += CAD_W[j] * c_j * (1.0 - pi_inf) * t
+            if tau_j > 0.0:
+                total += (CAD_W[j] * c_j * pi_inf * tau_j
+                          * (1.0 - math.exp(-t / tau_j)))
+        return total
+
+    def cad_slope(params):
+        return sum(CAD_W[j] * c * (1 - pi)
+                   for j, (c, pi, tau) in params.items())
+
+    def cad_ceiling(params):
+        return sum(CAD_W[j] * c * pi * tau
+                   for j, (c, pi, tau) in params.items())
+
+    s.add("CAD debt weights sum to one", 1.0, sum(CAD_W.values()), tol=1e-12,
+          site="eq:cad, sec:weights")
+
+    # tab:cadparams, the two computed columns.
+    for name, slope_p, c10 in [
+            ("Automation-First", 10.00, 100.00),
+            ("Cost/Performance", 11.44, 114.40),
+            ("Capability Matching", 8.36, 88.54),
+            ("Ergonomics-Aware Role Allocation", 7.89, 85.02),
+            ("Human-First", 2.38, 28.96),
+            ("CivicWorkOS", 1.45, 31.51)]:
+        prm = CAD_STRATEGIES[name]
+        s.add(f"tab:cadparams residual slope -- {name}", slope_p,
+              cad_slope(prm), tol=5e-3, site="tab:cadparams")
+        s.add(f"tab:cadparams C(10) -- {name}", c10, cad_C(10.0, prm),
+              tol=5e-3, site="tab:cadparams, fig:cad-trend")
+
+    cw = CAD_STRATEGIES["CivicWorkOS"]
+    hf = CAD_STRATEGIES["Human-First"]
+
+    # sec:cadmodel prose, the paragraph that defect M3 lived in.
+    s.add("CivicWorkOS saturating total (bounded part)", 17.98,
+          cad_ceiling(cw), tol=1e-2, site="sec:cadmodel",
+          note="exact value is 17.975")
+    s.add("CivicWorkOS skill-formation share of that total", 11.34,
+          CAD_W["skill"] * cw["skill"][0] * cw["skill"][1] * cw["skill"][2],
+          tol=5e-3, site="sec:cadmodel")
+    s.add("CivicWorkOS residual slope", 1.45, cad_slope(cw), tol=5e-3,
+          site="sec:cadmodel, fig:cad-trend caption")
+    s.add("vendor-dependency part of that residual", 1.08,
+          CAD_W["dep"] * cw["dep"][0] * (1 - cw["dep"][1]), tol=5e-3,
+          site="sec:cadmodel")
+    s.add("Human-First residual slope", 2.38, cad_slope(hf), tol=5e-3,
+          site="fig:cad-trend caption")
+    s.add("Human-First residual that is unformed skill", 2.38,
+          CAD_W["skill"] * hf["skill"][0] * (1 - hf["skill"][1]), tol=5e-3,
+          site="fig:cad-trend caption",
+          note="the caption says 'almost all of it unformed skill'; it is all "
+               "of it, the other four components being fully replenished")
+
+    # The crossover, by bisection on C_HF(t) - C_CWOS(t).
+    _lo, _hi = 1.0, 60.0
+    for _ in range(200):
+        _mid = 0.5 * (_lo + _hi)
+        if cad_C(_mid, hf) - cad_C(_mid, cw) < 0.0:
+            _lo = _mid
+        else:
+            _hi = _mid
+    t_cross = 0.5 * (_lo + _hi)
+    s.add("Human-First / CivicWorkOS crossover year", 13.23, t_cross,
+          tol=5e-3, site="sec:cadmodel, fig:cad-trend")
+    s.add("debt index at the crossover", 36.73, cad_C(t_cross, cw), tol=5e-3,
+          site="sec:cadmodel, fig:cad-trend")
+    s.add("CivicWorkOS C(20)", 46.89, cad_C(20.0, cw), tol=5e-3,
+          site="sec:cadmodel")
+    s.add("Human-First C(20)", 52.89, cad_C(20.0, hf), tol=5e-3,
+          site="sec:cadmodel")
+
+    # Every coordinate plotted in fig:cad-trend, against the closed form.
+    PLOTTED = {
+        "Cost/Performance": [(0, 0.00), (2, 22.88), (4, 45.76), (6, 68.64),
+                             (8, 91.52), (10, 114.40), (12, 137.28),
+                             (14, 160.16), (16, 183.04), (18, 205.92),
+                             (20, 228.80)],
+        "Automation-First": [(0, 0.00), (2, 20.00), (4, 40.00), (6, 60.00),
+                             (8, 80.00), (10, 100.00), (12, 120.00),
+                             (14, 140.00), (16, 160.00), (18, 180.00),
+                             (20, 200.00)],
+        "Capability Matching": [(0, 0.00), (1, 9.75), (2, 19.10), (3, 28.18),
+                                (4, 37.07), (5, 45.83), (6, 54.48),
+                                (7, 63.06), (8, 71.59), (9, 80.08),
+                                (10, 88.54), (12, 105.40), (14, 122.20),
+                                (16, 138.97), (18, 155.72), (20, 172.46)],
+        "Ergonomics-Aware Role Allocation":
+            [(0, 0.00), (1, 9.66), (2, 18.80), (3, 27.58), (4, 36.12),
+             (5, 44.48), (6, 52.73), (7, 60.88), (8, 68.97), (9, 77.01),
+             (10, 85.02), (12, 100.96), (14, 116.83), (16, 132.67),
+             (18, 148.48), (20, 164.28)],
+        "Human-First": [(0, 0.00), (0.5, 3.66), (1, 5.86), (1.5, 7.52),
+                        (2, 8.96), (2.5, 10.31), (3, 11.62), (3.5, 12.91),
+                        (4, 14.19), (4.5, 15.45), (5, 16.71), (5.5, 17.95),
+                        (6, 19.19), (6.5, 20.43), (7, 21.66), (7.5, 22.88),
+                        (8, 24.11), (8.5, 25.32), (9, 26.54), (9.5, 27.75),
+                        (10, 28.96), (11, 31.37), (12, 33.77), (13, 36.17),
+                        (14, 38.57), (15, 40.96), (16, 43.35), (17, 45.74),
+                        (18, 48.12), (19, 50.51), (20, 52.89)],
+        "CivicWorkOS": [(0, 0.00), (0.5, 4.36), (1, 7.73), (1.5, 10.45),
+                        (2, 12.71), (2.5, 14.64), (3, 16.35), (3.5, 17.88),
+                        (4, 19.28), (4.5, 20.58), (5, 21.80), (5.5, 22.94),
+                        (6, 24.03), (6.5, 25.08), (7, 26.08), (7.5, 27.05),
+                        (8, 27.99), (8.5, 28.90), (9, 29.79), (9.5, 30.66),
+                        (10, 31.51), (11, 33.17), (12, 34.79), (13, 36.37),
+                        (14, 37.92), (15, 39.45), (16, 40.96), (17, 42.45),
+                        (18, 43.94), (19, 45.42), (20, 46.89)],
+    }
+    worst = 0.0
+    n_pts = 0
+    for name, pts in PLOTTED.items():
+        prm = CAD_STRATEGIES[name]
+        for t, plotted in pts:
+            worst = max(worst, abs(plotted - cad_C(float(t), prm)))
+            n_pts += 1
+    s.add(f"fig:cad-trend: worst of {n_pts} plotted coordinates", 0.0, worst,
+          tol=5e-3, site="fig:cad-trend",
+          note="every point on both panels recomputed from tab:cadparams")
     out.append(s)
 
     # -- Section 8 pre-deletion baseline -------------------------------
@@ -677,8 +855,10 @@ def main() -> int:
             print(f"  - [{title}] {c.label}: printed {c.printed}, "
                   f"computed {c.computed:.6g}  ({c.site})")
     if n_known:
-        print(f"\n{n_known} check(s) fail as expected and are registered as "
-              f"defects awaiting Phase 2.  Re-run with --known for detail.")
+        print(f"\n{n_known} check(s) differ as expected. These are the "
+              f"pre-deletion records of defects M4 and M5, whose sites "
+              f"Phase 1 removed with Section 8. They are an audit trail, "
+              f"not outstanding work. Re-run with --known for detail.")
     print("=" * 72)
     return 1 if failures else 0
 

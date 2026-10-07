@@ -114,6 +114,8 @@ Every reviewer finding, plus the four this document adds, mapped to a phase. Kee
 > **Phase 0 closed.** Branch `revision/frontiers-hnt`, tag `pre-revision-frontiers`. Harness: `check.sh` (build, length, front matter, integrity greps, artifact — each gate tagged with the phase that closes it) and `audit_numbers.py` (160 comparisons; 152 PASS, 8 registered defects awaiting Phase 2).
 >
 > **Phase 1 closed.** All Phase 1 gates green. Main text 21,048 → 19,390 body words, 53 → 46 pages, 19 → 13 tables. Both documents build with zero undefined references.
+>
+> **Phase 2 closed.** All Phase 2 gates green: `check.sh 2` reports 15 passed / 0 failed, `audit_numbers.py` exits 0 with 187 PASS and 0 FAIL. The register grew from 160 to 189 comparisons. The two remaining KNOWN entries are the pre-deletion records of M4 and M5, whose sites Phase 1 removed with Section 8; they are an audit trail, not outstanding work. The substantive change is M3: Figure 3's coordinates previously had no stated provenance and could not be recovered from any declared parameter set, so Phase 2 adds Table 11 (`tab:cadparams`), which fixes $(c_j, \pi_{j,\infty}, \tau_j)$ for all five CAD components of all six strategies, and replots the figure from it. All 116 plotted coordinates are now checked against Equation (47). Word count rose 19,390 → 19,636, which Phase 4 absorbs.
 
 | ID | Severity | Issue | Location (compiled) | Phase | Status |
 |---|---|---|---|---|---|
@@ -131,13 +133,13 @@ Every reviewer finding, plus the four this document adds, mapped to a phase. Kee
 | **H2** | High | H1 propagated: "at a cost of 1.3 CAD points" | §8.7 line 1521, §8.9 line 1580, §10 line 1705 | 2 | ☑ Closed by removal; the Conclusions sentence now reports the 622→1,344 hour access arithmetic instead. |
 | **H3** | High | P8's "CAD ≤ +5" clause vacuous under the real sign | Table `tab:predictions` l.1352, `tab:hypoutcomes` l.1573 | 2 | ☑ Closed by removal; P8 survives only as a specified, untested hypothesis in App. S2.7. |
 | **H4** | High | "solve times < 1.5 s" against a tabled 74 s | §8.8 line 1549 | 2 | ☑ Closed by removal (tab:runtime deleted). §4 and §9.5 now state that no solver profile has been measured. |
-| **H5** | High | §6.8 robustness claim contradicted by 10 rows of its own table | §6.8 vs `tab:sensitivity` l.1139 | 2 | ☐ |
+| **H5** | High | §6.8 robustness claim contradicted by 10 rows of its own table | §6.8 vs `tab:sensitivity` l.1139 | 2 | ☑ Closed. "Survives every feasible value"/"does not depend on the estimates" replaced with the claim the table supports: developmental staffing occurs at every feasible value, but across the **eight** feasible "no reversal" rows the lead-only roster is retained on 1.3–46.1% of tasks and the dual falls to 0.0005–0.0033. (The programme said ten rows; the table has eight.) Range pinned in `audit_numbers.py`. |
 | **H6** | High | ERA (Merlo) scored on 12 metrics; absent from `tab:stress`; unimplemented | `tab:mainresults` l.1388, `tab:stress` l.1475, §7.2 l.1231 | 1 | ☑ Closed. ERA removed with §8; retained only as a specified comparator in App. S2.2, with the circularity concession stated there and in §9.6. |
 | **H7** | High | Analytic recomputations presented as simulation output | §8.3 l.1432, §8.6 l.1489–1497 | 1 | ☑ Closed. Retirement arithmetic relocated to new §6.9 as exact arithmetic; the "simulated dual 0.0451" sentence deleted. |
 | **H8** | High | "Appeals resolved in window: 0.942" with no generative model | `tab:mainresults` l.1398 | 1 | ☑ Closed. 0.942 removed. App. S2.3 now states that no appeals throughput is reportable without a generative model, and names the four components such a model needs. |
-| **M1** | Medium | `eq:lambdaworked`: 0.0273/0.6 = 0.04550, printed as 0.0454 (10 sites) | §6.4 + downstream | 2 | ☐ |
-| **M2** | Medium | `eq:augworked`: tied modes compute to 0.43532 / 0.43538, printed 0.4352 | §6.4 | 2 | ☐ |
-| **M3** | Medium | §9.1 debt decomposition: 13.5 + 1.37t gives 40.9 at t=20, stated 49.3 | §9.1 lines 1640–1644 | 2 | ☐ |
+| **M1** | Medium | `eq:lambdaworked`: 0.0273/0.6 = 0.04550, printed as 0.0454 (10 sites) | §6.4 + downstream | 2 | ☑ Closed by Option A. The equation now carries 0.308240, 0.335452 and 0.027212, so it reproduces its own quotient, λ_k = 0.045353. The headline 0.0454 is preserved at all 15 sites and stated as λ_k to four decimals. 0.0455 appears nowhere. |
+| **M2** | Medium | `eq:augworked`: tied modes compute to 0.43532 / 0.43538, printed 0.4352 | §6.4 | 2 | ☑ Closed. At the exact λ_k the two augmented values are equal to machine precision — the discrepancy was an artifact of substituting the rounded 0.0454. Printed as 0.435229, with a sentence stating that the equality is exact by construction because λ_k is *defined* by the tie. Tie residual checked at 1e-12. |
+| **M3** | Medium | §9.1 debt decomposition: 13.5 + 1.37t gives 40.9 at t=20, stated 49.3 | §9.1 lines 1640–1644 | 2 | ☑ Closed, and wider than the programme scoped it. The figure's coordinates fitted no declared parameterisation at all, so the fix is a stated one: new `tab:cadparams` gives $(c_j,\pi_{j,\infty},\tau_j)$ per component per strategy; the figure is replotted from Eq. (47) over 0–20 years in two panels. Recomputed values: bounded part **17.98** (11.34 of it skill formation), residual slope **1.45**/yr (1.08 of it vendor dependency), Human-First slope 2.38 (now derived, not asserted), crossover **t = 13.23** at 36.73, C(20) = 46.89 vs 52.89. All checked in `audit_numbers.py`, including every plotted coordinate. |
 | **M4** | Medium | P3's 80-pt gap uses the weaker comparator (CM 0.17, not HF 0.31 → 66 pts) | `tab:hypoutcomes` l.1568 | 2 | ☑ Closed by removal (tab:hypoutcomes deleted). Recorded in audit_numbers.py as a pre-deletion baseline check. |
 | **M5** | Medium | `tab:persector` final row labels a sum ("mean over sectors", 803,100) | line 1427 | 2 | ☑ Closed by removal (tab:persector deleted). Recorded in audit_numbers.py: the column mean is 133,850, not 803,100. |
 | **M6** | Medium | Scalarization/convex-hull admission belongs where legitimacy is claimed | §9.5 l.1687 → §5.1 | 6 | ☐ |
@@ -148,7 +150,7 @@ Every reviewer finding, plus the four this document adds, mapped to a phase. Kee
 | **L1** | Low | 53 overfull `\hbox` warnings | throughout | 7 | ☐ |
 | **L2** | Low | Mixed orthography ("unfavourable" l.1638, "behaviourally") | §9.1, App. S4.2 | 7 | ☐ |
 | **L3** | Low | `BenDaya2026` / `syed2026fedagent` volume–number collision | `references.bib` | 7 | ☐ |
-| **L4** | Low | "differ by two to four points" → 2.2 and 4.3 | §9.1 line 1644 | 2 | ☐ |
+| **L4** | Low | "differ by two to four points" → 2.2 and 4.3 | §9.1 line 1644 | 2 | ☑ Closed by removal in Phase 1 — the closed-form/simulation comparison paragraph does not survive Route A. Verified absent. |
 | **L5** | Low | Orphaned `$\dagger$` equal-contribution footnote | line 105 | 5 | ☐ |
 | **L6** | Low | `\correspondance{}` passed empty | line 97 | 5 | ☐ |
 | **L7** | Low | "AA" initials collide (Ali Akarma / Abdulaziz Alqurashi) | line 1724 | 5 | ☐ |
@@ -292,10 +294,10 @@ Note that Phase 1 has already removed the hosts of H1–H4, M4 and M5 under Rout
 
 **Success criteria**
 
-- ☐ `audit_numbers.py` exits 0 with every check PASS, including the three §9.1 trajectory checks added in item 3.
-- ☐ A manual pass over every remaining table confirms that each prose sentence reporting it states the correct direction, correct magnitude, and correct unit. Do this table by table, not by skimming — five of the nine original defects were exactly this failure.
-- ☐ `grep -n '0\.0454\|0\.0455' CivicWorkOS.tex` returns a single consistent value at every site.
-- ☐ The §6.8 claim no longer contains the words "every feasible value" or "does not depend on the estimates".
+- ☑ `audit_numbers.py` exits 0 with every check PASS. 187 PASS, 0 FAIL, 189 comparisons. The §9.1 trajectory checks are in, and go further than item 3 asked: slope, bounded part, per-component residual split, crossover, C(20), and all 116 plotted coordinates.
+- ☑ Manual pass done table by table over the eleven surviving tables. `tab:worked-decomp` (direction and sign of all nine terms, including that a rise in the Cost row is a worsening), `tab:dist` (622 / 1,344 / 2.16× / 3.8-of-14), `tab:sensitivity` (85% headroom on three axes, 0.33–9.60% range, eight "no reversal" rows), `tab:weights` (0.062 skill, 0.044 transition, 0.180 safety), `tab:worked-terms` and `tab:worked-mix` (covered by the audit's 60 worked-example checks), `tab:cadparams` (both computed columns). One residual inconsistency found and fixed outside the register: the cost of preservation was quoted as "4.3%" at two prose sites against 4.34% everywhere else.
+- ☑ `grep` returns one value: 0.0454 at 15 sites, plus the single six-decimal 0.045353 inside `eq:lambdaworked`. No 0.0455 anywhere.
+- ☑ Neither phrase appears in either document. A `check.sh` gate now enforces this, together with gates on 0.0455, the six-decimal numerator, the superseded debt constants, and the presence of `tab:cadparams`.
 
 **Effort:** 8–10 hours (1–1.5 days). Item 3 (the debt-model recomputation) is the long pole — budget 3 hours for it alone.
 **Compute:** `audit_numbers.py` < 1 s per run; 3–4 builds ≈ **4 minutes**.

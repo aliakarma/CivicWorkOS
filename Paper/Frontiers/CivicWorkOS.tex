@@ -1098,25 +1098,25 @@
 	
 	The optimum sends 28.30\% of inspections to robot-assisted human teams and 71.70\% to fully hybrid teams, and staffs a developing inspector on \textit{every} one of them. At that optimum the capability constraint's dual price follows from the tie between the two active staffed modes in equation~\eqref{eq:lambdaworked}:
 	\begin{equation}
-		0.3082 + 8\,\lambda_k(0.350) = 0.3355 + 8\,\lambda_k(0.275)
+		0.308240 + 8\,\lambda_k(0.350) = 0.335452 + 8\,\lambda_k(0.275)
 		\;\Longrightarrow\;
-		\lambda_k = \frac{0.0273}{0.6} = 0.0454 ,
+		\lambda_k = \frac{0.027212}{0.6} = 0.045353 ,
 		\label{eq:lambdaworked}
 	\end{equation}
-	so one additional qualified-practice hour in structural inspection costs the city 0.0454 objective units at the margin. The interpretation matters and earlier presentations inverted it. For a binding inequality constraint in a maximization, the dual is the marginal \textit{opportunity cost} of tightening the constraint, the rate at which achievable objective value falls as $B_k$ rises. It is not what an hour of practice is worth to the city, which is a quantity the framework does not estimate and does not need to: the panel's job is to decide whether 0.0454 units per hour is a price worth paying, and the framework's job is to compute it and publish it.
+	where the two $SCV$ values are carried at six decimals rather than at the four Table~\ref{tab:worked-terms} prints, because the difference between them is the whole of the numerator and rounding it first would not reproduce the quotient. So one additional qualified-practice hour in structural inspection costs the city 0.0454 objective units at the margin, which is the figure quoted throughout and is $\lambda_k$ to the four decimals every other number in this section carries. The interpretation matters and earlier presentations inverted it. For a binding inequality constraint in a maximization, the dual is the marginal \textit{opportunity cost} of tightening the constraint, the rate at which achievable objective value falls as $B_k$ rises. It is not what an hour of practice is worth to the city, which is a quantity the framework does not estimate and does not need to: the panel's job is to decide whether 0.0454 units per hour is a price worth paying, and the framework's job is to compute it and publish it.
 	
 	Substituting into equation~\eqref{eq:aug} reproduces the program's ranking in equation~\eqref{eq:augworked} without solving it:
 	\begin{equation}
 		\begin{split}
-			\widetilde{SCV}_{H+R/a_1} = \widetilde{SCV}_{H+A+R/a_1} &= 0.4352\\
+			\widetilde{SCV}_{H+R/a_1} = \widetilde{SCV}_{H+A+R/a_1} &= 0.435229\\
 			\;>\;\widetilde{SCV}_{H+A+R/a_0} &= 0.3426\\
 			\;>\;\widetilde{SCV}_{H+R/a_0} &= 0.3108 .
 		\end{split}
 		\label{eq:augworked}
 	\end{equation}
-	The capability price reverses the winner. Without it the city buys a fully hybrid team staffed by a lead working alone. With it, the same objective, the same estimates, and the same weights select a trainee-staffed team, and move more than a quarter of the domain's inspections from the fully hybrid mode to robot-assisted human inspection. The reversal falls first on \textit{who is on the team} and only second on \textit{which machines are used}, which is a more informative result than earlier presentations produced and follows directly from repairing the constraint.
+	The first equality is exact rather than approximate: $\lambda_k$ is \textit{defined} by the tie in~\eqref{eq:lambdaworked}, so the two augmented values coincide to machine precision by construction, and the six decimals are printed only to make that visible. The capability price reverses the winner. Without it the city buys a fully hybrid team staffed by a lead working alone. With it, the same objective, the same estimates, and the same weights select a trainee-staffed team, and move more than a quarter of the domain's inspections from the fully hybrid mode to robot-assisted human inspection. The reversal falls first on \textit{who is on the team} and only second on \textit{which machines are used}, which is a more informative result than earlier presentations produced and follows directly from repairing the constraint.
 	
-	The LP solution is fractional and the task count is not. Realizing 28.30\% of 2{,}100 tasks requires 594.3 tasks in $H{+}R/a_1$; 594 tasks deliver 4{,}976.40 qualified-practice hours and miss the budget by 0.24 hours, while 595 deliver 4{,}977.00 and satisfy it. The integer optimum is therefore 595 tasks, and its mean $SCV$ of 0.327742 sits $7.8\times10^{-6}$ objective units below the LP value of 0.327750. That gap is the integrality gap discussed in Section~\ref{sec:online}, and it is small here because the domain's task count is large relative to the number of active modes.
+	The LP solution is fractional and the task count is not. Realizing 28.30\% of 2{,}100 tasks requires 594.4 tasks in $H{+}R/a_1$; 594 tasks deliver 4{,}976.40 qualified-practice hours and miss the budget by 0.24 hours, while 595 deliver 4{,}977.00 and satisfy it. The integer optimum is therefore 595 tasks, and its mean $SCV$ of 0.327742 sits $7.8\times10^{-6}$ objective units below the LP value of 0.327750. That gap is the integrality gap discussed in Section~\ref{sec:online}, and it is small here because the domain's task count is large relative to the number of active modes.
 	
 	\subsection{What Preservation Costs and What It Buys}
 	\label{sec:costs}
@@ -1147,9 +1147,9 @@
 		\end{tabular}
 	\end{table}
 	
-	The city pays mainly in operating cost, which rises 24.5\% because every inspection now carries a second person, and in productivity, which falls 11.5\% for the same reason plus the shift toward robot-assisted human work. It pays 6.7\% of service quality and 2.9\% of safety, both of which remain above the floor by construction. Reporting this decomposition is not optional detail. A city that learns preservation costs 4.3\% of aggregate objective value has learned much less than one that learns it costs a quarter of its inspection budget, and only the second figure is the one a finance committee will contest.
+	The city pays mainly in operating cost, which rises 24.5\% because every inspection now carries a second person, and in productivity, which falls 11.5\% for the same reason plus the shift toward robot-assisted human work. It pays 6.7\% of service quality and 2.9\% of safety, both of which remain above the floor by construction. Reporting this decomposition is not optional detail. A city that learns preservation costs 4.34\% of aggregate objective value has learned much less than one that learns it costs a quarter of its inspection budget, and only the second figure is the one a finance committee will contest.
 	
-	What the city buys is a change of sign. Under the constraint the domain delivers $B_k = 4{,}976.64$ practice hours, generating $4976.64/1440 = 3.456$ competent-equivalents a year against attrition of $24 \times 0.12 = 2.88$, a net gain of 0.576 practitioners a year. Without it the domain delivers zero practice hours, generates zero competent-equivalents, and loses 2.88 practitioners a year with nothing replacing them. One configuration replenishes the inspection cadre and the other empties it, for 4.3\% of annual objective value. The identity $B_k/h_k = \eta_k N_k r_k$ makes the replenishment rate independent of $h_k$, which is worth noting because it means the \textit{rate} of formation is robust to the parameter the example is otherwise most sensitive to, even though feasibility is not.
+	What the city buys is a change of sign. Under the constraint the domain delivers $B_k = 4{,}976.64$ practice hours, generating $4976.64/1440 = 3.456$ competent-equivalents a year against attrition of $24 \times 0.12 = 2.88$, a net gain of 0.576 practitioners a year. Without it the domain delivers zero practice hours, generates zero competent-equivalents, and loses 2.88 practitioners a year with nothing replacing them. One configuration replenishes the inspection cadre and the other empties it, for 4.34\% of annual objective value. The identity $B_k/h_k = \eta_k N_k r_k$ makes the replenishment rate independent of $h_k$, which is worth noting because it means the \textit{rate} of formation is robust to the parameter the example is otherwise most sensitive to, even though feasibility is not.
 	
 	\subsection{Pipeline Arithmetic and the Intake Requirement}
 	\label{sec:pipeline}
@@ -1258,7 +1258,7 @@
 	
 	Four things follow, and two of them are uncomfortable.
 	
-	The staffing reversal, that the constraint forces a developing practitioner onto essentially every task, is robust. It survives every feasible value of all six parameters, because no lead-only roster delivers any credit at all and the budget is strictly positive. This is the paper's central claim and it does not depend on the estimates.
+	The qualitative staffing result holds across the frontier; its magnitude does not. The capability budget is never satisfiable by lead-only rosters alone, because no such roster delivers any credit at all and the budget is strictly positive, so some developmental staffing occurs at every feasible parameter value we swept. What is \textit{not} robust is the strength of that effect. Across the eight feasible rows Table~\ref{tab:sensitivity} labels ``no reversal'' the constrained optimum retains the lead-only roster on between 1.3\% and 46.1\% of tasks, and the dual falls from 0.0454 to between 0.0005 and 0.0033, one to two orders of magnitude below the baseline price. The claim the table supports is therefore that a binding capability budget always places developing practitioners on some of the work, not that it places them on essentially all of it; the latter is a property of the baseline parameterization. Table~\ref{tab:sensitivity} is the range that should accompany any single quoted figure.
 	
 	The \textit{mode} reversal, the shift of 28.3\% of inspections from the fully hybrid mode to robot-assisted human work, is not robust. It requires $\phi_{H+A+R} \leq 0.55$ and $\psi_{a_1} \leq 0.5$. Raise the fully hybrid mode's developmental share to 0.60, or allow two developing practitioners per lead, and the fully hybrid mode alone nearly satisfies the budget, the dual collapses by an order of magnitude, and the cost of preservation falls below 2\%. This is the correct behavior rather than a defect, since a mode that develops people is one a capability budget should not penalize, but it means the headline mode shift is a statement about a specific estimate of $\phi_{H+A+R}$ and should be read as such.
 	
@@ -1295,47 +1295,82 @@
 		\qquad w_j\in\{\alpha,\beta,\gamma,\delta,\epsilon\}.
 		\label{eq:cadmodel}
 	\end{equation}
-	Earlier presentations modeled a single scalar $\pi(t)$ described as ``the fraction of required developmental practice delivered'', which is $D^{skill}$ and nothing else, then plotted the result as though it were CAD. Equation~\eqref{eq:cadmodel} models all five, and the reason that matters is visible as soon as one asks which mechanism drives each $\pi_{j,\infty}$. Skill formation is driven to one by the hard constraint~\eqref{eq:hcpb}, with $\tau_{skill}=\tau_k=4.05$ years taken from Proposition~\ref{prop:intake} rather than assumed. Fallback is driven to one by~\eqref{eq:res3r}. Accountability is driven high but not to one by the oversight zones, which are revisable. Transition burden is driven high by~\eqref{eq:justtransition}. \textit{vendor dependency has no mechanism in this framework at all}, so $\pi_{dep,\infty}$ stays low and $D^{dep}$ keeps accruing linearly. Figure~\ref{fig:cad-trend} plots Equation~\eqref{eq:cadmodel} for the six strategies at the parameters its caption lists.
+	Earlier presentations modeled a single scalar $\pi(t)$ described as ``the fraction of required developmental practice delivered'', which is $D^{skill}$ and nothing else, then plotted the result as though it were CAD. Equation~\eqref{eq:cadmodel} models all five, and the reason that matters is visible as soon as one asks which mechanism drives each $\pi_{j,\infty}$. Skill formation is driven to one by the hard constraint~\eqref{eq:hcpb}, with $\tau_{skill}=\tau_k=4.05$ years taken from Proposition~\ref{prop:intake} rather than assumed. Fallback is driven to one by~\eqref{eq:res3r}. Accountability is driven high but not to one by the oversight zones, which are revisable. Transition burden is driven high by~\eqref{eq:justtransition}. \textit{vendor dependency has no mechanism in this framework at all}, so $\pi_{dep,\infty}$ stays low and $D^{dep}$ keeps accruing linearly. Table~\ref{tab:cadparams} fixes $\pi_{j,\infty}$, $\tau_j$ and $c_j$ for all five components of all six strategies, and Figure~\ref{fig:cad-trend} plots Equation~\eqref{eq:cadmodel} at exactly those values, so every point on it can be recovered by substitution.
 	
+	\begin{table}[!htbp]
+		\caption{Per-component replenishment parameters for Equation~\eqref{eq:cadmodel}, one row per strategy, reported as $\pi_{j,\infty}$ with $\tau_j$ in years in parentheses. The accrual rate is $c_j = 10$ index units per year for every component of every strategy, except that Cost/Performance carries $c_{acct}=14$ and $c_{dep}=16$. These are the article's illustrative choices, not measured quantities; they are tabulated so that Figure~\ref{fig:cad-trend} is reproducible by direct substitution rather than asserted. Only $\tau_{skill}=4.05$ is derived, from Proposition~\ref{prop:intake}. The final two columns are computed from the row, not fitted to the plot.}
+		\label{tab:cadparams}
+		\footnotesize
+		\begin{tabularx}{\textwidth}{@{}Xccccccc@{}}
+			\toprule
+			\textbf{Strategy} & $\pi_{skill,\infty}$ & $\pi_{fall,\infty}$ & $\pi_{acct,\infty}$ & $\pi_{dep,\infty}$ & $\pi_{trans,\infty}$ & \textbf{Residual} & $C(10)$\\
+			& $(\tau)$ & $(\tau)$ & $(\tau)$ & $(\tau)$ & $(\tau)$ & \textbf{slope} & \\
+			\midrule
+			Automation-First & 0 & 0 & 0 & 0 & 0 & 10.00 & 100.00\\
+			Cost/Performance & 0 & 0 & 0 & 0 & 0 & 11.44 & 114.40\\
+			Capability Matching & 0.35 (4.05) & 0.30 (2.0) & 0 & 0 & 0 & 8.36 & 88.54\\
+			Ergonomics-Aware Role Allocation & 0.40 (4.05) & 0.45 (2.0) & 0 & 0 & 0 & 7.89 & 85.02\\
+			Human-First & 0.15 (4.05) & 1.00 (0.5) & 1.00 (0.5) & 1.00 (0.5) & 1.00 (0.5) & 2.38 & 28.96\\
+			\textbf{CivicWorkOS} & \textbf{1.00 (4.05)} & \textbf{1.00 (1.0)} & \textbf{0.85 (1.5)} & \textbf{0.10 (2.0)} & \textbf{0.95 (1.0)} & \textbf{1.45} & \textbf{31.51}\\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+
 	\begin{figure}[!htbp]
 		\centering
 		\begin{tikzpicture}
 			\begin{axis}[
-				width=0.80\linewidth, height=6.6cm,
+				name=main,
+				width=0.50\linewidth, height=6.4cm,
 				xlabel={Year $t$}, ylabel={Accumulated debt index $C(t)$},
 				xlabel style={font=\small}, ylabel style={font=\small},
 				x tick label style={font=\footnotesize}, y tick label style={font=\footnotesize},
-				xmin=0, xmax=10, ymin=0, ymax=118,
-				legend style={font=\tiny, at={(0.02,0.98)}, anchor=north west, draw=none, fill=none},
+				xmin=0, xmax=20, ymin=0, ymax=235,
+				legend style={font=\tiny, at={(0.02,0.98)}, anchor=north west, draw=none, fill=white, fill opacity=0.85, text opacity=1},
 				legend cell align=left, axis line style={civicgray}, tick style={civicgray},
 				grid=major, grid style={civicgray!18}
 				]
-				\addplot[civicgray, thick, dashed] coordinates {(0,0.00)(1,11.09)(2,22.18)(3,33.27)(4,44.36)(5,55.45)(6,66.54)(7,77.63)(8,88.72)(9,99.81)(10,110.90)};
+				\addplot[civicgray, thick, dashed] coordinates {(0,0.00)(2,22.88)(4,45.76)(6,68.64)(8,91.52)(10,114.40)(12,137.28)(14,160.16)(16,183.04)(18,205.92)(20,228.80)};
 				\addlegendentry{Cost/Performance}
-				\addplot[civicgray, thick] coordinates {(0,0.00)(1,10.00)(2,20.00)(3,30.00)(4,40.00)(5,50.00)(6,60.00)(7,70.00)(8,80.00)(9,90.00)(10,100.00)};
+				\addplot[civicgray, thick] coordinates {(0,0.00)(2,20.00)(4,40.00)(6,60.00)(8,80.00)(10,100.00)(12,120.00)(14,140.00)(16,160.00)(18,180.00)(20,200.00)};
 				\addlegendentry{Automation-First}
-				\addplot[civicblue, thick, dashdotted] coordinates {(0,0.00)(1,9.66)(2,18.81)(3,27.62)(4,36.21)(5,44.65)(6,53.00)(7,61.29)(8,69.53)(9,77.75)(10,85.94)};
+				\addplot[civicblue, thick, dashdotted] coordinates {(0,0.00)(1,9.75)(2,19.10)(3,28.18)(4,37.07)(5,45.83)(6,54.48)(7,63.06)(8,71.59)(9,80.08)(10,88.54)(12,105.40)(14,122.20)(16,138.97)(18,155.72)(20,172.46)};
 				\addlegendentry{Capability Matching}
-				\addplot[civicblue, thick, dotted] coordinates {(0,0.00)(1,9.54)(2,18.37)(3,26.76)(4,34.85)(5,42.74)(6,50.51)(7,58.20)(8,65.83)(9,73.42)(10,80.98)};
+				\addplot[civicblue, thick, dotted] coordinates {(0,0.00)(1,9.66)(2,18.80)(3,27.58)(4,36.12)(5,44.48)(6,52.73)(7,60.88)(8,68.97)(9,77.01)(10,85.02)(12,100.96)(14,116.83)(16,132.67)(18,148.48)(20,164.28)};
 				\addlegendentry{Ergonomics-Aware Role Allocation}
-				\addplot[civicamber, thick, densely dotted] coordinates {(0,0.00)(0.5,4.37)(1,7.77)(1.5,10.52)(2,12.83)(2.5,14.83)(3,16.61)(3.5,18.24)(4,19.76)(4.5,21.20)(5,22.57)(5.5,23.91)(6,25.21)(6.5,26.49)(7,27.75)(7.5,28.99)(8,30.23)(8.5,31.45)(9,32.67)(9.5,33.88)(10,35.08)};
+				\addplot[civicamber, thick, densely dotted] coordinates {(0,0.00)(0.5,3.66)(1,5.86)(2,8.96)(3,11.62)(4,14.19)(5,16.71)(6,19.19)(7,21.66)(8,24.11)(9,26.54)(10,28.96)(12,33.77)(14,38.57)(16,43.35)(18,48.12)(20,52.89)};
 				\addlegendentry{Human-First}
-				\addplot[civicteal, very thick] coordinates {(0,0.00)(0.5,4.50)(1,8.18)(1.5,11.27)(2,13.91)(2.5,16.20)(3,18.22)(3.5,20.03)(4,21.66)(4.5,23.14)(5,24.51)(5.5,25.77)(6,26.95)(6.5,28.07)(7,29.12)(7.5,30.12)(8,31.08)(8.5,32.01)(9,32.90)(9.5,33.76)(10,34.60)};
+				\addplot[civicteal, very thick] coordinates {(0,0.00)(0.5,4.36)(1,7.73)(2,12.71)(3,16.35)(4,19.28)(5,21.80)(6,24.03)(7,26.08)(8,27.99)(9,29.79)(10,31.51)(12,34.79)(14,37.92)(16,40.96)(18,43.94)(20,46.89)};
 				\addlegendentry{CivicWorkOS}
-				\addplot[civicgray, thin, mark=*, mark size=1.4pt, only marks] coordinates {(9.34,33.49)};
-				\node[font=\tiny, anchor=west, civicgray] at (axis cs:8.0,42) {crossover $t=9.34$};
-				\draw[civicgray, thin, ->] (axis cs:8.9,41) -- (axis cs:9.3,34.7);
+			\end{axis}
+			\begin{axis}[
+				at={(main.east)}, anchor=west, xshift=16mm,
+				width=0.42\linewidth, height=6.4cm,
+				xlabel={Year $t$}, ylabel={$C(t)$ (expanded scale)},
+				xlabel style={font=\small}, ylabel style={font=\small},
+				x tick label style={font=\footnotesize}, y tick label style={font=\footnotesize},
+				xmin=0, xmax=20, ymin=0, ymax=58,
+				axis line style={civicgray}, tick style={civicgray},
+				grid=major, grid style={civicgray!18}
+				]
+				\addplot[civicamber, thick, densely dotted] coordinates {(0,0.00)(0.5,3.66)(1,5.86)(1.5,7.52)(2,8.96)(2.5,10.31)(3,11.62)(3.5,12.91)(4,14.19)(4.5,15.45)(5,16.71)(5.5,17.95)(6,19.19)(6.5,20.43)(7,21.66)(7.5,22.88)(8,24.11)(8.5,25.32)(9,26.54)(9.5,27.75)(10,28.96)(11,31.37)(12,33.77)(13,36.17)(14,38.57)(15,40.96)(16,43.35)(17,45.74)(18,48.12)(19,50.51)(20,52.89)};
+				\addplot[civicteal, very thick] coordinates {(0,0.00)(0.5,4.36)(1,7.73)(1.5,10.45)(2,12.71)(2.5,14.64)(3,16.35)(3.5,17.88)(4,19.28)(4.5,20.58)(5,21.80)(5.5,22.94)(6,24.03)(6.5,25.08)(7,26.08)(7.5,27.05)(8,27.99)(8.5,28.90)(9,29.79)(9.5,30.66)(10,31.51)(11,33.17)(12,34.79)(13,36.37)(14,37.92)(15,39.45)(16,40.96)(17,42.45)(18,43.94)(19,45.42)(20,46.89)};
+				\addplot[civicgray, thin, mark=*, mark size=1.4pt, only marks] coordinates {(13.23,36.73)};
+				\node[font=\tiny, anchor=east, civicgray] at (axis cs:12.4,47) {crossover $t=13.23$};
+				\draw[civicgray, thin, ->] (axis cs:12.5,46) -- (axis cs:13.1,38.0);
+				\node[font=\tiny, anchor=west, civicamber] at (axis cs:9.5,32.5) {Human-First};
+				\node[font=\tiny, anchor=west, civicteal] at (axis cs:3.4,14.5) {CivicWorkOS};
 			\end{axis}
 		\end{tikzpicture}
-		\caption{Accumulated Civic Automation Debt under Equation~\eqref{eq:cadmodel} with per-component replenishment. Automation-First is normalized to 100 at year ten by setting $c_j=10$ for every component. Cost/Performance carries elevated accountability and dependency accrual rates. CivicWorkOS drives skill formation and fallback to full replenishment through hard constraints, with $\tau_{skill}=4.05$ years derived from Proposition~\ref{prop:intake}, but has no mechanism for vendor dependency, so its curve does not saturate. Human-First accumulates less debt than CivicWorkOS until year 9.34 and more thereafter, because its residual slope of 2.38 index units per year, almost all of it unformed skill, exceeds CivicWorkOS's 1.37, most of which is vendor dependency.}
+		\caption{Accumulated Civic Automation Debt under Equation~\eqref{eq:cadmodel} at the per-component parameters of Table~\ref{tab:cadparams}. Every plotted point is that equation evaluated at those parameters; nothing here is measured or simulated. \textit{Left:} all six strategies over twenty years. Automation-First is normalized to 100 at year ten by setting $c_j=10$ for every component, and Cost/Performance exceeds it because it carries elevated accountability and dependency accrual. \textit{Right:} the two capability-forming strategies at an expanded scale. CivicWorkOS drives skill formation and fallback to full replenishment through hard constraints, with $\tau_{skill}=4.05$ years derived from Proposition~\ref{prop:intake}, but has no mechanism for vendor dependency, so its curve does not saturate. Human-First accumulates less debt than CivicWorkOS until year 13.23 and more thereafter, because its residual slope of 2.38 index units per year, almost all of it unformed skill, exceeds CivicWorkOS's 1.45, three-quarters of which is vendor dependency.}
 		\label{fig:cad-trend}
 	\end{figure}
 	
 	Three things follow from Figure~\ref{fig:cad-trend}, and one of them is unfavourable to the framework.
 	
-	\textit{No strategy here bounds debt, CivicWorkOS included.} Its saturating components reach a ceiling of 13.5 index units, but the linear residual from vendor dependency and the unreplenished part of accountability and transition burden accrues at 1.37 units a year without limit. The qualitative claim a capability budget supports is narrower than earlier presentations of this framework asserted: it converts \textit{skill} debt from unbounded to bounded, and says nothing about the other four components except through weights that competing terms can outvote. Vendor dependency is the honest gap. It is a procurement variable, the allocation mechanism does not control it, and pretending a capability constraint disciplines it would be a category error of exactly the kind Section~\ref{sec:access} corrects for reskilling coverage.
+	\textit{No strategy here bounds debt, CivicWorkOS included.} Its saturating components contribute a bounded 17.98 index units in total, 11.34 of that from skill formation alone, which is the component the capability budget actually governs; but the linear residual from vendor dependency and the unreplenished parts of accountability and transition burden accrues at 1.45 units a year without limit, and 1.08 of those 1.45 units is vendor dependency. The qualitative claim a capability budget supports is narrower than earlier presentations of this framework asserted: it converts \textit{skill} debt from unbounded to bounded, and says nothing about the other four components except through weights that competing terms can outvote. Vendor dependency is the honest gap. It is a procurement variable, the allocation mechanism does not control it, and pretending a capability constraint disciplines it would be a category error of exactly the kind Section~\ref{sec:access} corrects for reskilling coverage.
 	
-	\textit{Human-First beats CivicWorkOS on this metric for nine years.} That is not an artifact and we do not want it buried. A strategy that keeps humans on everything accrues less total debt early, because it replenishes fallback, accountability, dependency, and transition immediately while CivicWorkOS is still filling its pipeline over a 4.05-year time constant. The curves cross at $t=9.34$ and diverge afterwards, because Human-First never closes its skill-formation gap: maximizing human share is not the same thing as forming practitioners, and a strategy that assigns work on availability alone drives $\pi_{skill,\infty}$ nowhere near one. A city choosing on a five-year horizon and on accumulated debt alone should prefer Human-First on this one index, and would then pay for it in the operational terms of~\eqref{eq:scv} that this index does not contain. That is why debt is one construct among thirteen in Table~\ref{tab:weights} rather than the objective itself.
+	\textit{Human-First beats CivicWorkOS on this metric for thirteen years.} That is not an artifact and we do not want it buried. A strategy that keeps humans on everything accrues less total debt early, because it replenishes fallback, accountability, dependency, and transition immediately while CivicWorkOS is still filling its pipeline over a 4.05-year time constant. The curves cross at $t=13.23$, where both stand at 36.73 index units, and diverge afterwards, by year twenty standing at 46.89 for CivicWorkOS against 52.89 for Human-First, because Human-First never closes its skill-formation gap: maximizing human share is not the same thing as forming practitioners, and a strategy that assigns work on availability alone drives $\pi_{skill,\infty}$ nowhere near one. A city choosing on a ten-year horizon and on accumulated debt alone should prefer Human-First on this one index, and would then pay for it in the operational terms of~\eqref{eq:scv} that this index does not contain. That is why debt is one construct among thirteen in Table~\ref{tab:weights} rather than the objective itself.
 	
 	\textit{The ordering of the curves is not evidence.} It follows analytically from the $\pi_{j,\infty}$ values, which follow in turn from which mechanisms each strategy enforces, so Figure~\ref{fig:cad-trend} is a statement about the debt accounting and not a finding about cities. What it does not settle is the empirical question underneath it: whether $\pi_{skill,\infty}$ can be driven to one across heterogeneous task streams without excessive Zone Z4 fallback, and whether the onboarding horizon $\tau_k$ is stable when attrition and automation share move together. Those are the questions the protocol of Section~\ref{sec:protocol} is designed to answer and this article does not.
 	

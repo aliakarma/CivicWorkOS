@@ -163,6 +163,42 @@ grep -qi 'Hypothesis and Theory' "$MAIN.tex" \
   && gate 1 "article type declared" pass \
   || gate 1 "article type declared" fail
 
+# ------------------------------------------------ numerical consistency ----
+echo
+echo "Numerical consistency (Phase 2)"
+
+# M1: one capability price, quoted consistently.  0.0455 is the value the
+# rounded intermediate used to imply; it must appear nowhere.
+hits=$(grep -nE '0\.0455' "$MAIN.tex" "$SUPP.tex" || true)
+[[ -z "$hits" ]] && gate 2 "single capability price (no 0.0455)" pass \
+                 || gate 2 "single capability price (no 0.0455)" fail \
+                      "$(echo "$hits" | wc -l | tr -d ' ') hits"
+
+# M1: the equation must carry the unrounded numerator that reproduces it.
+grep -q '0.027212' "$MAIN.tex" \
+  && gate 2 "eq:lambdaworked reproduces its own quotient" pass \
+  || gate 2 "eq:lambdaworked reproduces its own quotient" fail \
+       "six-decimal numerator absent"
+
+# H5: the overstated robustness claim must not come back.
+hits=$(grep -nE 'every feasible value|does not depend on the estimates' \
+       "$MAIN.tex" "$SUPP.tex" || true)
+[[ -z "$hits" ]] && gate 2 "no overstated robustness claim" pass \
+                 || gate 2 "no overstated robustness claim" fail \
+                      "$(echo "$hits" | wc -l | tr -d ' ') hits"
+
+# M3: the superseded debt-trajectory constants.
+STALE_CAD='ceiling of 13\.5|at 1\.37 units|t=9\.34|\$t=9\.34\$|year 9\.34'
+hits=$(grep -nE "$STALE_CAD" "$MAIN.tex" "$SUPP.tex" || true)
+[[ -z "$hits" ]] && gate 2 "no superseded debt-trajectory constants" pass \
+                 || gate 2 "no superseded debt-trajectory constants" fail \
+                      "$(echo "$hits" | wc -l | tr -d ' ') hits"
+
+# M3: the figure is only reproducible if its parameters are tabulated.
+grep -q 'label{tab:cadparams}' "$MAIN.tex" \
+  && gate 2 "fig:cad-trend parameters tabulated" pass \
+  || gate 2 "fig:cad-trend parameters tabulated" fail "tab:cadparams absent"
+
 # -------------------------------------------------------------- numbers ----
 echo
 echo "Arithmetic and artifact"
