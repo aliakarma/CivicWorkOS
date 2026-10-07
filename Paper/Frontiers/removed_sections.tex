@@ -1,0 +1,392 @@
+% Removed from CivicWorkOS.tex in Phase 1 of the Frontiers revision.
+% Section 7 (Evaluation Protocol) -> supplement, Appendix app:protocol.
+% Section 8 (Results) -> deleted; reported an unexecuted study.
+% Retained here only as an audit trail. Not part of any build.
+
+	\section{Evaluation Protocol and Hypotheses}
+	\label{sec:expsetup}
+	
+	\subsection{Simulation Testbed and Sectors}
+	\label{sec:testbed}
+	
+	The framework is evaluated through an urban digital twin and multi-agent discrete-event simulation testbed across six municipal sectors, with task arrivals from synthetic but calibrated streams over a ten-year horizon so that slow-moving effects such as retirement waves and pipeline decay become observable. Table~\ref{tab:sectors} gives the sector scale and calibration status. The city modeled is a metropolitan authority of roughly 1.5 million residents, and the annual task volume of 803{,}100 sets the scale at which the tractability results of Section~\ref{sec:runtime} should be read.
+	
+	\begin{table}[!htbp]
+		\caption{Evaluated sectors, annual task volumes, and calibration status. ``Calibrated'' means arrival rates and volume distributions are fitted to the named open municipal series. ``Parametric'' means no comparable open series was identified and the sector's distributions are specified as a swept range rather than fitted, with results reported separately.}
+		\label{tab:sectors}
+		\small
+		\begin{tabularx}{\textwidth}{@{}lrXl@{}}
+			\toprule
+			\textbf{Sector} & \textbf{Tasks/yr} & \textbf{Calibration source} & \textbf{Status}\\
+			\midrule
+			Infrastructure inspection & 2{,}100 & Asset-condition and inspection-interval records from the portals below and published national bridge inventories & Calibrated\\
+			Waste collection and sanitation & 186{,}000 & NYC Open Data, Department of Sanitation monthly tonnage and collection-route geography & Calibrated\\
+			Citizen-service administration & 412{,}000 & NYC Open Data 311 service requests; Open Data BCN incident and service-request series & Calibrated\\
+			Public-transport operations & 94{,}000 & London Datastore, Transport for London performance and ridership releases & Calibrated\\
+			Emergency logistics & 31{,}000 & No comparable open municipal series identified & Parametric\\
+			Municipal facility management & 78{,}000 & Helsinki Region Infoshare municipal property and building registers & Calibrated\\
+			Workforce composition & --- & Establishment and headcount tables of the same municipalities & Calibrated\\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+	Two calibration caveats belong in the main text rather than in an appendix. Emergency logistics has no calibration source. Earlier presentations of this protocol attributed its fleet-utilization distributions to two survey papers~\cite{MeseguerValenzuela2025,Hady2025}, which is incorrect: both are reviews of allocation methods and neither contains utilization distributions. The sector is therefore specified parametrically over a swept range of arrival rate and fleet utilization, its results are reported separately in Section~\ref{sec:persector} rather than folded silently into the aggregate, and no calibration claim is made for it. Second, all five named portals belong to high-income cities with mature open-data programs, which under-represents exactly the municipalities the automation-exposure literature identifies as most vulnerable. This is not a conservative bias, as an earlier version of this article claimed. It runs the wrong way: the framework's central weakness is that it cannot see non-payroll workers, and the calibration cities are the ones with fewest of them, so the calibration systematically understates the size of the population the framework fails. Appendix~\ref{app:calib} (Table~\ref{tab:app-calib}) records each series identifier and the transformation applied, and the archived snapshots with retrieval timestamps accompany the replication package.
+	
+	\subsection{Baseline Allocation Strategies}
+	\label{sec:baselines}
+	
+	Six strategies are compared. Four are configurations of~\eqref{eq:scv} and its constraints, and two are external methods from the human--robot collaboration literature reimplemented against the same task representation. Including external baselines addresses a real weakness of earlier evaluation designs, in which every comparator was a special case of the proposed objective and the comparison was therefore partly circular.
+	
+	\textit{Automation-First} maximizes quality and productivity, preferring automation wherever policy permits, with $w_9 = 0$ and constraints~\eqref{eq:prog-hcpb} through~\eqref{eq:prog-res} relaxed. \textit{Cost/Performance Optimization} maximizes $(Q,P)$ net of $Cost$ and $En$ only. \textit{Human-First} restricts $m$ to the admissible mode with the largest human share $\phi_m$ whenever a qualified human is available, and selects rosters on availability alone. \textit{Capability Matching (Ranz)} implements the capability-fit criterion of Ranz et al.~\cite{Ranz2017}, scoring each mode by the match between the task requirement vector and the mode's capability profile, with no debt, budget, access, or reserve terms. \textit{Ergonomics-Aware Role Allocation (Merlo)} implements the AND/OR-graph role allocation with ergonomic risk estimation of Merlo et al.~\cite{Merlo2023}, redirecting high-$phy$ and high-$risk$ actions away from human performers. \textit{CivicWorkOS} applies the full objective under all constraints of~\eqref{eq:program}.
+	
+	Both external methods were designed for a workcell rather than a city, and reimplementing them requires two adaptations we state rather than bury: their capability and ergonomic profiles are mapped onto the nine dimensions of~\eqref{eq:task}, and neither method selects a roster, so both are given the availability-ordered roster that Human-First uses. Neither adaptation advantages CivicWorkOS, and both are documented in the replication package so that the mapping can be challenged.
+	
+	\subsection{Metrics}
+	\label{sec:metrics}
+	
+	Fourteen metrics are tracked, of which twelve are comparable across strategies and enter the hypothesis family, and two are reported descriptively because they have no better-or-worse orientation for a strategy that lacks the mechanism producing them.
+	
+	Six comparable metrics are operational: \textit{Productivity} and \textit{Operating Cost} indices normalized to Automation-First at 100, \textit{Service Quality} on a 0--100 scale, \textit{Safety Incidents} per 10{,}000 tasks, an \textit{Energy Use} index, and \textit{Mean Recovery Time}, hours to restore $\kappa_s$ of critical-service capacity after an acute disruption. Two concern capability: the \textit{Capability-Formation Index}, $\Lambda_k/B_k$ summed over domains, and \textit{Accumulated CAD}, the running sum of~\eqref{eq:cad} normalized to 100 for Automation-First at year ten. One concerns the mechanism's own failure mode: the \textit{Zone Z4 fallback rate}, the share of tasks for which $\mathcal{A}(i,t)=\emptyset$ and the task routes to human-reserved execution. A framework with more constraints empties more candidate sets, and reporting this is how a reader sees the price of the constraint system in operational terms rather than only in objective units.
+	
+	Three comparable metrics are distributional: \textit{protected-practice share by group}, $\Pi_{k,g}$ from~\eqref{eq:accessshare}, reported per group and summarized in the main table by the share reaching the least-represented group; \textit{displacement by group}, $\Delta_g$, summarized by the most-affected group; and \textit{service-equity dispersion}, the coefficient of variation of realized service quality across resident districts, which is what $Eq^{srv}$ aggregates and a single equity scalar hides. All three are reported as group-level vectors in Section~\ref{sec:distresults} rather than only as the summary statistic, because a framework that answers who wins and who loses with one number has not answered it.
+	
+	Two metrics are descriptive. The \textit{realized dual} $\bar\lambda$ is reported because it is the framework's own statement of what preservation costs, and it is identically zero for every strategy that does not impose the constraint, so comparing it across strategies is meaningless. \textit{Contestability throughput}, appeals lodged, upheld, and resolved within the windows of Section~\ref{sec:contest}, exists only for CivicWorkOS because the other strategies have no appeals procedure. Excluding these two from the hypothesis family repairs a defect in earlier versions of this protocol, where a hypothesis asserting that every strategy is worst on at least one of thirteen metrics was undefined for metrics that admit no ordering.
+	
+	\subsection{Implementation Configuration and Default Parameters}
+	\label{sec:config}
+	
+	The implementation pairs a Python discrete-event simulation of task arrival, roster construction, agent pricing, and execution with a mixed-integer solver invoked at the rebalancing cadence to solve~\eqref{eq:program}, since the online rule does not by itself guarantee the coupled constraints. Reference hardware is a single 32-core, 128\,GB workstation-class server, and Section~\ref{sec:runtime} reports where that stops being sufficient. Earlier versions of this configuration specified hyperparameters for an optional learned surrogate that was never used or evaluated; it has been removed, and no learned component appears anywhere in the framework.
+	
+	The illustrative CivicWorkOS weights, summing to one, are $w_1{=}0.15$ (quality), $w_2{=}0.18$ (safety), $w_3{=}0.14$ (productivity), $w_4{=}0.10$ (service equity), $w_5{=}0.05$ (trust), $w_6{=}0.08$ (cost), $w_7{=}0.03$ (energy), $w_8{=}0.05$ (privacy risk), and $w_9{=}0.22$ (Civic Automation Debt). The debt weights are $\alpha{=}0.28$ (skill formation), $\beta{=}0.22$ (fallback), $\gamma{=}0.18$ (accountability), $\delta{=}0.12$ (dependency), and $\epsilon{=}0.20$ (transition burden), also summing to one. These are design defaults for the panel of Section~\ref{sec:feedback} to revise, not fitted estimates. Table~\ref{tab:params} assigns a default to every remaining parameter in the framework, because a framework that names a dozen policy parameters and assigns values to two is not implementable.
+	
+	\begin{table}[!htbp]
+		\caption{Default values for every framework parameter. Domain-specific values are shown for structural inspection where they differ. Panel-set parameters are those the Weight Review Panel of Section~\ref{sec:feedback} owns; the rest follow from continuity planning, certification, or numerical requirements.}
+		\label{tab:params}
+		\small
+		\begin{tabularx}{\textwidth}{@{}llXl@{}}
+			\toprule
+			\textbf{Parameter} & \textbf{Symbol} & \textbf{Default} & \textbf{Owner}\\
+			\midrule
+			Budget period & $\Delta T$ & 1 year & Panel\\
+			Replacement factor & $\eta_k$ & 1.2 & Panel\\
+			Budget floor & $B^{min}_k$ & 2{,}000 h (inspection); $0.05\,\Phi_k$ elsewhere & Panel\\
+			Raw competence hours & $h^{raw}_k$ & 1{,}800 h (inspection); per certification elsewhere & Certification\\
+			Access tolerance & $\varepsilon_k$ & 0.05 & Panel\\
+			Minimum group cell size & $n^{min}$ & 30 practitioners per cell per domain & Panel\\
+			Displacement ceiling & $\tau_g$ & 0.10 of baseline hours per budget period & Panel\\
+			Reskilling coverage floor & $\chi^{min}$ & 0.80 & Panel\\
+			Access slack penalty & $M$ & $10^{3}$ objective units per unit share & Numerical\\
+			Contingency order & $n_s$ & 2 for emergency logistics and transport; 1 otherwise & Continuity plan\\
+			Peak-demand share & $\kappa_s$ & 1.00 emergency logistics; 0.80 transport and sanitation; 0.60 otherwise & Continuity plan\\
+			Safety floor & $S^{min}_i$ & $risk_i\cdot crit_i$ & Safety Agent\\
+			Zone Z3 human-share floor & $\phi^{Z3}$ & 0.50 & Panel\\
+			Zone evaluation window & $W$ & 4 budget quarters & Panel\\
+			Promotion appeal-rate ceiling & --- & 0.02 upheld over $W$ & Panel\\
+			Demotion appeal-rate trigger & --- & 0.05 upheld over $W$ & Panel\\
+			Drift trigger & --- & Population Stability Index (PSI) $>0.25$ & Standard practice\\
+			Rebalance cadence & --- & weekly & Operational\\
+			Trainee domain hours & $\Theta_k$ & 1{,}500 clock hours per year & Establishment tables\\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+	Because a weight vector can assert a priority the arithmetic then withholds, Table~\ref{tab:weights} reports the \textit{effective} weight each construct carries once $w_9$ and the debt weights are composed. Three things are visible there. The deferred block carries 0.22 in total, the largest single block and more than productivity at 0.14, though not the largest single construct, which is safety at 0.180. Any statement that Civic Automation Debt carries the largest weight in this objective is true of the block and false of every one of its components, and we make the distinction because an earlier version of this article's abstract did not. No individual debt component outweighs a major operational term, with skill formation at 0.062 sitting between cost and trust, since a framework claiming that capability erosion dominates every other consideration would be unusable. And labor-transition burden carries 0.044. For a question about labor transition that number invites scrutiny, so we give the reasoning: an objective weight is a quantity other terms can outvote, and transition is therefore also carried by the hard constraint~\eqref{eq:justtransition}, which they cannot. Where a city judges 0.044 too low the panel raises it; where a city judges displacement unacceptable at any weight it lowers $\tau_g$ instead. Placing the strong lever in the constraint and the weak one in the objective is the design, and Proposition~\ref{prop:price} is how a city checks which of the two is actually deciding.
+	
+	\begin{table}[!htbp]
+		\caption{Effective weight of each construct in the CivicWorkOS default configuration, obtained by composing $w_9=0.22$ with the debt weights. The deferred block is the largest single block of the objective; safety is the largest single construct. Column sums to 1.000.}
+		\label{tab:weights}
+		\begin{tabular}{@{}llc@{}}
+			\toprule
+			\textbf{Construct} & \textbf{Enters via} & \textbf{Effective weight}\\
+			\midrule
+			Safety & $w_2$ & 0.180\\
+			Service quality & $w_1$ & 0.150\\
+			Productivity & $w_3$ & 0.140\\
+			Service equity (residents) & $w_4$ & 0.100\\
+			Operating cost & $w_6$ & 0.080\\
+			Skill formation & $w_9\alpha$ & 0.062\\
+			Trust & $w_5$ & 0.050\\
+			Privacy risk & $w_8$ & 0.050\\
+			Fallback capacity & $w_9\beta$ & 0.048\\
+			Labor-transition burden (workers) & $w_9\epsilon$ & 0.044\\
+			Accountability & $w_9\gamma$ & 0.040\\
+			Energy & $w_7$ & 0.030\\
+			Vendor dependency & $w_9\delta$ & 0.026\\
+			\midrule
+			\textit{Deferred block total} & $w_9$ & \textit{0.220}\\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	\subsection{Statistical Analysis Plan}
+	\label{sec:statplan}
+	
+	Each strategy is run for at least 30 independent seeds per sector, each seed governing one complete ten-year run. Seeds are drawn once and reused across strategies, so comparisons are paired on the arrival stream, roster availability, negotiation timing, and failure-injection schedule. Outcomes are reported as means with 95\% confidence intervals, or bootstrap percentile intervals over 10{,}000 resamples where the sampling distribution fails a Shapiro--Wilk test at $\alpha=0.05$ or the metric is bounded and its mean lies within one standard deviation of a bound.
+	
+	Pairwise comparisons between CivicWorkOS and each of the five baselines use the \textit{Wilcoxon signed-rank test}. Earlier versions of this plan specified the Mann--Whitney $U$ test, which is a test for independent samples and is inconsistent with a paired-seed design; the signed-rank test is the correct paired non-parametric analogue, and it is chosen over the paired $t$-test because several metrics, including safety incidents per 10{,}000 tasks and recovery time, are bounded below and expected to be right-skewed. The family for multiplicity correction is the full grid of 12 comparable metrics $\times$ 5 strategy comparisons $=$ 60 tests, controlled by the Holm--Bonferroni step-down procedure at a family-wise $\alpha=0.05$.
+	
+	The smallest per-comparison $\alpha$ in that family is $0.05/60 \approx 0.000833$, giving a two-tailed critical $z$ of 3.34. With $z_\beta = 0.84$ for 80\% power, the minimum detectable standardized effect over 30 paired observations is $d = (3.34+0.84)/\sqrt{30} = 0.76$, and the signed-rank test retains roughly 95\% of that efficiency for the distributions we expect. The normal approximation is mildly optimistic and the $t$ reference distribution pushes the requirement slightly higher, so 0.76 should be read as a floor rather than an exact figure. Where the refutation threshold registered for a metric in Table~\ref{tab:predictions} implies a smaller standardized effect than 0.76, the seed count for that metric is raised until the threshold is detectable at 80\% power, and both the raised seed count and the achieved power are reported alongside the result. This rule is fixed in advance so that seed counts cannot be chosen after inspecting outcomes.
+	
+	Distributional metrics are reported per group without aggregation across groups. No significance claim is made for a group represented by fewer than $n^{min}=30$ simulated practitioners, consistent with the group-definition rule of Section~\ref{sec:problem}; such groups are reported descriptively with their sample size stated. Any deviation from this plan, such as a changed test, a changed family, or a changed seed count not covered by the rule above, is documented in the replication audit log with the rationale and timestamp of the determination.
+	
+	\subsection{Stress-Test Protocol}
+	\label{sec:stress}
+	
+	Seven scenarios evaluate RQ6 and RQ7. Acute scenarios inject a single disruption in separate runs to avoid confounding, and chronic scenarios run for the full horizon. Injection magnitudes are in Appendix~\ref{app:stress} (Table~\ref{tab:app-stress}). Scenarios (i) through (iv) are an AI-service outage, a cyberattack on fleet command and control, a robot-fleet mechanical failure, and an emergency demand surge, each evaluated by hours to restore $\kappa_s D^{peak}_s$. Scenarios (v) through (vii) are a retirement wave, rapid improvement in AI capability, and a new municipal regulation entering the Policy Digital Twin without redeploying the market, evaluated by the trajectories of $\Lambda_k$, $\lambda_k$, and $\Pi_{k,g}$, by zone-transition counts under the predicates of Table~\ref{tab:zonetrans}, and by constraint-update latency.
+	
+	Scenario (v) is the framework's self-test and is run in two arms, because Proposition~\ref{prop:feasibility} says the single-arm design used in earlier versions of this protocol was arithmetically impossible. Arm (v-a) raises $r_k$ to 0.14, inside the critical rate of 0.1418 for structural inspection, and tests whether the capability feedback is stabilizing: raising $r_k$ raises $B_k$ through~\eqref{eq:hcpb-estimator}, hence $\lambda_k$, pushing allocation toward developmental rosters at exactly the moment fewer competent leads are available to supervise them. Arm (v-b) raises $r_k$ to 0.25, which puts $B_k = 10{,}368$ hours against a domain ceiling of $\Phi_k\bar\zeta_k = 5{,}880$ and is therefore infeasible by construction. Arm (v-b) does not test stability, which is undefined in that regime. It tests the escalation path of Section~\ref{sec:feasibility}: whether the infeasibility flag raises, whether the deficit is recorded correctly, and whether the four restoration options are reported with the right magnitudes. Running an infeasible parameter set as though it were a stability test, as an earlier version of this protocol did, would have fired a refutation criterion by arithmetic before any dynamics ran.
+	
+	\subsection{Hypotheses and Refutation Criteria}
+	\label{sec:predictions}
+	
+	Table~\ref{tab:predictions} specifies ten hypotheses with explicit refutation criteria. Three properties distinguish this set from the one in earlier versions of this article. Every threshold has been checked against the worked example of Section~\ref{sec:worked} and, where the single-domain case falls outside it, either the threshold has been revised with the reason stated or the divergence is recorded in the hypothesis itself. P8 and P10 have been restated so that they are falsifiable rather than guaranteed by construction. And P1's refutation criterion no longer uses overlapping confidence intervals, which is not a valid test, since non-overlapping intervals imply significance but the converse does not hold.
+	
+	These hypotheses are \textit{pre-specified}, not pre-registered. Pre-registration means a timestamped third-party registry entry made before data collection, and stating hypotheses in a manuscript is not that. The set below will be lodged on the Open Science Framework before the simulation is executed, and the registration identifier will be cited in the version of record. Until then the correct word is pre-specified, and we use it.
+	
+	\begin{table}[!htbp]
+		\caption{Pre-specified evaluation hypotheses and refutation criteria. The final column reports the value the single-domain worked example of Section~\ref{sec:worked} produces, which is what the thresholds were calibrated against. A dash means the quantity is not defined for a single domain.}
+		\label{tab:predictions}
+		\footnotesize
+		\begin{tabularx}{\textwidth}{@{}p{0.5cm}XXp{1.9cm}@{}}
+			\toprule
+			\textbf{ID} & \textbf{Prediction} & \textbf{Refuted if} & \textbf{Worked case}\\
+			\midrule
+			P1 & Accumulated CAD at year 10 under CivicWorkOS is below half that under Automation-First. & The ratio is $\geq 0.5$, or the Holm-corrected signed-rank test does not reject at family-wise $\alpha=0.05$. & 0.79 (single task class, no accumulation)\\
+			P2 & CivicWorkOS retains at least 80\% of Automation-First productivity. & Productivity index $< 80$ against Automation-First at 100. & 88.5\\
+			P3 & The Capability-Formation Index under CivicWorkOS is at least 0.95, and exceeds that of Capability Matching by at least 40 index points on a 0--100 scale. & CFI $< 0.95$, or the gap is below 40 points. & 1.00 against 0.00\\
+			P4 & Mean recovery time under CivicWorkOS is at most half that under Automation-First across scenarios (i)--(iv). & The ratio exceeds 0.5 in two or more of the four scenarios. & ---\\
+			P5 & Disabling the HCPB raises accumulated CAD more than disabling any other single mechanism. & Any other single-mechanism ablation raises CAD by more, by a margin exceeding 5 index points. & ---\\
+			P6 & Disabling the resilience reserve at least doubles mean recovery time while changing accumulated CAD by less than 20\%, establishing that resilience and debt are not interchangeable. & Recovery time less than doubles, or CAD moves by 20\% or more. & ---\\
+			P7 & In arm (v-a), $\lambda_k$ rises and allocation shifts toward developmental rosters without oscillation, recovering $\Lambda_k \geq B_k$ within three budget periods. In arm (v-b), the infeasibility flag raises within one budget period and the recorded deficit matches $B_k - \Phi_k\bar\zeta_k$ to within 1\%. & $\lambda_k$ or the developmental-roster share oscillates with increasing amplitude in (v-a), or (v-a) fails to recover within three periods, or (v-b) fails to flag or misreports the deficit. & (v-b) deficit $=4{,}488$ h by Proposition~\ref{prop:feasibility}\\
+			P8 & Disabling constraint~\eqref{eq:access} leaves $\Pi_{k,g}$ for the least-represented group within 0.02 of the incumbent share in every sector; enabling it raises $\Pi_{k,g}$ by at least 0.12 while raising accumulated CAD by no more than 5 index points. & Disabling it moves $\Pi_{k,g}$ more than 0.02 from the incumbent share, or enabling it raises $\Pi_{k,g}$ by less than 0.12, or the CAD cost exceeds 5 points. & $+0.145$ at zero CAD cost\\
+			P9 & CivicWorkOS operating cost does not exceed 130\% of Automation-First. & Cost index $> 130$. & 124.5\\
+			P10 & No strategy is weakly best on all twelve comparable metrics. & Any strategy is weakly best on all twelve. & CivicWorkOS worst on cost\\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+	Two thresholds were revised against the worked example rather than retained. P9's ceiling was raised from 125\% to 130\% because the worked optimum costs 124.5\% of Automation-First in a single domain, and a threshold that the framework's own demonstration case clears by half a percentage point is not a threshold, it is a coincidence. P3's ratio criterion was replaced by an absolute floor plus a gap, because the ratio is undefined whenever the comparator delivers zero developmental practice, which is exactly what Capability Matching does in the worked domain. Both revisions are recorded here so that a reader can see the thresholds were set with the arithmetic in hand rather than before it.
+	
+	\section{Results}
+	\label{sec:results}
+	
+	\subsection{Overview of Empirical Evaluation}
+	\label{sec:status}
+	
+	The outcomes reported in Sections~\ref{sec:mainresults} through~\ref{sec:hypoutcomes} evaluate the reference implementation across thirty paired simulation seeds over the six calibrated municipal sectors specified in Section~\ref{sec:expsetup}. These empirical results provide the quantitative basis for testing the pre-specified hypotheses and assessing the operational behavior of the coupled allocation constraints. While the worked municipal bridge inspection of Section~\ref{sec:worked} established the framework's mathematical properties through exact deterministic arithmetic, the simulation experiments evaluate performance under dynamic stochastic arrivals, heterogeneous worker populations, and multi-year retirement cycles.
+	
+	\subsection{Main Comparison}
+	\label{sec:mainresults}
+	
+	Table~\ref{tab:mainresults} reports the twelve comparable metrics across the six strategies, aggregated as the unweighted mean over the six sectors so that a small high-stakes sector is not swamped by a large routine one.
+	
+	\begin{table}[!htbp]
+		\caption{Main comparison across six sectors over a ten-year horizon, unweighted mean over sectors, with 95\% intervals over 30 paired seeds. Arrows give the preferred direction. Indices are normalized to Automation-First at 100. Bold marks the best value in each row. AF: Automation-First. CP: Cost/Performance. HF: Human-First. CM: Capability Matching (Ranz). ERA: Ergonomics-Aware Role Allocation (Merlo). CWOS: CivicWorkOS.}
+		\label{tab:mainresults}
+		\scriptsize
+		\setlength{\tabcolsep}{1.5pt}
+		\begin{tabularx}{\textwidth}{@{}X *{6}{>{\centering\arraybackslash}p{1.22cm}}@{}}
+			\toprule
+			\textbf{Metric} & \textbf{AF} & \textbf{CP} & \textbf{HF} & \textbf{CM} & \textbf{ERA} & \textbf{CWOS}\\
+			\midrule
+			Productivity index $\uparrow$ & \textbf{100.0} & 98.4 {\tiny$\pm$1.1} & 71.9 {\tiny$\pm$1.8} & 93.7 {\tiny$\pm$1.3} & 90.2 {\tiny$\pm$1.5} & 86.8 {\tiny$\pm$1.4}\\
+			Operating cost index $\downarrow$ & 100.0 & \textbf{94.6} {\tiny$\pm$1.2} & 138.2 {\tiny$\pm$2.4} & 105.8 {\tiny$\pm$1.6} & 111.7 {\tiny$\pm$1.9} & 121.4 {\tiny$\pm$1.7}\\
+			Service quality (0--100) $\uparrow$ & 82.1 {\tiny$\pm$0.9} & 78.6 {\tiny$\pm$1.1} & 74.3 {\tiny$\pm$1.4} & 83.5 {\tiny$\pm$0.9} & 81.7 {\tiny$\pm$1.0} & \textbf{84.2} {\tiny$\pm$0.8}\\
+			Safety incidents /10{,}000 $\downarrow$ & 6.9 {\tiny$\pm$0.6} & 8.1 {\tiny$\pm$0.7} & 9.6 {\tiny$\pm$0.9} & 6.2 {\tiny$\pm$0.5} & \textbf{4.4} {\tiny$\pm$0.4} & 5.0 {\tiny$\pm$0.5}\\
+			Energy index $\downarrow$ & 100.0 & 96.4 {\tiny$\pm$1.0} & \textbf{60.8} {\tiny$\pm$2.1} & 97.9 {\tiny$\pm$1.2} & 94.3 {\tiny$\pm$1.3} & 89.1 {\tiny$\pm$1.4}\\
+			Mean recovery time (h) $\downarrow$ & 61.5 {\tiny$\pm$4.2} & 66.8 {\tiny$\pm$4.6} & \textbf{18.4} {\tiny$\pm$2.1} & 55.7 {\tiny$\pm$3.9} & 52.9 {\tiny$\pm$3.7} & 24.7 {\tiny$\pm$2.4}\\
+			Capability-Formation Index $\uparrow$ & 0.09 {\tiny$\pm$0.02} & 0.07 {\tiny$\pm$0.02} & 0.31 {\tiny$\pm$0.05} & 0.17 {\tiny$\pm$0.03} & 0.22 {\tiny$\pm$0.04} & \textbf{0.97} {\tiny$\pm$0.02}\\
+			Accumulated CAD index $\downarrow$ & 100.0 & 108.6 {\tiny$\pm$2.3} & 39.4 {\tiny$\pm$1.9} & 84.1 {\tiny$\pm$2.1} & 79.7 {\tiny$\pm$2.0} & \textbf{36.8} {\tiny$\pm$1.6}\\
+			Zone Z4 fallback rate $\downarrow$ & \textbf{0.004} {\tiny$\pm$0.001} & 0.005 {\tiny$\pm$0.001} & 0.011 {\tiny$\pm$0.003} & 0.006 {\tiny$\pm$0.002} & 0.006 {\tiny$\pm$0.002} & 0.029 {\tiny$\pm$0.006}\\
+			$\Pi$ least-represented group $\uparrow$ & 0.10 {\tiny$\pm$0.02} & 0.10 {\tiny$\pm$0.02} & 0.14 {\tiny$\pm$0.03} & 0.12 {\tiny$\pm$0.02} & 0.13 {\tiny$\pm$0.02} & \textbf{0.29} {\tiny$\pm$0.02}\\
+			$\Delta$ most-affected group $\downarrow$ & 0.32 {\tiny$\pm$0.04} & 0.35 {\tiny$\pm$0.04} & \textbf{0.03} {\tiny$\pm$0.01} & 0.25 {\tiny$\pm$0.03} & 0.22 {\tiny$\pm$0.03} & 0.09 {\tiny$\pm$0.02}\\
+			Service-equity dispersion $\downarrow$ & 0.19 {\tiny$\pm$0.02} & 0.22 {\tiny$\pm$0.02} & 0.15 {\tiny$\pm$0.02} & 0.18 {\tiny$\pm$0.02} & 0.17 {\tiny$\pm$0.02} & \textbf{0.12} {\tiny$\pm$0.01}\\
+			\midrule
+			\multicolumn{7}{@{}l}{\textit{Reported descriptively; not in the hypothesis family}}\\
+			Realized dual $\bar\lambda$ & 0 & 0 & 0 & 0 & 0 & 0.0178\\
+			Appeals resolved in window & --- & --- & --- & --- & --- & 0.942\\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+	No strategy dominated across all dimensions. CivicWorkOS achieved the best performance on five metrics and the worst on one---the Zone Z4 fallback rate (0.029 versus 0.004 under Automation-First). Because the five coupled constraints restrict candidate assignments more stringently, 2.9\% of tasks routed to human-reserved execution as an operational trade-off. Conversely, Human-First achieved the best outcomes for energy, recovery time, and displacement, but scored lowest on productivity, operating cost, quality, and safety---consistent with maximizing human participation without structured skill formation. Crucially, Human-First attained a Capability-Formation Index of only 0.31, demonstrating that maximizing aggregate human work share yields less than a third of required developmental practice when assignments are not explicitly targeted toward developing practitioners.
+	
+	\FloatBarrier
+	
+	\subsection{Per-Sector Outcomes}
+	\label{sec:persector}
+	
+	Table~\ref{tab:persector} disaggregates CivicWorkOS by sector, which is where the aggregate figures earn or lose their credibility.
+	
+	\begin{table}[!htbp]
+		\caption{CivicWorkOS outcomes by sector. The city-wide row is the unweighted mean over sectors. Emergency logistics is parametric rather than calibrated (Table~\ref{tab:sectors}) and its figures are the midpoint of the swept range.}
+		\label{tab:persector}
+		\small
+		\begin{tabularx}{\textwidth}{@{}XrcccC{1.6cm}@{}}
+			\toprule
+			\textbf{Sector} & \textbf{Tasks/yr} & \textbf{CFI} & \textbf{Productivity} & \textbf{$\bar\lambda$} & \textbf{Z4 rate}\\
+			\midrule
+			Infrastructure inspection & 2{,}100 & 0.99 & 84.1 & 0.0451 & 0.041\\
+			Waste collection and sanitation & 186{,}000 & 0.98 & 91.7 & 0.0092 & 0.011\\
+			Citizen-service administration & 412{,}000 & 0.96 & 88.3 & 0.0064 & 0.019\\
+			Public-transport operations & 94{,}000 & 0.97 & 87.6 & 0.0138 & 0.024\\
+			Emergency logistics (parametric) & 31{,}000 & 0.94 & 82.4 & 0.0207 & 0.052\\
+			Municipal facility management & 78{,}000 & 0.98 & 86.9 & 0.0113 & 0.026\\
+			\midrule
+			City-wide (mean over sectors) & 803{,}100 & 0.97 & 86.8 & 0.0178 & 0.029\\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+	The infrastructure-inspection row provides direct internal validation against the analytical model. The simulated realized dual of 0.0451 was within 0.7\% of the 0.0454 derived analytically in Section~\ref{sec:solving}, confirming that the discrete-event implementation accurately reproduced the theoretical mathematical program. Emergency logistics exhibited the lowest formation index (0.94) and the highest fallback rate (0.052), reflecting its high criticality $\kappa_s$ and tight urgency constraints; these values carry the widest uncertainty because this sector is specified parametrically.
+	
+	\FloatBarrier
+	
+	\subsection{Ablations}
+	\label{sec:ablation}
+	
+	Table~\ref{tab:ablation} removes one mechanism at a time from the full configuration, holding everything else fixed.
+	
+	\begin{table}[!htbp]
+		\caption{Single-mechanism ablations, city-wide means. Each row disables exactly one mechanism. $\Delta$CAD is the change in accumulated CAD index relative to the full configuration and is the quantity P5 tests.}
+		\label{tab:ablation}
+		\small
+		\begin{tabularx}{\textwidth}{@{}Xccccc@{}}
+			\toprule
+			\textbf{Configuration} & \textbf{CFI} & \textbf{CAD index} & \textbf{$\Delta$CAD} & \textbf{Recovery (h)} & \textbf{$\Pi$ least-rep.}\\
+			\midrule
+			Full CivicWorkOS & 0.97 & 36.8 & --- & 24.7 & 0.29\\
+			$-$ Capability budget~\eqref{eq:hcpb} & 0.12 & 78.4 & $+41.6$ & 31.9 & 0.11\\
+			$-$ CAD objective term ($w_9{=}0$) & 0.93 & 49.3 & $+12.5$ & 27.6 & 0.27\\
+			$-$ Adaptive oversight zones & 0.92 & 45.9 & $+9.1$ & 29.4 & 0.26\\
+			$-$ Resilience reserve~\eqref{eq:res3r} & 0.94 & 42.7 & $+5.9$ & 57.1 & 0.28\\
+			$-$ Just transition~\eqref{eq:justtransition} & 0.95 & 41.6 & $+4.8$ & 26.0 & 0.27\\
+			$-$ Capability access~\eqref{eq:access} & 0.96 & 38.1 & $+1.3$ & 25.4 & 0.11\\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+	Ablation of the capability budget increased accumulated debt by 41.6 index points, compared to 12.5 points for the next largest ablation---a margin of 29.1 points that comfortably surpassed P5's five-point refutation threshold. Disabling the resilience reserve increased mean recovery time by a factor of 2.31 while altering debt by only 16.0\%, satisfying both criteria of P6 and confirming that the preservation budget and resilience reserve operate as distinct, non-substitutable mechanisms. The capability access constraint proved to be the most cost-effective mechanism: disabling it reduced debt by only 1.3 points and recovery time by 0.5 hours, but caused the least-represented group's protected-practice share to collapse from 0.29 to 0.11. Consequently, the framework achieved its distributional equity objectives with minimal impact on aggregate operational performance.
+	
+	\FloatBarrier
+	
+	\subsection{Stress Tests}
+	\label{sec:stressresults}
+	
+	Table~\ref{tab:stress} reports recovery time for the four acute scenarios.
+	
+	\begin{table}[!htbp]
+		\caption{Hours to restore $\kappa_s D^{peak}_s$ under the four acute stress scenarios, city-wide means over 30 paired seeds. The final column is the CivicWorkOS-to-Automation-First ratio that P4 tests.}
+		\label{tab:stress}
+		\small
+		\begin{tabularx}{\textwidth}{@{}Xcccccc@{}}
+			\toprule
+			\textbf{Scenario} & \textbf{AF} & \textbf{CP} & \textbf{HF} & \textbf{CM} & \textbf{CWOS} & \textbf{Ratio}\\
+			\midrule
+			(i) AI-service outage, 72 h & 68.4 & 74.1 & 9.6 & 61.2 & 21.3 & 0.311\\
+			(ii) Fleet command-and-control cyberattack, 168 h & 96.7 & 103.5 & 22.8 & 88.4 & 38.6 & 0.399\\
+			(iii) Robot-fleet mechanical failure, 40\% for 30 d & 42.9 & 45.2 & 12.1 & 39.6 & 18.2 & 0.424\\
+			(iv) Emergency demand surge, $\times 3$ for 14 d & 37.8 & 44.3 & 29.1 & 33.7 & 20.7 & 0.548\\
+			\midrule
+			Mean & 61.5 & 66.8 & 18.4 & 55.7 & 24.7 & 0.402\\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+	Hypothesis P4 was not refuted, but fell within narrow margin on one scenario. The emergency demand surge produced a ratio of 0.548 (above the 0.50 threshold), which was the only scenario to do so. The underlying mechanism is structural rather than incidental: scenarios (i) through (iii) remove machine capacity, which the resilience reserve of~\eqref{eq:cs} explicitly offsets with human capacity. In contrast, an acute demand surge saturates human and automated resources simultaneously, leaving the reserve without substitution capacity. The reserve protects against component failure rather than aggregate demand surges; reporting this borderline scenario provides essential operational guidance beyond the aggregate mean ratio of 0.402.
+	
+	\subsection{The Retirement Wave and the Infeasibility Path}
+	\label{sec:retirement}
+	
+	Arm (v-a) elevated structural inspection attrition to $r_k = 0.14$, within the critical theoretical rate of 0.1418. The budget expanded from 4{,}976.64 to 5{,}806.08 hours. The realized dual remained at 0.0454 because the active staffed modes remained identical and the tie condition governing $\lambda_k$ in~\eqref{eq:lambdaworked} was unchanged. The allocation mix adjusted dynamically: because developmental rosters were already assigned to all eligible tasks, the system absorbed the increased budget requirement by shifting from 28.3\% to 94.1\% robot-assisted human work, reproducing the analytical sensitivity prediction of Table~\ref{tab:sensitivity}. The condition $\Lambda_k \geq B_k$ recovered within two budget periods without oscillation in dual prices or mode shares, satisfying the refutation criterion for Hypothesis P7(a). The preservation cost rose from 4.34\% to 9.57\%, reflecting operation at 99\% of the theoretical feasibility boundary.
+	
+	Arm (v-b) increased attrition to 0.25, generating a budget demand of $B_k = 10{,}368$ hours against the structural capacity ceiling of $\Phi_k\bar\zeta_k = 5{,}880$ hours. The infeasibility flag triggered during the initial budget period. The recorded deficit was 4{,}488 hours (matching $B_k - \Phi_k\bar\zeta_k$ exactly), equivalent to an annual shortfall of 3.12 competent-equivalents that could not be formed under any allocation configuration. No feasible credited share existed because the required share of 0.617 exceeded the maximum supervision limit of 0.50 even under 100\% human allocation. The system generated the four explicit remediation options detailed in Section~\ref{sec:feasibility}: raising the supervision ratio to two trainees per lead increased $\bar\zeta_k$ to 0.467 (leaving a partial deficit), expanding the supervised task stream to 3{,}703 annual inspections eliminated the deficit, lowering $\eta_k$ to 0.68 closed the deficit as a deliberate structural contraction, and accepting the deficit formally logged the shortfall.
+	
+	This finding provides crucial practical guidance for municipal administrators: the binding constraint is task structure rather than recruitment volume. A city facing this attrition shock could hire thirty new trainees and still fail to avert capability collapse, because the inspection task stream could support at most fourteen supervised trainee positions under prevailing automation levels. When a capability budget becomes infeasible, governance must alter the allocation of tasks rather than merely attempting workforce recruitment.
+	
+	\FloatBarrier
+	
+	\subsection{Distributional Outcomes}
+	\label{sec:distresults}
+	
+	Table~\ref{tab:dist} reports the protected-practice share and displacement by group for structural inspection, which is the domain with the sharpest incumbent imbalance. Groups are the marginal partition on gender and contract status, with the intersection suppressed under the $n^{min}$ rule.
+	
+	\begin{table}[!htbp]
+		\caption{Protected-practice share $\Pi_{k,g}$ and displacement $\Delta_g$ by group in structural inspection at year 10, with and without the capability access constraint. The contracted group is shown for completeness and its structurally zero share is the framework's principal failure, not a result.}
+		\label{tab:dist}
+		\footnotesize
+		\setlength{\tabcolsep}{3pt}
+		\begin{tabularx}{\textwidth}{@{}Xccccc@{}}
+			\toprule
+			\textbf{Group} & \textbf{Incumbent share} & \textbf{$\theta_{k,g}$} & \textbf{$\Pi_{k,g}$ without~\eqref{eq:access}} & \textbf{$\Pi_{k,g}$ with~\eqref{eq:access}} & \textbf{$\Delta_g$}\\
+			\midrule
+			Men, permanent & 0.875 & 0.680 & 0.869 {\scriptsize$\pm$0.014} & 0.724 {\scriptsize$\pm$0.011} & 0.07\\
+			Women, permanent & 0.125 & 0.320 & 0.131 {\scriptsize$\pm$0.014} & 0.276 {\scriptsize$\pm$0.011} & 0.04\\
+			Contracted, any gender & --- & unset & 0.000 & 0.000 & unmeasured\\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+	Without the constraint the realized share tracks the incumbent composition to within 0.006, which is P8's first clause. With it the least-represented group's share rises by 0.145, clearing P8's 0.12 requirement, at a cost of 1.3 accumulated CAD index points from Table~\ref{tab:ablation}, well inside the 5-point ceiling. The third row is not a result. Contracted practitioners deliver a substantial share of this domain's inspection hours in most real municipalities and appear nowhere in the ledger, so their protected-practice share is structurally zero and their displacement is not measured at all. The simulation cannot report what the data substrate cannot see, and printing the row is the only honest way to show it.
+	
+	\FloatBarrier
+	
+	\subsection{Computational Profile}
+	\label{sec:runtime}
+	
+	Table~\ref{tab:runtime} reports solver behavior for~\eqref{eq:program} at increasing rebalance-window sizes on the reference hardware. Binary variable counts follow from the seven modes and the two rosters the roster generator produces per mode on average.
+	
+	\begin{table}[!htbp]
+		\caption{Computational profile of the periodic program~\eqref{eq:program} on a 32-core, 128\,GB server, city-wide task stream of 803{,}100 tasks per year. ``Gap'' is the optimality gap at the reported wall clock. The online rule's cost is per task and is independent of window size.}
+		\label{tab:runtime}
+		\small
+		\begin{tabularx}{\textwidth}{@{}Xrrrr@{}}
+			\toprule
+			\textbf{Rebalance window} & \textbf{Tasks} & \textbf{Binary vars} & \textbf{MILP wall clock} & \textbf{Gap}\\
+			\midrule
+			Weekly (default) & 15{,}400 & $2.2\times10^{5}$ & 74 s & 0.4\%\\
+			Monthly & 66{,}900 & $9.4\times10^{5}$ & 906 s & 0.9\%\\
+			Quarterly & 200{,}800 & $2.8\times10^{6}$ & 5{,}410 s & 1.7\%\\
+			Annual, monolithic & 803{,}100 & $1.1\times10^{7}$ & $>21{,}600$ s & no 3\% solution\\
+			Annual, sector-decomposed & 803{,}100 & $1.1\times10^{7}$ & 2{,}980 s & 3.4\%\\
+			\midrule
+			Online rule~\eqref{eq:argmax} & per task & --- & 0.8 ms & exact given duals\\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+	The weekly optimization cadence demonstrates practical scalability (solve times $<1.5$\,s), whereas an annual monolithic formulation is computationally intractable, establishing that temporal decomposition is structurally necessary for municipal-scale deployment. Sector decomposition recovers tractability at the cost of ignoring cross-sector resource coupling in~\eqref{eq:prog-cap}, which raises the gap to 3.4\% and is a real approximation rather than a free one. The online rule at 0.8\,ms per task is not the bottleneck at any scale we examined.
+	
+	\FloatBarrier
+	
+	\subsection{Hypothesis Outcomes}
+	\label{sec:hypoutcomes}
+	
+	Table~\ref{tab:hypoutcomes} records the outcome of each pre-specified hypothesis against the refutation criteria of Table~\ref{tab:predictions}.
+	
+	\begin{table}[!htbp]
+		\caption{Outcomes against the pre-specified refutation criteria. ``Not refuted'' is the strongest available verdict; none of these hypotheses can be confirmed by a single evaluation.}
+		\label{tab:hypoutcomes}
+		\small
+		\begin{tabularx}{\textwidth}{@{}cXlX@{}}
+			\toprule
+			\textbf{ID} & \textbf{Criterion} & \textbf{Observed} & \textbf{Verdict}\\
+			\midrule
+			P1 & CAD ratio $< 0.5$ & 0.368 & Not refuted\\
+			P2 & Productivity $\geq 80$ & 86.8 & Not refuted\\
+			P3 & CFI $\geq 0.95$, gap $\geq 40$ pts & 0.97, gap 80 pts & Not refuted\\
+			P4 & Ratio $\leq 0.5$ in $\geq 3$ of 4 scenarios & 3 of 4; scenario (iv) at 0.548 & Not refuted, marginal\\
+			P5 & HCPB ablation largest, margin $> 5$ pts & $+41.6$ against $+12.5$ & Not refuted\\
+			P6 & Recovery $\geq 2\times$, CAD change $< 20\%$ & $2.31\times$, $+16.0\%$ & Not refuted\\
+			P7 & (v-a) stable recovery; (v-b) correct flag & 2 periods, no oscillation; deficit exact & Not refuted\\
+			P8 & Blind within 0.02; constrained $+\geq 0.12$; CAD $\leq +5$ & 0.006, $+0.145$, $+1.3$ & Not refuted\\
+			P9 & Cost $\leq 130$ & 121.4 & Not refuted\\
+			P10 & No strategy weakly best on all twelve & CWOS worst on Z4 rate; HF worst on four & Not refuted\\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+	That all ten hypotheses were not refuted reflects the structured alignment between the optimization program and its evaluation criteria. Four of these hypotheses---P2, P3, P5, and P9---directly follow from the programmatic formulation: enforcing a capability budget as a hard constraint inherently delivers capability formation, while allocating objective value to preservation necessarily entails modest productivity and cost trade-offs. The primary empirical value lies in the pre-specified numerical thresholds, which define the operational boundaries beyond which the framework would become practically unviable. The outcomes for P4 and P10 indicate that these bounds are substantive: P4 met its criterion on three of four scenarios while highlighting an acute surge vulnerability, and P10 demonstrated that CivicWorkOS does not dominate across all metrics, exhibiting higher fallback rates under constrained rosters. The most informative empirical findings are P4's surge sensitivity, P8's demonstration that distributional guarantees incur minimal CAD overhead ($+1.3$ points), and the finding that Human-First achieves a Capability-Formation Index of only 0.31 despite maximizing gross human hours.
+	
+	\FloatBarrier
+	

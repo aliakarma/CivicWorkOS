@@ -18,6 +18,8 @@ Author reference implementation of the theoretical framework by Toqeer Ali Syed,
 > As stated in the manuscript's Data Availability Statement, this *Hypothesis and Theory* article presents a normative theoretical architecture and reports **no dataset and no measured empirical result**. This repository recomputes every checkable number the article publishes — the §5.3 worked example and the §7.1 / Fig. 3 closed-form debt model — and reports the agreement explicitly, check by check, in [Verification Against the Published Worked Example](#verification-against-the-published-worked-example).
 >
 > Everything under [`sim/`](sim/) runs on **clearly labelled synthetic demonstration data**. It exercises the protocol's software shape and must never be cited as empirical municipal validation. See [docs/reproducibility.md](docs/reproducibility.md).
+>
+> **The evaluation protocol specified in the article has not been executed.** The article specifies it in full — six sectors, a ten-year horizon, thirty paired seeds, six strategies, and ten hypotheses with refutation criteria — so that the evaluation is fixed in advance and auditable. No outcome of it is reported anywhere, in the article or here. The article's evidence is the worked bridge-inspection allocation, its sensitivity frontier, its two parameter shocks, and the closed-form debt model, all of which are exact arithmetic reproducible from the published values.
 
 ---
 

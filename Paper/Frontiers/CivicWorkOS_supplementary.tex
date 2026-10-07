@@ -1,0 +1,339 @@
+\documentclass[utf8]{frontiers_suppmat}
+
+\usepackage[hyphens]{url}
+\usepackage{xr-hyper}
+\usepackage[hypertexnames=false]{hyperref}
+\externaldocument{CivicWorkOS}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\sisetup{detect-all}
+\usepackage{float}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{threeparttable}
+\usepackage{multirow}
+\usepackage{adjustbox}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=MidnightBlue,
+	urlcolor=MidnightBlue,
+	citecolor=MidnightBlue
+}
+
+\renewcommand{\theHtable}{S\arabic{table}}
+\renewcommand{\theHfigure}{S\arabic{figure}}
+\renewcommand{\thesection}{S\arabic{section}}
+
+\def\firstAuthorLast{Syed et~al.}
+
+\begin{document}
+
+\title[CivicWorkOS Supplementary]{CivicWorkOS: Capability-Preserving Allocation of Municipal Work Among Humans, AI Agents and Robots}
+
+\maketitle
+
+\section{The Contestability Procedure in Full}
+\label{app:contest}
+
+This appendix is the operative specification of the procedure summarized in Section~\ref{sec:contest}. Where the body of the article states a window or a threshold, the value given here governs.
+
+\subsection{Standing}
+\label{app:contest-standing}
+
+An appeal against an allocation decision may be lodged by:
+
+\begin{enumerate}
+	\item any resident materially affected by the service outcome the allocation produced;
+	\item any worker whose allocation, access to budget-protected developmental work, or displacement is at issue, \emph{irrespective of contract status}, whether permanent, fixed-term, agency, contracted, or platform-mediated;
+	\item an authorized representative of either, including a recognized trade union or a community organization acting on a resident's behalf; and
+	\item the municipal ombudsman or equivalent office, acting on its own motion where a pattern of outcomes rather than a single decision is at issue.
+\end{enumerate}
+
+Clause 2 is deliberately decoupled from the competent-practitioner headcount $N_k(t)$ used to size the capability budget. A worker who is invisible to the budget arithmetic can still contest a decision that affects them. This does not repair the exclusion documented in Section~\ref{sec:whowins}, but it ensures the exclusion is at least reportable by the people it affects. Clause 4 is the systemic-challenge route: an individual appellant contests one decision, whereas the ombudsman may contest the configuration that produced a pattern of them.
+
+\subsection{Windows}
+\label{app:contest-windows}
+
+Table~\ref{tab:app-windows} gives the operative appeal and resolution windows by oversight zone and rights impact.
+
+\begin{table}[!htbp]
+	\caption{Appeal windows by oversight zone and rights impact. All values are policy parameters set by the Weight Review Panel; those below are the defaults proposed in Section~\ref{sec:contest}, which reproduces them exactly.}
+	\label{tab:app-windows}
+	\small
+	\begin{tabularx}{\textwidth}{@{}p{3.6cm}p{2.3cm}p{2.3cm}X@{}}
+		\toprule
+		\textbf{Decision class} & \textbf{Lodgement} & \textbf{Resolution} & \textbf{Effect of lodgement}\\
+		\midrule
+		Zone Z1 or Z2, routine & 20 working days & 20 working days & Outcome stands pending resolution\\
+		Zone Z1 or Z2, rights-affecting ($auth_i$ or $priv_i$ above threshold) & 20 working days & 10 working days & Outcome suspended pending resolution\\
+		Zone Z3 or Z4 & 20 working days & 20 working days & Outcome stands; the human decision-maker of record is named in the response\\
+		Worker access or displacement appeal & 40 working days & 30 working days & Displacement suspended pending resolution\\
+		\bottomrule
+	\end{tabularx}
+\end{table}
+
+The longer lodgement window for worker appeals reflects the fact that a worker may not observe the pattern of allocations affecting their developmental access until a budget period has closed. The rights-affecting threshold on $auth_i$ and $priv_i$ defaults to 0.7 on the normalized scale of~\eqref{eq:task}.
+
+\subsection{Evidentiary Record}
+\label{app:contest-record}
+
+Every allocation decision writes an append-only record containing:
+
+\begin{enumerate}
+	\item the task profile $T_i$ of~\eqref{eq:task}, including $d_i$ and the derived developmental content $\ell_i$;
+	\item the mode set drafted, the roster set $\mathcal{A}_{i,m}$ constructed for each surviving mode, and the set surviving policy filtering, with the Policy Digital Twin status returned for each removed mode and each pruned roster, together with the identifier of every rule that fired;
+	\item for every surviving staffed mode, the full term vector $(Q,S,P,Eq^{srv},Tr,Cost,En,Pr)$, the five debt components, the composed $CAD_{i,m,a}$, the base $SCV_{i,m,a}$, the Lagrangian-augmented score $\widetilde{SCV}_{i,m,a}$, and the credited developmental share $\phi_m\psi_a$;
+	\item the admissibility outcome for each staffed mode, and where one was excluded, which bracket of the admissibility test excluded it and the value of the catch-up increment $\delta_k(t)$ in force;
+	\item the dual prices $\lambda_k$, $\mu_s$, $\nu_{k,g}$, $\varrho_g$, $\upsilon_r$ in force and the timestamp of the rebalance that produced them, together with the integrality gap that rebalance reported;
+	\item the debt-weight flip threshold $w_9^\star$ of Proposition~\ref{prop:price} for this task, so that an appellant can see whether the objective or a constraint determined the outcome;
+	\item the version identifier of the parameter configuration, covering weights, budgets, access targets, the group coarsening and minimum cell size, transition ceilings, zone thresholds, and contingency parameters, and the panel decision that authorized it; and
+	\item the identity and role of the accountable human where the zone designates one.
+\end{enumerate}
+
+The record is disclosable in full to an appellant with standing, subject only to redaction of third-party personal data and to the small-cell suppression rule of Section~\ref{sec:problem}, which prevents the record from identifying individual members of a group cell below $n^{min}$. Items 5 through 7 are what make an appeal about a \textit{policy} rather than about a single decision possible: an appellant who believes the weight configuration itself is unjustified can identify and cite the panel decision that set it, and item 6 tells them whether disputing the weights would have changed anything.
+
+\subsection{Remedy and Systemic Trigger}
+\label{app:contest-remedy}
+
+An upheld appeal entitles the appellant to re-decision of the task class under Zone Z3, with a designated human decision-maker who is named in the response and who may depart from the mechanism's recommendation on the record.
+
+Beyond individual remedy, if the upheld-appeal rate for a task class exceeds 0.05 within the rolling window $W$, the class is automatically demoted one oversight zone by predicate 2 of Table~\ref{tab:zonetrans} (Z1$\to$Z2, Z2$\to$Z3, Z3$\to$Z4) and referred to the Weight Review Panel at its next sitting. The demotion is recorded as a versioned policy update in the same way as any other panel decision, so the appeal history that triggered it remains traceable. Restoration to the previous zone requires an affirmative panel decision and cannot occur automatically.
+
+\section{The Specified Evaluation Protocol}
+\label{app:protocol}
+
+This appendix records in full the evaluation protocol that Section~\ref{sec:protocol} of the main article summarizes. \textbf{The protocol has not been executed.} It is set out at this level of detail so that the evaluation the framework requires is reproducible by others and auditable against a plan fixed in advance rather than against one reconstructed afterwards. No quantity anywhere in this appendix is an observed outcome. The one column of measured-looking numbers, the ``worked case'' column of Table~\ref{tab:app-predictions}, is the exact arithmetic of Section~\ref{sec:worked} of the main article, which is what the refutation thresholds were calibrated against.
+
+\subsection{Testbed and Sectors}
+\label{app:protocol-testbed}
+
+The protocol specifies an urban digital twin and multi-agent discrete-event simulation testbed across six municipal sectors, with task arrivals from synthetic but calibrated streams over a ten-year horizon so that slow-moving effects such as retirement waves and pipeline decay would become observable. Table~\ref{tab:app-sectors} gives the sector scale and calibration status. The city to be modeled is a metropolitan authority of roughly 1.5 million residents, and the annual task volume of 803{,}100 sets the scale at which the tractability of the periodic program~\eqref{eq:program} has to be assessed.
+
+\begin{table}[!htbp]
+	\caption{Evaluated sectors, annual task volumes, and calibration status. ``Calibrated'' means arrival rates and volume distributions are fitted to the named open municipal series. ``Parametric'' means no comparable open series was identified and the sector's distributions are specified as a swept range rather than fitted, with results reported separately.}
+	\label{tab:app-sectors}
+	\small
+	\begin{tabularx}{\textwidth}{@{}lrXl@{}}
+		\toprule
+		\textbf{Sector} & \textbf{Tasks/yr} & \textbf{Calibration source} & \textbf{Status}\\
+		\midrule
+		Infrastructure inspection & 2{,}100 & Asset-condition and inspection-interval records from the portals below and published national bridge inventories & Calibrated\\
+		Waste collection and sanitation & 186{,}000 & NYC Open Data, Department of Sanitation monthly tonnage and collection-route geography & Calibrated\\
+		Citizen-service administration & 412{,}000 & NYC Open Data 311 service requests; Open Data BCN incident and service-request series & Calibrated\\
+		Public-transport operations & 94{,}000 & London Datastore, Transport for London performance and ridership releases & Calibrated\\
+		Emergency logistics & 31{,}000 & No comparable open municipal series identified & Parametric\\
+		Municipal facility management & 78{,}000 & Helsinki Region Infoshare municipal property and building registers & Calibrated\\
+		Workforce composition & --- & Establishment and headcount tables of the same municipalities & Calibrated\\
+		\bottomrule
+	\end{tabularx}
+\end{table}
+
+Two calibration caveats belong with the protocol rather than buried in it. Emergency logistics has no calibration source. Earlier presentations of this protocol attributed its fleet-utilization distributions to two survey papers by Meseguer-Valenzuela and co-authors and by Hady and co-authors, which is incorrect: both are reviews of allocation methods and neither contains utilization distributions. The sector is therefore specified parametrically over a swept range of arrival rate and fleet utilization, its outcomes are to be reported separately rather than folded silently into the aggregate, and no calibration claim is made for it. Second, all five named portals belong to high-income cities with mature open-data programs, which under-represents exactly the municipalities the automation-exposure literature identifies as most vulnerable. This is not a conservative bias, as an earlier version of this article claimed. It runs the wrong way: the framework's central weakness is that it cannot see non-payroll workers, and the calibration cities are the ones with fewest of them, so the calibration would systematically understate the size of the population the framework fails. Appendix~\ref{app:calib} (Table~\ref{tab:app-calib}) records each series identifier and the transformation to be applied.
+
+\subsection{Baseline Allocation Strategies}
+\label{app:protocol-baselines}
+
+Six strategies are to be compared. Four are configurations of~\eqref{eq:scv} and its constraints, and two are external methods from the human--robot collaboration literature, to be reimplemented against the same task representation.
+
+\textit{Automation-First} maximizes quality and productivity, preferring automation wherever policy permits, with $w_9 = 0$ and constraints~\eqref{eq:prog-hcpb} through~\eqref{eq:prog-res} relaxed. \textit{Cost/Performance Optimization} maximizes $(Q,P)$ net of $Cost$ and $En$ only. \textit{Human-First} restricts $m$ to the admissible mode with the largest human share $\phi_m$ whenever a qualified human is available, and selects rosters on availability alone. \textit{Capability Matching} implements the capability-fit criterion of Ranz and co-authors, scoring each mode by the match between the task requirement vector and the mode's capability profile, with no debt, budget, access, or reserve terms. \textit{Ergonomics-Aware Role Allocation} implements the AND/OR-graph role allocation with ergonomic risk estimation of Merlo and co-authors, redirecting high-$phy$ and high-$risk$ actions away from human performers. \textit{CivicWorkOS} applies the full objective under all constraints of~\eqref{eq:program}.
+
+Both external methods were designed for a workcell rather than a city, and reimplementing them requires two adaptations we state rather than bury: their capability and ergonomic profiles must be mapped onto the nine dimensions of~\eqref{eq:task}, and neither method selects a roster, so both would be given the availability-ordered roster that Human-First uses. Neither adaptation advantages CivicWorkOS, and both are to be documented in the replication package so that the mapping can be challenged.
+
+The limit of this design should be stated where the design is, and not only where its results would be. An evaluation in which four of six comparators are configurations of the proposed objective can show that the mechanism does what it was designed to do; it cannot show that it outperforms an independently designed alternative. The two external baselines are specified for that reason, and the comparison is incomplete until they are implemented and run. Neither is implemented at the time of writing.
+
+\subsection{Metrics}
+\label{app:protocol-metrics}
+
+Fourteen metrics are to be tracked, of which twelve are comparable across strategies and enter the hypothesis family, and two are to be reported descriptively because they have no better-or-worse orientation for a strategy that lacks the mechanism producing them.
+
+Six comparable metrics are operational: \textit{Productivity} and \textit{Operating Cost} indices normalized to Automation-First at 100, \textit{Service Quality} on a 0--100 scale, \textit{Safety Incidents} per 10{,}000 tasks, an \textit{Energy Use} index, and \textit{Mean Recovery Time}, hours to restore $\kappa_s$ of critical-service capacity after an acute disruption. Two concern capability: the \textit{Capability-Formation Index}, $\Lambda_k/B_k$ summed over domains, and \textit{Accumulated CAD}, the running sum of~\eqref{eq:cad} normalized to 100 for Automation-First at year ten. One concerns the mechanism's own failure mode: the \textit{Zone Z4 fallback rate}, the share of tasks for which $\mathcal{A}(i,t)=\emptyset$ and the task routes to human-reserved execution. A framework with more constraints empties more candidate sets, and reporting this is how a reader would see the price of the constraint system in operational terms rather than only in objective units.
+
+Three comparable metrics are distributional: \textit{protected-practice share by group}, $\Pi_{k,g}$ from~\eqref{eq:accessshare}, to be reported per group and summarized by the share reaching the least-represented group; \textit{displacement by group}, $\Delta_g$, summarized by the most-affected group; and \textit{service-equity dispersion}, the coefficient of variation of realized service quality across resident districts, which is what $Eq^{srv}$ aggregates and a single equity scalar hides. All three are to be reported as group-level vectors rather than only as the summary statistic, because a framework that answers who wins and who loses with one number has not answered it.
+
+Two metrics are descriptive. The \textit{realized dual} $\bar\lambda$ is to be reported because it is the framework's own statement of what preservation costs, and it is identically zero for every strategy that does not impose the constraint, so comparing it across strategies is meaningless. \textit{Contestability throughput}, appeals lodged, upheld, and resolved within the windows of Section~\ref{sec:contest}, exists only for CivicWorkOS because the other strategies have no appeals procedure. Excluding these two from the hypothesis family repairs a defect in earlier versions of this protocol, where a hypothesis asserting that every strategy is worst on at least one of thirteen metrics was undefined for metrics that admit no ordering.
+
+Reporting contestability throughput at all requires a generative model of appeals that this protocol does not yet contain. Arrival of appeals, determination of standing, the upheld rate, and the resolution-time distribution would each have to be specified and justified before any throughput figure could be reported, and the systemic trigger of Section~\ref{app:contest-remedy} depends on all four. Until that model exists, the metric is named in the protocol and no value for it is reportable.
+
+\subsection{Implementation Configuration and Default Parameters}
+\label{app:protocol-config}
+
+The implementation pairs a Python discrete-event simulation of task arrival, roster construction, agent pricing, and execution with a mixed-integer solver invoked at the rebalancing cadence to solve~\eqref{eq:program}, since the online rule does not by itself guarantee the coupled constraints. Reference hardware is a single 32-core, 128\,GB workstation-class server. Earlier versions of this configuration specified hyperparameters for an optional learned surrogate that was never used or evaluated; it has been removed, and no learned component appears anywhere in the framework.
+
+Because~\eqref{eq:program} is a binary multi-dimensional assignment problem with side constraints, the rebalance window is the parameter that governs tractability, and the protocol requires the solve time, binary-variable count and optimality gap to be reported at each cadence rather than asserted. The weekly default, the monthly, quarterly and annual alternatives, and a sector-decomposed annual variant that trades the cross-sector coupling of~\eqref{eq:prog-cap} for tractability are all to be profiled. No such profile has been measured, and the main article makes no scalability claim on this basis.
+
+Table~\ref{tab:app-params} assigns a default to every remaining parameter in the framework. The objective and debt weights themselves are given in Section~\ref{sec:weights} of the main article.
+
+\begin{table}[!htbp]
+	\caption{Default values for every framework parameter. Domain-specific values are shown for structural inspection where they differ. Panel-set parameters are those the Weight Review Panel of Section~\ref{sec:feedback} owns; the rest follow from continuity planning, certification, or numerical requirements.}
+	\label{tab:app-params}
+	\small
+	\begin{tabularx}{\textwidth}{@{}llXl@{}}
+		\toprule
+		\textbf{Parameter} & \textbf{Symbol} & \textbf{Default} & \textbf{Owner}\\
+		\midrule
+		Budget period & $\Delta T$ & 1 year & Panel\\
+		Replacement factor & $\eta_k$ & 1.2 & Panel\\
+		Budget floor & $B^{min}_k$ & 2{,}000 h (inspection); $0.05\,\Phi_k$ elsewhere & Panel\\
+		Raw competence hours & $h^{raw}_k$ & 1{,}800 h (inspection); per certification elsewhere & Certification\\
+		Access tolerance & $\varepsilon_k$ & 0.05 & Panel\\
+		Minimum group cell size & $n^{min}$ & 30 practitioners per cell per domain & Panel\\
+		Displacement ceiling & $\tau_g$ & 0.10 of baseline hours per budget period & Panel\\
+		Reskilling coverage floor & $\chi^{min}$ & 0.80 & Panel\\
+		Access slack penalty & $M$ & $10^{3}$ objective units per unit share & Numerical\\
+		Contingency order & $n_s$ & 2 for emergency logistics and transport; 1 otherwise & Continuity plan\\
+		Peak-demand share & $\kappa_s$ & 1.00 emergency logistics; 0.80 transport and sanitation; 0.60 otherwise & Continuity plan\\
+		Safety floor & $S^{min}_i$ & $risk_i\cdot crit_i$ & Safety Agent\\
+		Zone Z3 human-share floor & $\phi^{Z3}$ & 0.50 & Panel\\
+		Zone evaluation window & $W$ & 4 budget quarters & Panel\\
+		Promotion appeal-rate ceiling & --- & 0.02 upheld over $W$ & Panel\\
+		Demotion appeal-rate trigger & --- & 0.05 upheld over $W$ & Panel\\
+		Drift trigger & --- & Population Stability Index (PSI) $>0.25$ & Standard practice\\
+		Rebalance cadence & --- & weekly & Operational\\
+		Trainee domain hours & $\Theta_k$ & 1{,}500 clock hours per year & Establishment tables\\
+		\bottomrule
+	\end{tabularx}
+\end{table}
+
+\subsection{Statistical Analysis Plan}
+\label{app:protocol-stats}
+
+Each strategy is to be run for at least 30 independent seeds per sector, each seed governing one complete ten-year run. Seeds are to be drawn once and reused across strategies, so that comparisons are paired on the arrival stream, roster availability, negotiation timing, and failure-injection schedule. Outcomes are to be reported as means with 95\% confidence intervals, or bootstrap percentile intervals over 10{,}000 resamples where the sampling distribution fails a Shapiro--Wilk test at $\alpha=0.05$ or the metric is bounded and its mean lies within one standard deviation of a bound.
+
+Pairwise comparisons between CivicWorkOS and each of the five baselines use the \textit{Wilcoxon signed-rank test}. Earlier versions of this plan specified the Mann--Whitney $U$ test, which is a test for independent samples and is inconsistent with a paired-seed design; the signed-rank test is the correct paired non-parametric analogue, and it is chosen over the paired $t$-test because several metrics, including safety incidents per 10{,}000 tasks and recovery time, are bounded below and expected to be right-skewed. The family for multiplicity correction is the full grid of 12 comparable metrics $\times$ 5 strategy comparisons $=$ 60 tests, to be controlled by the Holm--Bonferroni step-down procedure at a family-wise $\alpha=0.05$.
+
+The smallest per-comparison $\alpha$ in that family is $0.05/60 \approx 0.000833$, giving a two-tailed critical $z$ of 3.34. With $z_\beta = 0.84$ for 80\% power, the minimum detectable standardized effect over 30 paired observations is $d = (3.34+0.84)/\sqrt{30} = 0.76$, and the signed-rank test retains roughly 95\% of that efficiency for the distributions we expect. The normal approximation is mildly optimistic and the $t$ reference distribution pushes the requirement slightly higher, so 0.76 should be read as a floor rather than an exact figure. Where the refutation threshold registered for a metric in Table~\ref{tab:app-predictions} implies a smaller standardized effect than 0.76, the seed count for that metric is to be raised until the threshold is detectable at 80\% power, and both the raised seed count and the achieved power are to be reported alongside the outcome. This rule is fixed in advance so that seed counts cannot be chosen after inspecting outcomes.
+
+Distributional metrics are to be reported per group without aggregation across groups. No significance claim is to be made for a group represented by fewer than $n^{min}=30$ simulated practitioners, consistent with the group-definition rule of Section~\ref{sec:problem}; such groups are to be reported descriptively with their sample size stated. Any deviation from this plan, such as a changed test, a changed family, or a changed seed count not covered by the rule above, is to be documented in the replication audit log with the rationale and timestamp of the determination.
+
+\subsection{Stress-Test Protocol}
+\label{app:protocol-stress}
+
+Seven scenarios address RQ6 and RQ7. Acute scenarios inject a single disruption in separate runs to avoid confounding, and chronic scenarios run for the full horizon. Injection magnitudes are in Appendix~\ref{app:stress} (Table~\ref{tab:app-stress}). Scenarios (i) through (iv) are an AI-service outage, a cyberattack on fleet command and control, a robot-fleet mechanical failure, and an emergency demand surge, each to be evaluated by hours to restore $\kappa_s D^{peak}_s$. Scenarios (v) through (vii) are a retirement wave, rapid improvement in AI capability, and a new municipal regulation entering the Policy Digital Twin without redeploying the market, to be evaluated by the trajectories of $\Lambda_k$, $\lambda_k$, and $\Pi_{k,g}$, by zone-transition counts under the predicates of Table~\ref{tab:zonetrans}, and by constraint-update latency.
+
+Scenario (v) is the framework's self-test and is to be run in two arms, because Proposition~\ref{prop:feasibility} shows that the single-arm design used in earlier versions of this protocol was arithmetically impossible. Arm (v-a) raises $r_k$ to 0.14, inside the critical rate of 0.1418 for structural inspection, and tests whether the capability feedback is stabilizing: raising $r_k$ raises $B_k$ through~\eqref{eq:hcpb-estimator}, hence $\lambda_k$, pushing allocation toward developmental rosters at exactly the moment fewer competent leads are available to supervise them. Arm (v-b) raises $r_k$ to 0.25, which puts $B_k = 10{,}368$ hours against a domain ceiling of $\Phi_k\bar\zeta_k = 5{,}880$ and is therefore infeasible by construction. Arm (v-b) does not test stability, which is undefined in that regime. It tests the escalation path of Section~\ref{sec:feasibility}: whether the infeasibility flag raises, whether the deficit is recorded correctly, and whether the four restoration options are reported with the right magnitudes. Running an infeasible parameter set as though it were a stability test, as an earlier version of this protocol did, would have fired a refutation criterion by arithmetic before any dynamics ran. Section~\ref{sec:shocks} of the main article gives the exact arithmetic of both arms, which is the target the implementation would have to reproduce.
+
+\subsection{Hypotheses and Refutation Criteria}
+\label{app:protocol-hypotheses}
+
+Table~\ref{tab:app-predictions} specifies ten hypotheses with explicit refutation criteria. Three properties distinguish this set from the one in earlier versions of this article. Every threshold has been checked against the worked example of Section~\ref{sec:worked} and, where the single-domain case falls outside it, either the threshold has been revised with the reason stated or the divergence is recorded in the hypothesis itself. P8 and P10 have been restated so that they are falsifiable rather than guaranteed by construction. And P1's refutation criterion no longer uses overlapping confidence intervals, which is not a valid test, since non-overlapping intervals imply significance but the converse does not hold.
+
+These hypotheses are \textit{pre-specified}, not pre-registered. Pre-registration means a timestamped third-party registry entry made before data collection, and stating hypotheses in a manuscript is not that. The set below will be lodged on the Open Science Framework before the evaluation is executed, and the registration identifier will be cited in whichever article reports the outcome. Until then the correct word is pre-specified, and we use it. No hypothesis in Table~\ref{tab:app-predictions} has been tested, and the table records no verdicts.
+
+\begin{table}[!htbp]
+	\caption{Pre-specified evaluation hypotheses and refutation criteria. The final column reports the value the single-domain worked example of Section~\ref{sec:worked} produces, which is what the thresholds were calibrated against. A dash means the quantity is not defined for a single domain. No hypothesis in this table has been tested; the protocol specifying the test has not been executed.}
+	\label{tab:app-predictions}
+	\footnotesize
+	\begin{tabularx}{\textwidth}{@{}p{0.5cm}XXp{1.9cm}@{}}
+		\toprule
+		\textbf{ID} & \textbf{Prediction} & \textbf{Refuted if} & \textbf{Worked case}\\
+		\midrule
+		P1 & Accumulated CAD at year 10 under CivicWorkOS is below half that under Automation-First. & The ratio is $\geq 0.5$, or the Holm-corrected signed-rank test does not reject at family-wise $\alpha=0.05$. & 0.79 (single task class, no accumulation)\\
+		P2 & CivicWorkOS retains at least 80\% of Automation-First productivity. & Productivity index $< 80$ against Automation-First at 100. & 88.5\\
+		P3 & The Capability-Formation Index under CivicWorkOS is at least 0.95, and exceeds that of Capability Matching by at least 40 index points on a 0--100 scale. & CFI $< 0.95$, or the gap is below 40 points. & 1.00 against 0.00\\
+		P4 & Mean recovery time under CivicWorkOS is at most half that under Automation-First across scenarios (i)--(iv). & The ratio exceeds 0.5 in two or more of the four scenarios. & ---\\
+		P5 & Disabling the HCPB raises accumulated CAD more than disabling any other single mechanism. & Any other single-mechanism ablation raises CAD by more, by a margin exceeding 5 index points. & ---\\
+		P6 & Disabling the resilience reserve at least doubles mean recovery time while changing accumulated CAD by less than 20\%, establishing that resilience and debt are not interchangeable. & Recovery time less than doubles, or CAD moves by 20\% or more. & ---\\
+		P7 & In arm (v-a), $\lambda_k$ rises and allocation shifts toward developmental rosters without oscillation, recovering $\Lambda_k \geq B_k$ within three budget periods. In arm (v-b), the infeasibility flag raises within one budget period and the recorded deficit matches $B_k - \Phi_k\bar\zeta_k$ to within 1\%. & $\lambda_k$ or the developmental-roster share oscillates with increasing amplitude in (v-a), or (v-a) fails to recover within three periods, or (v-b) fails to flag or misreports the deficit. & (v-b) deficit $=4{,}488$ h by Proposition~\ref{prop:feasibility}\\
+		P8 & Disabling constraint~\eqref{eq:access} leaves $\Pi_{k,g}$ for the least-represented group within 0.02 of the incumbent share in every sector; enabling it raises $\Pi_{k,g}$ by at least 0.12 while raising accumulated CAD by no more than 5 index points. & Disabling it moves $\Pi_{k,g}$ more than 0.02 from the incumbent share, or enabling it raises $\Pi_{k,g}$ by less than 0.12, or the CAD cost exceeds 5 points. & $+0.145$ at zero CAD cost\\
+		P9 & CivicWorkOS operating cost does not exceed 130\% of Automation-First. & Cost index $> 130$. & 124.5\\
+		P10 & No strategy is weakly best on all twelve comparable metrics. & Any strategy is weakly best on all twelve. & CivicWorkOS worst on cost\\
+		\bottomrule
+	\end{tabularx}
+\end{table}
+
+Two thresholds were revised against the worked example rather than retained. P9's ceiling was raised from 125\% to 130\% because the worked optimum costs 124.5\% of Automation-First in a single domain, and a threshold that the framework's own demonstration case clears by half a percentage point is not a threshold, it is a coincidence. P3's ratio criterion was replaced by an absolute floor plus a gap, because the ratio is undefined whenever the comparator delivers zero developmental practice, which is exactly what Capability Matching does in the worked domain. Both revisions are recorded here so that a reader can see the thresholds were set with the arithmetic in hand rather than before it. Setting a threshold against arithmetic one already holds is a weaker form of pre-specification than setting it against data one does not, and we claim no more than the weaker form.
+
+
+\section{Stress-Test Injection Schedules}
+\label{app:stress}
+
+This appendix gives the injection magnitudes for the seven scenarios of Appendix~\ref{app:protocol-stress} (Table~\ref{tab:app-stress}). Acute scenarios (i) through (iv) are injected independently in separate runs to avoid confounding, and chronic scenarios (v) through (vii) run for the full horizon.
+
+\begin{table}[!htbp]
+	\caption{Stress scenarios, injection points, and evaluation criteria. Scenario (v) is split into two arms because Proposition~\ref{prop:feasibility} shows that a single-arm design at $r_k=0.25$ is arithmetically infeasible for the structural-inspection domain and therefore cannot test stability.}
+	\label{tab:app-stress}
+	\small
+	\begin{tabularx}{\textwidth}{@{}p{0.6cm}p{3.5cm}XX@{}}
+		\toprule
+		& \textbf{Scenario} & \textbf{Injection} & \textbf{Evaluated by}\\
+		\midrule
+		i & AI-service outage & 100\% of AI-agent capacity removed for 72 simulated hours at year 5 & Hours to restore $\kappa_s D^{peak}_s$\\
+		ii & Cyberattack on fleet command and control & 100\% of robot-fleet capacity removed for 168 hours; policy twin raises affected classes to Z3 & Hours to restore $\kappa_s D^{peak}_s$; zone transitions\\
+		iii & Robot-fleet mechanical failure & 40\% of one fleet class removed for 30 days & Hours to restore $\kappa_s D^{peak}_s$\\
+		iv & Emergency demand surge & Arrival rate $\times 3$ for 14 days in the emergency-logistics and facility sectors & Hours to restore $\kappa_s D^{peak}_s$\\
+		v-a & Retirement wave, feasible arm & $r_k$ raised from 0.12 to 0.14 for two consecutive budget periods, inside the critical rate $r^{crit}_k = 0.1418$ & Trajectories of $B_k$, $\lambda_k$, $\Lambda_k$, developmental-roster share; oscillation check per P7\\
+		v-b & Retirement wave, infeasible arm & $r_k$ raised to 0.25, exceeding $r^{crit}_k$ by 76\% & Infeasibility flag latency; recorded deficit against $B_k-\Phi_k\bar\zeta_k$; correctness of the four reported restoration options\\
+		vi & Rapid AI capability improvement & AI-agent $Q$ and $Tr$ raised 20\% over 3 years & Z2$\to$Z1 transition counts under the promotion predicates of Table~\ref{tab:zonetrans}\\
+		vii & New municipal regulation & A new \textit{prohibit} rule added to the Policy Digital Twin at year 6 without redeploying the market & Constraint-update latency; allocation shift; consistency-check outcome\\
+		\bottomrule
+	\end{tabularx}
+\end{table}
+
+Scenario (v) is the framework's self-test. Raising $r_k$ raises $B_k$ through~\eqref{eq:hcpb-estimator}, which raises the dual price $\lambda_k$ and pushes allocation toward developmental rosters at precisely the moment fewer competent leads are available to supervise them. Prediction P7 of Table~\ref{tab:app-predictions} defines the refutation criterion for each arm. Arm (v-a) is refuted by oscillation with increasing amplitude or by failure to recover $\Lambda_k \geq B_k$ within three budget periods. Arm (v-b) is refuted if the infeasibility flag does not raise within one budget period or if the recorded deficit departs from $B_k - \Phi_k\bar\zeta_k$ by more than 1\%. Stability is undefined in the (v-b) regime and is not tested there.
+
+\section{Calibration Sources and Transformations}
+\label{app:calib}
+
+This appendix expands the calibration column of Table~\ref{tab:app-sectors} with the series used and the transformation applied to each (Table~\ref{tab:app-calib}). The archived snapshots, with the retrieval timestamp for each series, accompany the replication package rather than being listed here, because a timestamp without the corresponding snapshot is not verifiable.
+
+\begin{table}[!htbp]
+	\caption{Calibration sources, series, and transformations across the evaluated sectors. Emergency logistics has no calibration source and is specified parametrically; no calibration claim is made for it.}
+	\label{tab:app-calib}
+	\footnotesize
+	\setlength{\tabcolsep}{3pt}
+	\begin{tabularx}{\textwidth}{@{}p{2.3cm}p{2.4cm}XX@{}}
+		\toprule
+		\textbf{Sector} & \textbf{Portal} & \textbf{Series} & \textbf{Transformation applied}\\
+		\midrule
+		Waste collection and sanitation & NYC Open Data & Department of Sanitation monthly tonnage; collection-route and district geography & Monthly tonnage converted to route-day task counts by district, then to a non-homogeneous Poisson arrival rate with weekly and seasonal components\\
+		Public-transport operations & London Datastore & Transport for London performance and ridership releases & Performance-incident counts converted to maintenance and intervention task arrivals; ridership used to set $D^{peak}_s$\\
+		Citizen-service administration & NYC Open Data; Open Data BCN & 311 service requests; Barcelona incident and service-request series & Request records grouped into task classes by complaint type, with service-level targets giving $urg_i$ and closure times giving $d_i$\\
+		Municipal facility management & Helsinki Region Infoshare & Municipal property and building registers & Building stock and asset class converted to periodic maintenance and inspection task streams on statutory intervals\\
+		Infrastructure inspection & Open portals of the above municipalities; published national bridge inventories & Asset condition and inspection-interval records & Structure counts and statutory inspection intervals converted to annual inspection events; team sizes from establishment tables\\
+		Emergency logistics & No comparable open series identified & --- & Arrival rate and fleet utilization specified parametrically and swept; results reported separately and not aggregated as calibrated\\
+		Workforce composition & Establishment and headcount tables of the same municipalities & Practitioner counts by domain; age and tenure distributions where published & Headcount by domain gives $N_k$; age and tenure distributions give $r_k$ by cohort projection\\
+		\bottomrule
+	\end{tabularx}
+\end{table}
+
+The direction of the sampling bias in this design is stated in Appendix~\ref{app:protocol-testbed}, and it runs against the framework rather than for it. One further limit belongs here. Open portals do not publish practitioner-level developmental logs, so $learn_i$ and the derived $\ell_i$, the mode shares $\phi_m$, the supervision ratios that bound $\psi_a$, and the certification hours $h^{raw}_k$ cannot be calibrated from them. Appendix~\ref{app:elicit} specifies the elicitation protocol for those parameters. That protocol has \emph{not} been executed. The values used throughout this article are the authors' own structured estimates, and Section~\ref{sec:sensitivity} maps the region over which each conclusion survives them.
+
+\section{Elicitation Protocol for the Judgment Parameters}
+\label{app:elicit}
+
+Four parameters in CivicWorkOS are structured professional judgments rather than measurements: the task learning value $learn_i$, the human developmental share $\phi_m$ of each hybrid mode, the supervision ratio that bounds the roster eligibility $\psi_a$, and the certification requirement $h^{raw}_k$. The first three carry the framework's headline result and the fourth determines whether the capability budget is feasible at all, so this appendix specifies the instrument that would replace the estimates with data. Nothing in this appendix has been carried out.
+
+\subsection{Participants and Qualification}
+\label{app:elicit-participants}
+
+Per domain, a minimum of 12 raters drawn from three groups in equal proportion: practitioners currently competent in the domain with at least five years of practice, practitioners currently developing in the domain, and the supervisors responsible for signing off developmental progression. Including developing practitioners is not a courtesy. They are the only group with direct experience of what a machine-assisted task teaches, and excluding them would reproduce inside the instrument the same incumbent bias that Section~\ref{sec:access} identifies in the budget.
+
+\subsection{Instrument}
+\label{app:elicit-instrument}
+
+Each parameter is rated on an anchored eleven-point scale with behaviourally defined endpoints and a defined midpoint.
+
+For $learn_i$, the anchors are: 0, a task from which a developing practitioner acquires no judgment transferable to any other task in the domain; 0.5, a task from which a developing practitioner acquires judgment transferable within the same task class only; 1.0, a task from which a developing practitioner acquires judgment transferable across the domain and required for independent competence.
+
+For $\phi_m$, raters are shown a task specification and a mode description and asked what share of the judgment the task requires is still exercised by the human, with anchors at 0 (the human observes an outcome and cannot alter it), 0.5 (the human sets the parameters of a machine determination and reviews its output against independent evidence), and 1.0 (the human forms the determination and the machine supplies data only).
+
+For the supervision ratio, raters are asked the maximum number of developing practitioners one competent lead can supervise on the given task class without the lead's own attention to the task being compromised, conditioned on the task's $risk_i$ and $crit_i$.
+
+For $h^{raw}_k$, raters supply the supervised clock hours the certification route requires, which is a documentary question, and separately their estimate of the hours actually required in practice, which is a judgment. Divergence between the two is itself reportable.
+
+\subsection{Procedure and Reliability}
+\label{app:elicit-procedure}
+
+Ratings are collected in two rounds on a Delphi pattern. Round one is independent and unseen. Round two shows each rater the anonymized distribution of round-one ratings and the free-text rationales attached to the extreme ratings, and invites revision. Agreement is assessed on round-two ratings by the two-way random-effects intraclass correlation coefficient ICC(2,k) with a pre-set acceptance threshold of 0.75. Where agreement falls below the threshold for a parameter, that parameter is reported as a range rather than a point value, and the sensitivity analysis of Section~\ref{sec:sensitivity} is re-run across the observed range rather than the illustrative one.
+
+\subsection{Ethics and Data Protection}
+\label{app:elicit-ethics}
+
+The protocol involves human participants giving professional judgments about their own work and their colleagues' development, so it requires institutional ethics approval and written informed consent before any data collection. Ratings are held pseudonymously, group-level results only are reported, and no rating is disclosable to a participant's employer in a form that identifies the rater. Because the ratings concern developmental progression, which affects the participants' own access to protected work, the consent form must state that participation is voluntary and that a refusal has no effect on the participant's allocation under any deployed system.
+
+\end{document}

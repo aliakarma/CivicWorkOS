@@ -42,3 +42,15 @@ checkpoints/
 *.lp
 *.mps
 *.sol
+
+# LaTeX build artefacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*-eps-converted-to.pdf
