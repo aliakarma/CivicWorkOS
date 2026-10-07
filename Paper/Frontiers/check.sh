@@ -91,9 +91,23 @@ for doc in $MAIN $SUPP; do
   n=$(grep -ci 'undefined' "$log" || true)
   [[ "$n" == 0 ]] && gate 1 "$doc: no undefined refs/citations" pass \
                   || gate 1 "$doc: no undefined refs/citations" fail "$n hits"
-  n=$(grep -c 'Overfull' "$log" || true)
-  [[ "$n" == 0 ]] && gate 7 "$doc: no overfull boxes" pass \
-                  || gate 7 "$doc: no overfull boxes" fail "$n boxes"
+  # Two overfull warnings come from the Frontiers classes themselves and
+  # reproduce in an empty document built on the unmodified class: the running
+  # foot is a fixed-height \vbox a point or two shorter than its contents (one
+  # warning per page, emitted by \output), and \maketitle sets an 8.5pt-wide
+  # line. Production re-typesets with Frontiers' own class, so they are counted
+  # separately; any other overfull box -- including a large one in \output,
+  # which is how an oversized float shows up -- fails the gate.
+  # TeX reports the \maketitle line, or the next one when a blank line ends it.
+  mt=$(grep -n '^[[:space:]]*\\maketitle' "$doc.tex" | head -1 | cut -d: -f1)
+  mt=${mt:-0}; mt1=$((mt + 1))
+  TEMPLATE_OVERFULL="Overfull \\\\vbox \\([0-2]\\.[0-9]+pt too high\\) has occurred while \\\\output is active|Overfull \\\\hbox \\(8\\.53581pt too wide\\) in paragraph at lines ($mt--$mt|$mt1--$mt1)\$"
+  total=$(grep -c 'Overfull' "$log" || true)
+  tmpl=$(grep -cE "$TEMPLATE_OVERFULL" "$log" || true)
+  n=$((total - tmpl))
+  [[ "$n" == 0 ]] && gate 7 "$doc: no overfull boxes" pass "($tmpl from the class)" \
+                  || gate 7 "$doc: no overfull boxes" fail \
+                       "$n boxes (+$tmpl from the class)"
 done
 
 pages=$(grep -o 'Output written.*(\([0-9]*\) pages' "$MAIN.log" 2>/dev/null \
@@ -302,6 +316,31 @@ decl=$(grep -oE 'Number of figures:\} *[0-9]+' "$MAIN.tex" | tr -dc '0-9')
 [[ "$nfig" == "$decl" ]] \
   && gate 6 "declared figure count matches" pass "$nfig" \
   || gate 6 "declared figure count matches" fail "declared $decl, found $nfig"
+
+# ------------------------------------------------ language and citations ----
+echo
+echo "Language and bibliography (Phase 7)"
+
+# N5: natbib's \cite is textual, so "Author~\cite{k}" printed the authors
+# twice and an aside printed unbracketed. Use \citet or \citep, never \cite.
+hits=$(grep -nE '\\cite\{' "$MAIN.tex" "$SUPP.tex" || true)
+[[ -z "$hits" ]] && gate 7 "no bare \\cite (use \\citet/\\citep) (N5)" pass \
+                 || gate 7 "no bare \\cite (use \\citet/\\citep) (N5)" fail \
+                      "$(echo "$hits" | wc -l | tr -d ' ') hits"
+
+# L2: US orthography. "International Labour Organization" is a proper name.
+UK='\b(behaviou?r(al|ally|s)?|[a-z]*our(able|ably|ed|ing|ite)\b|modell(ed|ing)|labell(ed|ing)|travell(ed|ing)|cancell(ed|ing)|signall(ed|ing)|centre|programme|catalogue|analys(e|ed|ing)|whilst|amongst|judgement|[a-z]+is(ation|ations|ed|es|ing)\b)'
+hits=$(grep -nE "$UK" "$MAIN.tex" "$SUPP.tex" | grep -iE 'behaviour|our(able|ably|ed|ing|ite)|modell|labell|travell|cancell|signall|centre|programme|catalogue|analys(e|ed|ing)\b|whilst|amongst|judgement|(organ|real|util|optim|minim|maxim|normal|recogn|author|categor|character|emphas|summar|prior|standard|operational|special|general|central|formal|parameter|regular|visual|stabil|initial|penal|legal|digit)is(ation|ed|es|ing)\b' \
+       | grep -v 'Labour Organization' || true)
+[[ -z "$hits" ]] && gate 7 "US orthography (L2)" pass \
+                 || gate 7 "US orthography (L2)" fail \
+                      "$(echo "$hits" | wc -l | tr -d ' ') hits"
+
+# M9: syed2026fedagent does not support the algorithmic-management claim.
+hits=$(grep -nE 'syed2026fedagent' "$MAIN.tex" "$SUPP.tex" || true)
+[[ -z "$hits" ]] && gate 7 "syed2026fedagent not misapplied (M9)" pass \
+                 || gate 7 "syed2026fedagent not misapplied (M9)" fail \
+                      "re-sited? check it supports the claim"
 
 # -------------------------------------------------------------- numbers ----
 echo

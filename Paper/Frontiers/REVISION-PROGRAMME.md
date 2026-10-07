@@ -139,6 +139,18 @@ Every reviewer finding, plus the four this document adds, mapped to a phase. Kee
 >
 > **Needs verification by a person, and the M7 gate depends on it:** (1) `SaudiCSL1977`: Article 4 of Royal Decree M/49 of 1397H confines appointment to nationals. Confirm it has not been superseded by newer government-HR legislation. (2) `SaudiPDPL2021` decree numbers. (3) The Nitaqat description (bands by national share, thresholds varying by activity and size, lowest band losing new permits and visa renewals). (4) The `ILOESCWA2026` characterisation, which was taken from the report's published summaries (the PDF was not read in full). The claims are migrant-labour dependence, public-sector employment held by nationals, and migrants among the groups at risk. (5) `Paternain2019` has no DOI or page numbers; Phase 7 should complete it. Every other new reference was checked against Crossref or the publisher.
 
+> **Phase 7 mechanical work complete; one human gate open.** `check.sh` (`.revision-phase` now 7): 35 passed, 1 failed (still only C7). Phases 0–6 were re-verified first, and every mechanical gate was green. Body words 11,785 → **11,769**. `\extraAuth` is now 11,491. Three new gates (N5, L2, M9) were each tested by injecting a regression.
+>
+> **L1 was mostly not a text problem.** 131 warnings came from three causes. (1) The supplement was set in the class's default two narrow 12pt columns. The class's running head is a `\textwidth` box, so it overflowed every column by exactly 261pt, and justification in 243pt columns produced about 50 paragraph overflows. One `\onecolumn`, matching the main article, took the supplement from 99 warnings to 22. (2) One real defect: Figure 1 (≈615pt of a 682pt page) sat above the unbreakable program display (26), which ran 195pt into the footer. The figure now opens on its own page ahead of §3.8, one page before its first reference. `[p]` cannot work here, because the class sets `\floatpagefraction` to 0.94 and the figure fills 0.90. (3) What remains, 36 + 22, is the 8.5pt `\maketitle` line and the per-page footer vbox. Both reproduce in an empty lipsum document built on the unmodified class. Frontiers re-typesets with its own class, so the gate now counts these two exact signatures separately and fails on anything else, including a large `\output` overflow. That was verified by injection.
+>
+> **N5:** 77 author-subject sites became `\citet` with the prose name deleted. Two possessives became `\citeauthor…'s \citeyearpar` ("Zuboff's (1988)", "Ostrom's terms (1990)"). The remaining 91 became `\citep`. Institutional authors (GDPR, EU AI Act, OECD, ILO, ISO, WEF) were deliberately left parenthetical. Checked on the rendered PDF.
+>
+> **Bibliography:** L3 was not a collision. Crossref confirms 9(9):136 and 9(7):106, two issues of one volume; the second entry's `article-number` is now `pages`, which the `.bst` prints. **Mintrom2025** went to print on 2 October 2026 (19(4):1071–1085) and is updated, so it now renders as 2026. **Paternain2019** gains editors, publisher and URL from the official NeurIPS record. That record gives no page numbers and NeurIPS 2019 assigns no DOI. 7555–7565 appears only in secondary sources, so it was not added. MeseguerValenzuela2025 is still an arXiv v1 preprint and gains its arXiv DOI. A scripted audit of all 87 cited entries found no placeholders, malformed or duplicate DOIs, and no other missing fields. 26 entries are books, laws, standards or reports without DOIs, which is expected. Phase 7 did not re-resolve every DOI; Phase 6 had checked the new ones.
+>
+> **Item 5:** no `proof` environment survives Phase 4; the proofs became prose in App. S8. The real implicit dependency was `\newtheorem` on the class's `amsthm`, which is now loaded explicitly with a comment.
+>
+> **Open (human):** item 6, the uninterrupted register read-through and its sign-off. The mechanical overclaim sweep (`we show/find/observe`, `our results/simulation`, `empirically`, `validated`, `outperform`) found only the paper's own concession in §7.
+
 | ID | Severity | Issue | Location (compiled) | Phase | Status |
 |---|---|---|---|---|---|
 | **C1** | Critical | §8 reports an unconducted study | §8, lines 1361–1583 | 1 | ☑ Closed. §8 deleted entire (388 lines). `removed_sections.tex` keeps the audit trail. |
@@ -167,11 +179,11 @@ Every reviewer finding, plus the four this document adds, mapped to a phase. Kee
 | **M6** | Medium | Scalarization/convex-hull admission belongs where legitimacy is claimed | §9.5 l.1687 → §5.1 | 6 | ☑ Closed. New paragraph in §5.1 (`sec:feedback`): bounded by the aggregation function, not the mandate. Adds that the hard constraints already act as ε-constraints. The §4.3 note and the Limitations bullet now point to it instead of restating it. |
 | **M7** | Medium | No GCC/Saudi legal analysis despite affiliations, funder, and `ILOESCWA2026` | new §5.x | 6 | ◐ Written: new §5.4 `sec:gcc`. Covers the Civil Service Law nationality rule and Nitaqat bands (Peck 2017). Maps onto Eq. `eq:access`: what transfers is a policy-set target, publication, and a graded penalty equivalent to elastic slack; what does not is the *Marschall* proportionality test. Reframes the access constraint: Nitaqat counts posts, while `eq:access` over nationality counts formation. `ILOESCWA2026` is tied to `eq:justtransition` (the migrant contracted workforce is the population the payroll ceiling misses) and the PDPL is named. **Open: co-author legal verification** (see the Phase 6 note). |
 | **M8** | Medium | Online rule: no regret/violation bound; CMDP + online-matching unengaged | §9.5 l.1688 | 6 | ☑ Closed. New §7.3 `sec:onlinebound` (Discussion is §7 since Phase 1 removed two sections) states the target: O(√T) regret against the offline optimum plus O(√T) cumulative violation. Cites Devanur–Hayes, Balseiro–Lu–Mirrokni, Mehta et al., Altman and Paternain et al. Checks the small-request condition (2.8/4,976.64 = 5.6×10⁻⁴, audited). Names four obstacles: stale duals, a covering rather than packing budget, endogenous ψ_a, and a ratio constraint over a combinatorial action space. |
-| **M9** | Medium | `syed2026fedagent` does not support the claim it is cited for | §2.6 | 7 | ☐ |
+| **M9** | Medium | `syed2026fedagent` does not support the claim it is cited for | §2.6 | 7 | ☑ Closed. Removed at both sites (main §2, App. S6); OECDAM2025 alone carries the claim. Nothing in either document makes a claim it supports, so there was no apposite site to move it to. Gate M9. |
 | **M10** | Medium | Tables `tab:notation`, `tab:params` are reference material in the main text | lines 857, 1255 | 4 | ☑ Closed in Phase 4. Neither table remains in the main text. |
-| **L1** | Low | 53 overfull `\hbox` warnings | throughout | 7 | ☐ |
-| **L2** | Low | Mixed orthography ("unfavourable" l.1638, "behaviourally") | §9.1, App. S4.2 | 7 | ☐ |
-| **L3** | Low | `BenDaya2026` / `syed2026fedagent` volume–number collision | `references.bib` | 7 | ☐ |
+| **L1** | Low | 53 overfull `\hbox` warnings | throughout | 7 | ☑ Closed. 131 → 0 attributable to content; 36 + 22 remain that reproduce in an empty document on the unmodified class, and are counted separately. See the Phase 7 note. |
+| **L2** | Low | Mixed orthography ("unfavourable" l.1638, "behaviourally") | §9.1, App. S4.2 | 7 | ☑ Closed. modelling, labelled, behaviour, behaviourally → US. "International Labour Organization" kept as a proper name. Gate L2. |
+| **L3** | Low | `BenDaya2026` / `syed2026fedagent` volume–number collision | `references.bib` | 7 | ☑ Closed as not a collision: Crossref gives 9(9):136 and 9(7):106. `article-number` → `pages`. Mintrom2025, Paternain2019 and MeseguerValenzuela2025 completed. |
 | **L4** | Low | "differ by two to four points" → 2.2 and 4.3 | §9.1 line 1644 | 2 | ☑ Closed by removal in Phase 1 — the closed-form/simulation comparison paragraph does not survive Route A. Verified absent. |
 | **L5** | Low | Orphaned `$\dagger$` equal-contribution footnote | line 105 | 5 | ☑ Closed. † attached to Syed and Akarma (author decision); footnote now prints with a † mark instead of a stray "0". |
 | **L6** | Low | `\correspondance{}` passed empty | line 97 | 5 | ☑ Closed as not a defect. The class prints `\corrAuthor`/`\corrEmail` (and `\Address`) after `\correspondance{}`/`ddress{}`, which the Frontiers template leaves empty; passing them would print the name twice. The block already rendered. The `check.sh` gate now checks the rendered PDF instead. |
@@ -181,7 +193,7 @@ Every reviewer finding, plus the four this document adds, mapped to a phase. Kee
 | **N2** | **High (new)** | `verify_worked_example.py` verifies a *different* worked example (B_k = 2,073.6 vs the manuscript's 4,976.64) | `scripts/verify_worked_example.py` | 3 | ☑ Closed, and wider than scoped — see the Phase 3 note. The defect was in **three** places, not one, and the fix is structural: `manuscript_values.py` re-exports `audit_numbers.py`, so no repository file restates a manuscript value. 82 checks, all green. |
 | **N3** | **High (new)** | The verification gate does not run: `pulp` is not installed; the script aborts at the constrained-optimum stage | repo environment | 3 | ☑ Closed. `pulp` was already in `requirements.txt`, but pinned `<4`; 3.x breaks the suite under `filterwarnings = error::DeprecationWarning`. Repinned `<3`. Verified from an empty virtualenv built from `requirements.txt` alone. |
 | **N4** | Medium (new) | Repo and README cite a third section numbering (§5.3, §7.1) | `README.md`, `scripts/`, `sim/` docstrings | 3 | ☑ Closed by label, not by renumbering, so Phase 4 cannot reopen it. 565 references across the whole repository now cite LaTeX labels; `check_repo.py` gates A and B enforce it. |
-| **N5** | **High (new)** | Every in-text citation prints its authors twice (`Author~\cite{key}` under Frontiers-Harvard renders "Author Author (year)"); parenthetical citations render unbracketed | ~30 sites throughout `CivicWorkOS.tex` | 7 | ☐ |
+| **N5** | **High (new)** | Every in-text citation prints its authors twice (`Author~\cite{key}` under Frontiers-Harvard renders "Author Author (year)"); parenthetical citations render unbracketed | ~30 sites throughout `CivicWorkOS.tex` | 7 | ☑ Closed, in both documents: 77 `\citet`, 2 possessive, 91 `\citep`. Gate N5 forbids bare `\cite`. |
 
 ---
 
@@ -487,12 +499,12 @@ That lands at the line. Build in margin by taking a further ~300 words out of §
 
 **Success criteria**
 
-- ☐ `grep -c 'Overfull' CivicWorkOS.log` returns **0** for both main and supplementary.
-- ☐ `grep -ci undefined` on both logs returns 0.
-- ☐ No British spellings remain (manual triage of the regex sweep complete).
-- ☐ Every `.bib` entry used in the manuscript has consistent, verified volume/number/DOI fields.
-- ☐ `syed2026fedagent` either removed or attached to a claim it supports.
-- ☐ Read-through complete and sign-off recorded.
+- ☑ Zero overfull boxes from content in either document. The literal count of 0 cannot be met on the unmodified Frontiers class: an empty document produces the footer and `\maketitle` warnings. The gate isolates exactly those two signatures and fails on everything else. Original criterion: `grep -c 'Overfull' CivicWorkOS.log` returns **0** for both main and supplementary.
+- ☑ `grep -ci undefined` on both logs returns 0.
+- ☑ No British spellings remain (manual triage of the regex sweep complete). Gate L2 holds it.
+- ◐ Every `.bib` entry used in the manuscript has consistent, verified volume/number/DOI fields. All 87 cited entries pass the field audit, and the three flagged entries plus both L3 entries were checked against Crossref, NeurIPS or arXiv. The other DOIs were not re-resolved in this phase.
+- ☑ `syed2026fedagent` either removed or attached to a claim it supports. Removed.
+- ☐ **Open (human).** Read-through complete and sign-off recorded.
 
 **Effort:** 6–8 hours (1 day). The overfull boxes are tedious rather than hard.
 **Compute:** 15–25 builds while chasing boxes ≈ **25 minutes**.
