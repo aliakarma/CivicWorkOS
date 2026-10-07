@@ -386,6 +386,58 @@ else
   gate 3 "pytest matches README badge" fail "see /tmp/pytest.out"
 fi
 
+# ------------------------------------------------------ submission package ----
+echo
+echo "Submission package (Phase 8)"
+
+# \extraAuth states the count on the journal's basis: texcount's text total
+# less the abstract, acknowledgment and funding statement.
+basis=$(python -I count_words.py "$MAIN.tex" 2>/dev/null)
+decl_w=$(grep -oE 'Word count:\} *[0-9,]+' "$MAIN.tex" | tr -dc '0-9')
+[[ -n "$basis" && "$basis" == "$decl_w" ]] \
+  && gate 8 "declared word count matches journal basis" pass "$basis" \
+  || gate 8 "declared word count matches journal basis" fail "declared $decl_w, measured ${basis:-?}"
+
+ntab=$(grep -c 'begin{table}' "$MAIN.tex")
+decl_t=$(grep -oE 'Number of tables:\} *[0-9]+' "$MAIN.tex" | tr -dc '0-9')
+[[ "$ntab" == "$decl_t" ]] \
+  && gate 8 "declared table count matches" pass "$ntab" \
+  || gate 8 "declared table count matches" fail "declared $decl_t, found $ntab"
+
+# The cover letter restates the counts; it drifted once already.
+if [[ -f cover-letter.md ]]; then
+  decl_f=$(grep -oE 'Number of figures:\} *[0-9]+' "$MAIN.tex" | tr -dc '0-9')
+  words=$(echo "$decl_w" | sed -E ':a;s/([0-9])([0-9]{3})($|,)/\1,\2\3/;ta')
+  want="$words words, with $decl_f figures and $decl_t tables"
+  grep -q "$want" cover-letter.md \
+    && gate 8 "cover letter counts match \\extraAuth" pass \
+    || gate 8 "cover letter counts match \\extraAuth" fail "expected \"$want\""
+else
+  gate 8 "cover letter counts match \\extraAuth" fail "cover-letter.md missing"
+fi
+
+# One response entry per register ID in REVISION-PROGRAMME.md section 4.
+if [[ -f response-to-reviewers.md ]]; then
+  ids=$(grep -oE '^\| \*\*[CHMLN][0-9]+\*\*' REVISION-PROGRAMME.md | tr -dc 'A-Z0-9\n' | sort -u)
+  missing=$(for id in $ids; do grep -qE "^\| $id \|" response-to-reviewers.md || echo "$id"; done | tr '\n' ' ')
+  [[ -z "${missing// }" ]] \
+    && gate 8 "response covers every register item" pass "$(echo "$ids" | wc -w | tr -d ' ') items" \
+    || gate 8 "response covers every register item" fail "missing: $missing"
+else
+  gate 8 "response covers every register item" fail "response-to-reviewers.md missing"
+fi
+
+# N6: the Data Availability link names no branch, so readers land on the
+# default branch. It must carry the revision, or N1-N4 are live again there.
+main_sha=$(cd $REPO && git ls-remote origin refs/heads/main 2>/dev/null | cut -f1)
+if [[ -z "$main_sha" ]]; then
+  gate 8 "default branch carries the revision (N6)" fail "origin unreachable"
+elif (cd $REPO && git merge-base --is-ancestor HEAD "$main_sha" 2>/dev/null); then
+  gate 8 "default branch carries the revision (N6)" pass "${main_sha:0:7}"
+else
+  gate 8 "default branch carries the revision (N6)" fail "origin/main ${main_sha:0:7} lacks HEAD"
+fi
+
 # ------------------------------------------------------------- summary ----
 echo
 echo "======================================================================"

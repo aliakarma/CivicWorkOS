@@ -151,6 +151,22 @@ Every reviewer finding, plus the four this document adds, mapped to a phase. Kee
 >
 > **Open (human):** item 6, the uninterrupted register read-through and its sign-off. The mechanical overclaim sweep (`we show/find/observe`, `our results/simulation`, `empirically`, `validated`, `outperform`) found only the paper's own concession in §7.
 
+> **Phase 8 mechanical work complete; four items cannot be closed by the author alone.** Phases 0–7 were re-verified first: `check.sh --all` was 35 passed, 1 failed (C7) and `audit_numbers.py` was 199 PASS, 0 FAIL. `.revision-phase` is now 8, and `check.sh` has a fifth group of Phase 8 gates, each tested by injecting a regression. From a clean tree it reports **39 passed, 2 failed**: C7, and N6, a new finding.
+>
+> **N6 is the important finding of this phase.** The Data Availability Statement links to `github.com/aliakarma/CivicWorkOS` without naming a branch, so a reader lands on `main`. On GitHub, `main` is still at `76d89cb`, which predates the whole revision. It shows the six-author list, the "164 passed" badge and the superseded worked example. N1–N4 are fixed only on `revision/frontiers-hnt`. An editor who follows the link today reaches exactly the inconsistencies Phase 3 closed. The fix is a merge of the revision branch into `main` before submission, which is the author's action. A new gate fails until `main` contains HEAD. A Zenodo archive of the release, cited by DOI in the Data Availability Statement, would pin it further.
+>
+> **Clean-clone verification (item 2)** ran from an empty directory: a shallow clone of `revision/frontiers-hnt` from GitHub at `8b5a955`, a fresh virtualenv from `requirements.txt` alone (PuLP 2.9.0), then `verify_worked_example.py` (82 checks, exit 0) and `pytest` (196 passed, exit 0, matching the badge). It verifies the branch, not `main`; see N6. On Windows the clone needs `core.longpaths` under a long working path, which says nothing about the repository.
+>
+> **latexdiff (item 3).** `CivicWorkOS-diff.tex` / `.pdf` (60 pages) against `pre-revision-frontiers`. latexdiff wrapped two `\cmidrule` arguments in `\DIFaddFL`, which breaks booktabs; both were unwrapped. The build has no errors. Its 22 undefined references are all labels of the deleted §7/§8 material and occur only in struck-out text; none names a label that still exists. The PDF has been checked mechanically, not read.
+>
+> **Counts (item 6).** 11,769 by `texcount`, **11,491** on the Frontiers basis (abstract 238, acknowledgment 20, funding 20 excluded); 4 figures; 10 tables; 36 pages main, 22 supplement. `\extraAuth` matched already. The cover letter still said 11,443 words and 3 figures; corrected, and now gated. `count_words.py` computes the basis, so it is no longer done by hand.
+>
+> **Response document (item 5):** `response-to-reviewers.md`, structured as §10 asks. A summary row for all 42 register IDs, N6 included (gated), per-reviewer answers with revised-manuscript locations, and a "not changed" section with seven entries. Every location it cites was checked against the label map of the compiled `.aux`. It records C7 as open rather than presenting it as done.
+>
+> **Package (item 7):** `make_package.sh` copies the nine source files the two documents need, plus the cover letter, the response and the diff PDF, into `submission/`. It builds both documents there from nothing, failing on any undefined reference, and writes `CivicWorkOS-submission.zip` (both ignored by git). It builds clean.
+>
+> **Open, and none of it can be done mechanically:** (1) C7, the grant code. (2) N6, the merge to `main`. (3) Item 4, the independent co-author read against `peer-review.md`. This now also covers the Phase 4 §2/§3 read, the Phase 5 front/back-matter sign-off, the Phase 6 GCC legal verification and the Phase 7 register read. (4) A human pass over the diff PDF for unintended changes.
+
 | ID | Severity | Issue | Location (compiled) | Phase | Status |
 |---|---|---|---|---|---|
 | **C1** | Critical | §8 reports an unconducted study | §8, lines 1361–1583 | 1 | ☑ Closed. §8 deleted entire (388 lines). `removed_sections.tex` keeps the audit trail. |
@@ -193,6 +209,7 @@ Every reviewer finding, plus the four this document adds, mapped to a phase. Kee
 | **N2** | **High (new)** | `verify_worked_example.py` verifies a *different* worked example (B_k = 2,073.6 vs the manuscript's 4,976.64) | `scripts/verify_worked_example.py` | 3 | ☑ Closed, and wider than scoped — see the Phase 3 note. The defect was in **three** places, not one, and the fix is structural: `manuscript_values.py` re-exports `audit_numbers.py`, so no repository file restates a manuscript value. 82 checks, all green. |
 | **N3** | **High (new)** | The verification gate does not run: `pulp` is not installed; the script aborts at the constrained-optimum stage | repo environment | 3 | ☑ Closed. `pulp` was already in `requirements.txt`, but pinned `<4`; 3.x breaks the suite under `filterwarnings = error::DeprecationWarning`. Repinned `<3`. Verified from an empty virtualenv built from `requirements.txt` alone. |
 | **N4** | Medium (new) | Repo and README cite a third section numbering (§5.3, §7.1) | `README.md`, `scripts/`, `sim/` docstrings | 3 | ☑ Closed by label, not by renumbering, so Phase 4 cannot reopen it. 565 references across the whole repository now cite LaTeX labels; `check_repo.py` gates A and B enforce it. |
+| **N6** | **Critical (new)** | The Data Availability link opens the default branch, which predates the revision and still carries N1–N4 | GitHub `main` at `76d89cb` | 8 | ◐ Open: merge `revision/frontiers-hnt` into `main` before submission (author action). Gate N6 fails until `main` contains HEAD. |
 | **N5** | **High (new)** | Every in-text citation prints its authors twice (`Author~\cite{key}` under Frontiers-Harvard renders "Author Author (year)"); parenthetical citations render unbracketed | ~30 sites throughout `CivicWorkOS.tex` | 7 | ☑ Closed, in both documents: 77 `\citet`, 2 possessive, 91 `\citep`. Gate N5 forbids bare `\cite`. |
 
 ---
@@ -527,13 +544,13 @@ That lands at the line. Build in margin by taking a further ~300 words out of §
 
 **Success criteria**
 
-- ☐ Every item in the §4 register marked closed, with a one-line note of how.
-- ☐ All `check.sh` gates green on a clean build.
-- ☐ Clean-clone repository verification exits 0.
-- ☐ `latexdiff` PDF generated and reviewed; no unintended changes.
-- ☐ Independent co-author sign-off recorded.
-- ☐ Response document complete, one entry per reviewer item, each with a location reference into the revised manuscript.
-- ☐ Word count ≤ 12,000; keywords 5–8; all statements present; no placeholders.
+- ◐ 39 of 42 register items closed, each with a one-line note. Still open: C7 (grant code), M7 (legal verification) and N6 (merge to `main`). Criterion: every item in the §4 register marked closed, with a one-line note of how.
+- ◐ 39 of 41 gates green on a clean build (all build products deleted first). The two failures are C7 and N6, and both need an action by the author, not a text edit. Criterion: all `check.sh` gates green on a clean build.
+- ☑ Exit 0 from a GitHub clone of `revision/frontiers-hnt` in an empty directory: 82 checks, 196 tests. `main` will match once N6 is merged. Criterion: clean-clone repository verification exits 0.
+- ◐ Generated, builds without errors, and undefined references are confined to deleted labels. **Open (human):** read it for unintended changes. Criterion: `latexdiff` PDF generated and reviewed; no unintended changes.
+- ☐ **Open (human).** Criterion: independent co-author sign-off recorded.
+- ☑ `response-to-reviewers.md`: 42 summary rows (gated), per-reviewer answers, locations checked against the `.aux`. Criterion: response document complete, one entry per reviewer item, each with a location reference into the revised manuscript.
+- ◐ 11,491 words; 8 keywords; Ethics, Data Availability, Abbreviations, Contributions and Funding statements all present. One placeholder remains, the grant code (C7). Criterion: word count ≤ 12,000; keywords 5–8; all statements present; no placeholders.
 
 **Effort:** 10–12 hours (1.5 days), of which the response document is about half.
 **Compute:** `latexdiff` + two builds ≈ **3 minutes**; clean-clone install and test ≈ **5 minutes**.
