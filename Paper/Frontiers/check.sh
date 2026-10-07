@@ -112,9 +112,12 @@ else
   gate 4 "body words <= $WORD_CEILING" fail "$words"
 fi
 
-n=$(grep -c 'keyword' "$MAIN.tex" || true)
-(( n >= 1 )) && gate 5 "keywords declared" pass \
-             || gate 5 "keywords declared" fail "none found"
+# Frontiers requires 5 to 8 keywords, set as \section{Keywords:} a, b, ...
+kw=$(grep -oE '\\section\{Keywords:\}[^}]*' "$MAIN.tex" | head -1 \
+     | sed 's/.*Keywords:}//')
+n=0; [[ -n "${kw// /}" ]] && n=$(echo "$kw" | awk -F, '{print NF}')
+(( n >= 5 && n <= 8 )) && gate 5 "keywords declared (5-8)" pass "$n" \
+                       || gate 5 "keywords declared (5-8)" fail "$n found"
 
 hits=$(grep -nE '26UQU\(|\(Staff number\)|\(track name\)|TODO|TBD|XXXX|FIXME' \
        "$MAIN.tex" || true)
@@ -135,9 +138,37 @@ else
   gate 5 "Abbreviations populated or absent" pass "absent"
 fi
 
-grep -qE '\\correspondance\{[^}]' "$MAIN.tex" \
-  && gate 5 "corresponding-author block passed" pass \
-  || gate 5 "corresponding-author block passed" fail "\\correspondance{} empty"
+# The class prints \corrAuthor and \corrEmail after \correspondance{}, which
+# the Frontiers template leaves empty; filling it would print the name twice.
+# So check that both are defined and that the block reaches the PDF.
+cauth=$(sed -n 's/^\\def\\corrAuthor{\(.*\)}$/\1/p' "$MAIN.tex")
+cmail=$(sed -n 's/^\\def\\corrEmail{\(.*\)}$/\1/p' "$MAIN.tex")
+if [[ -n "$cauth" && -n "$cmail" ]] && command -v pdftotext > /dev/null \
+   && pdftotext -f 1 -l 1 "$MAIN.pdf" - 2>/dev/null \
+      | tr '\n' ' ' | grep -q "Correspondence\*: *$cauth *$cmail"; then
+  gate 5 "corresponding-author block renders" pass "$cmail"
+else
+  gate 5 "corresponding-author block renders" fail "not on page 1"
+fi
+
+# L5: an equal-contribution footnote needs a dagger on at least two authors.
+if grep -q 'contributed equally' "$MAIN.tex"; then
+  nd=$(sed -n '/\\def\\Authors{/,/^}/p' "$MAIN.tex" | grep -c 'dagger')
+  (( nd >= 2 )) && gate 5 "equal-contribution footnote attached" pass \
+                || gate 5 "equal-contribution footnote attached" fail \
+                     "$nd authors marked"
+else
+  gate 5 "equal-contribution footnote attached" pass "absent"
+fi
+
+# L7: every initial in Author Contributions must name exactly one author.
+contrib=$(sed -n '/section\*{Author Contributions}/,/section\*{Funding}/p' \
+          "$MAIN.tex")
+if echo "$contrib" | grep -qE '\bAA\b'; then
+  gate 5 "author initials unambiguous" fail "AA names two authors"
+else
+  gate 5 "author initials unambiguous" pass
+fi
 
 # ------------------------------------------------------------ integrity ----
 echo

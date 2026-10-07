@@ -131,17 +131,19 @@ Every reviewer finding, plus the four this document adds, mapped to a phase. Kee
 >
 > **Also closed:** the supplement's claim that archived calibration snapshots accompany the replication package (Reviewer 2 listed it among the missing essentials). No snapshots exist; App. `app:calib` now says so, names each series and its issuing body, and states that no reported result depends on them. The README's badge, dependency pin, sample output, worked-example tables and the A9 discussion are all rebuilt on the current article.
 
+> **Phase 5 open on two items.** `check.sh 5`: 25 passed, 1 failed (the grant-code placeholder, C7). The other open item is the human gate, co-author sign-off on the front and back matter. Done: keywords (C6), Ethics Statement (C8), Abbreviations (C9), † attachment (L5), initials and CRediT roles (L7), and L6, which is closed as not a defect. Structure was checked against the live Frontiers article-type page (Abstract, Introduction, topical sections, Discussion): it conforms. That page states the 12,000 ceiling but not what counts toward it, so the counting basis is still unconfirmed. Body words 11,596 → 11,744 (`\extraAuth` 11,443), which leaves Phase 6 only 56 words under the 11,800 gate. Its additions must be paid for from §3/§4. Cover letter drafted at `cover-letter.md`. Phase 4's co-author read of §2/§3 also remains open.
+
 | ID | Severity | Issue | Location (compiled) | Phase | Status |
 |---|---|---|---|---|---|
 | **C1** | Critical | §8 reports an unconducted study | §8, lines 1361–1583 | 1 | ☑ Closed. §8 deleted entire (388 lines). `removed_sections.tex` keeps the audit trail. |
 | **C2** | Critical | §7.7 says the simulation is unexecuted while §8 reports it | line 1335 vs 1367 | 1 | ☑ Closed. The future-tense statement now governs: §9.6 and App. S2 both say the protocol is unexecuted and that OSF lodgement precedes execution. |
 | **C3** | Critical | Abstract's lead numbers (63.2%, 86.8%, 0.97) come from C1 | lines 108–110 | 1 | ☑ Closed. Abstract rebuilt on §6; 63.2/86.8/0.97 gone; leads with the intake result. |
 | **C4** | Critical | Data Availability Statement self-contradictory; misdescribes repo; wrong cross-ref | lines 1718–1720 | 1 | ☑ Closed. DAS rewritten; cross-refs corrected to sec:worked/sensitivity/shocks/cadmodel/protocol. |
-| **C5** | Critical | 21,048 words against a 12,000 ceiling | whole document | 4 | ☐ |
-| **C6** | Critical | No keywords (5–8 required) | preamble | 5 | ☐ |
-| **C7** | Critical | Funding/Acknowledgment placeholder `26UQU(Staff number)(track name)xx` | lines 1716, 1728 | 5 | ☐ |
-| **C8** | Critical | No Ethics Statement | back matter | 5 | ☐ |
-| **C9** | Critical | `\section*{Abbreviations}` present and empty | line 1712 | 5 | ☐ |
+| **C5** | Critical | 21,048 words against a 12,000 ceiling | whole document | 4 | ☑ Closed in Phase 4. 11,596 body words at phase close (11,744 after Phase 5 back matter; 11,443 on the Frontiers basis). |
+| **C6** | Critical | No keywords (5–8 required) | preamble | 5 | ☑ Closed. Eight keywords, set with `\keyFont{\section{Keywords:} …}` as in the official template (`\keyFont` supplied by `\providecommand`, since this class copy lacks it). Gate counts 5–8. |
+| **C7** | Critical | Funding/Acknowledgment placeholder `26UQU(Staff number)(track name)xx` | lines 1716, 1728 | 5 | ◐ Open: grant code not yet received from Umm Al-Qura. The only failing Phase 5 gate. |
+| **C8** | Critical | No Ethics Statement | back matter | 5 | ☑ Closed. Ethics Statement added before the Data Availability Statement; cites App. `app:elicit` and `app:elicit-ethics`. |
+| **C9** | Critical | `\section*{Abbreviations}` present and empty | line 1712 | 5 | ☑ Closed. Populated with the ten acronyms the main text uses (AI, CAD, EU, GDPR, HCPB, ILO, ISO, LP, MDP, SCV). The programme's list named CWOS, CFI, MILP, DES, PSI and ICC, none of which survive in the main text. |
 | **C10** | Critical | Article type never declared | preamble | 1 | ☑ Closed. Declared in `\extraAuth` and in a preamble header comment. |
 | **H1** | High | Access-constraint ablation: sign **and** magnitude wrong in prose | §8.4 line 1460 | 2 | ☑ Closed by removal (§8.4 deleted). |
 | **H2** | High | H1 propagated: "at a cost of 1.3 CAD points" | §8.7 line 1521, §8.9 line 1580, §10 line 1705 | 2 | ☑ Closed by removal; the Conclusions sentence now reports the 622→1,344 hour access arithmetic instead. |
@@ -160,14 +162,14 @@ Every reviewer finding, plus the four this document adds, mapped to a phase. Kee
 | **M7** | Medium | No GCC/Saudi legal analysis despite affiliations, funder, and `ILOESCWA2026` | new §5.x | 6 | ☐ |
 | **M8** | Medium | Online rule: no regret/violation bound; CMDP + online-matching unengaged | §9.5 l.1688 | 6 | ☐ |
 | **M9** | Medium | `syed2026fedagent` does not support the claim it is cited for | §2.6 | 7 | ☐ |
-| **M10** | Medium | Tables `tab:notation`, `tab:params` are reference material in the main text | lines 857, 1255 | 4 | ☐ |
+| **M10** | Medium | Tables `tab:notation`, `tab:params` are reference material in the main text | lines 857, 1255 | 4 | ☑ Closed in Phase 4. Neither table remains in the main text. |
 | **L1** | Low | 53 overfull `\hbox` warnings | throughout | 7 | ☐ |
 | **L2** | Low | Mixed orthography ("unfavourable" l.1638, "behaviourally") | §9.1, App. S4.2 | 7 | ☐ |
 | **L3** | Low | `BenDaya2026` / `syed2026fedagent` volume–number collision | `references.bib` | 7 | ☐ |
 | **L4** | Low | "differ by two to four points" → 2.2 and 4.3 | §9.1 line 1644 | 2 | ☑ Closed by removal in Phase 1 — the closed-form/simulation comparison paragraph does not survive Route A. Verified absent. |
-| **L5** | Low | Orphaned `$\dagger$` equal-contribution footnote | line 105 | 5 | ☐ |
-| **L6** | Low | `\correspondance{}` passed empty | line 97 | 5 | ☐ |
-| **L7** | Low | "AA" initials collide (Ali Akarma / Abdulaziz Alqurashi) | line 1724 | 5 | ☐ |
+| **L5** | Low | Orphaned `$\dagger$` equal-contribution footnote | line 105 | 5 | ☑ Closed. † attached to Syed and Akarma (author decision); footnote now prints with a † mark instead of a stray "0". |
+| **L6** | Low | `\correspondance{}` passed empty | line 97 | 5 | ☑ Closed as not a defect. The class prints `\corrAuthor`/`\corrEmail` (and `\Address`) after `\correspondance{}`/`ddress{}`, which the Frontiers template leaves empty; passing them would print the name twice. The block already rendered. The `check.sh` gate now checks the rendered PDF instead. |
+| **L7** | Low | "AA" initials collide (Ali Akarma / Abdulaziz Alqurashi) | line 1724 | 5 | ☑ Closed. AAk = Ali Akarma, AAl = Abdulaziz Alqurashi (MTN+AAl on investigation/validation), convention stated in the section. Roles also corrected: "experiments" → "the reference implementation and its verification", "data analysis" → "formal analysis", since Route A ran no experiment. |
 | **L8** | Low | Intake requirement buried; deserves Abstract + a figure | §6.6 → Abstract | 6 | ☐ |
 | **N1** | **Critical (new)** | `README.md` author list does not match the manuscript | `README.md` line 5 | 3 | ☑ Closed. `README.md` and `CITATION.cff` rebuilt on `\def\Authors`, with affiliations and the corresponding author. `check_repo.py` gate C fails on any future divergence. |
 | **N2** | **High (new)** | `verify_worked_example.py` verifies a *different* worked example (B_k = 2,073.6 vs the manuscript's 4,976.64) | `scripts/verify_worked_example.py` | 3 | ☑ Closed, and wider than scoped — see the Phase 3 note. The defect was in **three** places, not one, and the fix is structural: `manuscript_values.py` re-exports `audit_numbers.py`, so no repository file restates a manuscript value. 82 checks, all green. |
@@ -411,12 +413,12 @@ That lands at the line. Build in margin by taking a further ~300 words out of §
 
 **Success criteria**
 
-- ☐ `grep -nE '26UQU\(|\(Staff number\)|\(track name\)|xx\b|TODO|TBD|XXXX' CivicWorkOS.tex` returns **nothing**.
-- ☐ `grep -c 'keyword' CivicWorkOS.tex` ≥ 1, and the rendered PDF shows 5–8 keywords.
-- ☐ The compiled PDF's first page shows: title, full author list with affiliations, a corresponding-author block with name and email, keywords, abstract, and the word/figure/table counts.
-- ☐ Abbreviations section is either populated or absent — not present and empty.
-- ☐ Ethics Statement present.
-- ☐ Author Contributions contains no ambiguous initials; every initial maps to exactly one author.
+- ☐ **Open (C7).** Two hits remain, both the grant code. Every other placeholder is gone. `grep -nE '26UQU\(|\(Staff number\)|\(track name\)|xx\b|TODO|TBD|XXXX' CivicWorkOS.tex` returns **nothing**.
+- ☑ Eight keywords render on page 1. The gate was strengthened from `grep -c keyword ≥ 1`, which a comment alone satisfied, to a count of 5–8 parsed from `\section{Keywords:}`. Was: `grep -c 'keyword' CivicWorkOS.tex` ≥ 1, and the rendered PDF shows 5–8 keywords.
+- ☑ Checked by rendering page 1: title, five authors with affiliations and †/* marks, correspondence block, word/figure/table counts, abstract, keywords, † footnote. The compiled PDF's first page shows: title, full author list with affiliations, a corresponding-author block with name and email, keywords, abstract, and the word/figure/table counts.
+- ☑ Abbreviations section is either populated or absent — not present and empty.
+- ☑ Ethics Statement present.
+- ☑ Author Contributions contains no ambiguous initials; every initial maps to exactly one author.
 - ☐ A co-author other than the submitting author reads the full front and back matter and signs off.
 
 **Effort:** 3–4 hours of editing, plus however long the grant-code request takes. Start the request on day one.

@@ -63,6 +63,10 @@
 
 \newtheorem{Proposition}{Proposition}
 
+% The official Frontiers template sets keywords with \keyFont inside the
+% abstract; this copy of FrontiersinHarvard.cls does not define it.
+\providecommand{\keyFont}{\fontsize{8}{11}\helveticabold}
+
 \providecommand{\descriptionlabel}[1]{\hspace\labelsep\normalfont\bfseries #1}
 \newenvironment{description}
   {\list{}{\labelwidth=0pt \itemindent=-\leftmargin \let\makelabel\descriptionlabel}}
@@ -80,8 +84,8 @@
 
 
 \def\Authors{
-	Toqeer Ali Syed$^{1}$,
-	Ali Akarma$^{1,2}$,
+	Toqeer Ali Syed$^{1,\dagger}$,
+	Ali Akarma$^{1,2,\dagger}$,
 	Raghda M. Alqurashi$^{3,*}$,
 	Muhammad Tayyab Naqash$^{4}$,
 	Abdulaziz Alqurashi$^{4}$
@@ -110,17 +114,20 @@
 	\correspondance{}
 	\extraAuth{
 		\textbf{Article type:} Hypothesis and Theory \\
-		\textbf{Word count:} 11,319 \\
+		\textbf{Word count:} 11,443 \\
 		\textbf{Number of figures:} 3 \\
 		\textbf{Number of tables:} 10
 	}
 
 	\maketitle
-	\footnotetext{$\dagger$ These authors contributed equally to this work and share first authorship.}
+	{\renewcommand{\thefootnote}{}\footnotetext{$^{\dagger}$These authors contributed equally to this work and share first authorship.}}
 
 
 	\begin{abstract}
 		Cities are moving from sensing infrastructure to agentic operation, in which AI agents perform administrative work and robots perform physical work. Allocation research optimizes fit, throughput, and ergonomics; labor research examines displacement; neither prices the developmental practice through which cities form their future practitioners. We present CivicWorkOS, which makes municipal allocation a governed decision over \textit{staffed modes} --- pairings of an execution mode with a named roster at declared career stages --- rather than a human-versus-machine choice. Civic Automation Debt prices five deferred liabilities, and four constraints bind the objective: a Human Capability Preservation Budget denominated in qualified-practice hours accruing only to practitioners below independent competence, a Capability Access Constraint governing who receives protected practice, a Just Transition Constraint, and an N$-$1/N$-$2 resilience reserve. We give the city-wide program, an online Lagrangian rule with bounded between-rebalance violation, a feasibility condition, and an intake requirement for when the budget is unattainable. An exact bridge-inspection instance, reproducible by direct arithmetic from the reported values, prices protected practice at 0.0454 objective units per hour, costs 4.34\% of annual objective value (0.33--9.60\% across the swept parameter frontier), and yields 3.46 competent-equivalents a year against attrition of 2.88. The same arithmetic produces a result no headcount plan surfaces: machine-assisted supervised practice stretches time to competence by a factor of 3.38, from 1.2 to 4.05 years, so a city sizing intake from certification hours provisions four trainee posts where fourteen are required.
+
+		\tiny
+		\keyFont{\section{Keywords:} human--AI--robot task allocation, municipal automation governance, capability preservation, civic automation debt, workforce skill formation, algorithmic contestability, urban digital twin, constrained optimization}
 	\end{abstract}
 
 
@@ -1223,18 +1230,23 @@
 	
 
 	\section*{Abbreviations}
-	
-	
+
+	AI, artificial intelligence; CAD, Civic Automation Debt; EU, European Union; GDPR, General Data Protection Regulation; HCPB, Human Capability Preservation Budget; ILO, International Labour Organization; ISO, International Organization for Standardization; LP, linear program; MDP, Markov decision process; SCV, Sustainable Civic Value.
+
 	\section*{Acknowledgment}
 	The research work was funded by Umm Al-Qura University, Saudi Arabia under code number: 26UQU(Staff number)(track name)xx.
 	
+	\section*{Ethics Statement}
+
+	This study involved no human participants, no animal subjects, and no personal data. All parameter values reported are the authors' structured estimates, and all results are analytical. The expert-elicitation protocol specified in Appendix~\ref{app:elicit} has not been executed; its execution would require institutional ethics approval and written informed consent from participating practitioners, as Appendix~\ref{app:elicit-ethics} states. Ethical review and approval were therefore not required for this work in accordance with institutional and national requirements.
+
 	\section*{Data Availability Statement}
 
 	No new datasets were created or analyzed in this study. All parameter values, the worked allocation of Section~\ref{sec:worked}, the sensitivity sweep of Section~\ref{sec:sensitivity}, the parameter shocks of Section~\ref{sec:shocks}, and the debt trajectory of Section~\ref{sec:cadmodel} are fully specified in this article and can be reproduced from the reported values by direct arithmetic. The author-provided reference implementation, which recomputes every checkable number this article publishes and reports the agreement check by check, is available at \url{https://github.com/aliakarma/CivicWorkOS}. Code under \texttt{sim/} in that repository runs on clearly labelled synthetic demonstration data; it exercises the software shape of the protocol specified in Section~\ref{sec:protocol} and Appendix~\ref{app:protocol}, and it must not be cited as empirical municipal validation. The evaluation protocol of Section~\ref{sec:protocol} has not been executed.
 
 	\section*{Author Contributions}
 
-	TAS and AA conceptualized the study and developed the research methodology. RMA supervised the study and provided guidance on the research design and interpretation of the findings. MTN and AA contributed to the investigation, data analysis, and validation. TAS and AA conducted the implementation, experiments, and visualization. TAS prepared the initial manuscript. All authors contributed to the revision and editing of the manuscript, critically reviewed the final version, and approved the submitted version.
+	TAS and AAk conceptualized the study and developed the research methodology. RMA supervised the study and provided guidance on the research design and interpretation of the findings. MTN and AAl contributed to the investigation, formal analysis, and validation. TAS and AAk developed the reference implementation and its verification, and prepared the visualizations. TAS prepared the initial manuscript. All authors contributed to the revision and editing of the manuscript, critically reviewed the final version, and approved the submitted version. AAk denotes Ali Akarma and AAl Abdulaziz Alqurashi.
 
 	\section*{Funding}
 
