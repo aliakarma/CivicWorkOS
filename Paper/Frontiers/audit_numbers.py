@@ -503,6 +503,47 @@ def build() -> list:
           tol=0.15, site="l.1117, Abstract", note="4.147 -> 'four trainees'")
     out.append(s)
 
+    # -- fig:intake (Phase 6, item L8) ---------------------------------
+    # The figure plots eq:tau as closed-form pgfplots expressions, so its
+    # coefficients, its marked point and its right-axis scale are what can
+    # drift.  Each printed constant below appears literally in the figure.
+    s = Section("Intake figure (fig:intake, eq:tau, eq:intake)")
+    solo = w["h_raw_k"] / w["Theta_k"]
+    s.add("curve coefficient, omega_bar = 0.5: (h_raw/Theta)/0.5", 2.4,
+          solo / w["omega_bar"], tol=1e-9, site="fig:intake {2.4/x}")
+    s.add("curve coefficient, omega_bar = 1: h_raw/Theta", 1.2, solo,
+          tol=1e-9, site="fig:intake {1.2/x}")
+    # Plotted at full precision: the rounded 0.5925 would put the point at
+    # 4.0506, off the value 4.050926 that the exact optimum gives.
+    s.add("marked point x: phi_bar at the optimum", 0.592457, phi_bar,
+          tol=5e-7, site="fig:intake coordinates")
+    s.add("marked point y: tau_k", 4.050926, tau, tol=5e-7,
+          site="fig:intake coordinates")
+    s.add("marked point lies on the omega_bar = 0.5 curve", 0.0,
+          abs(2.4 / phi_bar - tau), tol=1e-9, site="fig:intake")
+    scale = w["eta_k"] * w["N_k"] * w["r_k"]
+    s.add("right-axis scale eta_k N_k r_k", 3.456, scale, tol=1e-9,
+          site="fig:intake caption")
+    s.add("right-axis ymax = 8.5 * eta_k N_k r_k", 29.376, 8.5 * scale,
+          tol=1e-9, site="fig:intake axis")
+    s.add("intake at the certification line, label 4.1", 4.1, scale * solo,
+          tol=5e-2, site="fig:intake caption and label")
+    s.add("intake at the marked point, label 14.0", 14.0, scale * tau,
+          tol=5e-2, site="fig:intake label")
+    s.add("trainee time per completion vs certification", 3.38,
+          (tau * w["Theta_k"]) / w["h_raw_k"], tol=5e-3,
+          site="sec:pipeline, training-economics paragraph")
+    out.append(s)
+
+    # -- sec:onlinebound (Phase 6, item M8) ----------------------------
+    s = Section("Small-request condition (sec:onlinebound)")
+    max_credit = ell * MODES["H+R/a1"].phi * MODES["H+R/a1"].psi
+    s.add("largest credited hours on one task, ell * zeta_bar", 2.8,
+          max_credit, tol=1e-9, site="sec:onlinebound")
+    s.add("request-to-budget ratio", 5.6e-4, max_credit / B_k, tol=5e-6,
+          site="sec:onlinebound")
+    out.append(s)
+
     # -- who receives the protected work -------------------------------
     s = Section("Capability access arithmetic (sec:whoworked)")
     blind = w["incumbent_women"] * B_k

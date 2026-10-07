@@ -236,6 +236,73 @@ grep -q 'label{tab:cadparams}' "$MAIN.tex" \
   && gate 2 "fig:cad-trend parameters tabulated" pass \
   || gate 2 "fig:cad-trend parameters tabulated" fail "tab:cadparams absent"
 
+# ------------------------------------------------ substantive additions ----
+echo
+echo "Substantive strengthening (Phase 6)"
+
+# Prints the body of one \section/\subsection, from its heading to the next.
+sec_body() {
+  awk -v lbl="$1" '
+    /\\(sub)?section\*?\{/ { if (on && seen) exit }
+    index($0, "label{" lbl "}") { on = 1; seen = 1 }
+    on' "$MAIN.tex"
+}
+
+# L8: the intake requirement in the Abstract, the Contributions, a figure,
+# sec:pipeline, and the Conclusions.
+missing=()
+sed -n '/begin{abstract}/,/end{abstract}/p' "$MAIN.tex" \
+  | grep -q 'fourteen are required' || missing+=(abstract)
+sed -n '/label{sec:contributions}/,/end{itemize}/p' "$MAIN.tex" \
+  | grep -q 'capability intake requirement' || missing+=(contributions)
+grep -q 'label{fig:intake}' "$MAIN.tex" || missing+=(figure)
+sec_body sec:pipeline | grep -q 'ref{fig:intake}' || missing+=(sec:pipeline)
+sec_body sec:conclusion | grep -q 'ref{fig:intake}' || missing+=(conclusions)
+(( ${#missing[@]} == 0 )) \
+  && gate 6 "intake requirement promoted (L8)" pass \
+  || gate 6 "intake requirement promoted (L8)" fail "missing: ${missing[*]}"
+
+# M7: a GCC subsection that names a composition instrument and connects
+# ILOESCWA2026 to the Just Transition Constraint.
+gcc=$(sec_body sec:gcc)
+if [[ -n "$gcc" ]] && grep -q 'Nitaqat' <<< "$gcc" \
+   && grep -q 'ILOESCWA2026' <<< "$gcc" \
+   && grep -q 'eq:justtransition' <<< "$gcc"; then
+  gate 6 "GCC subsection present and connected (M7)" pass
+else
+  gate 6 "GCC subsection present and connected (M7)" fail
+fi
+
+# M8: the online-rule discussion states a bound, cites both literatures,
+# and the Limitations bullet points at it.
+ob=$(sec_body sec:onlinebound)
+n=$(grep -oE 'First,|Second,|Third,|Fourth,' <<< "$ob" | wc -l)
+if grep -q 'regret' <<< "$ob" && grep -q 'Altman1999' <<< "$ob" \
+   && grep -qE 'Mehta2007|DevanurHayes2009|Balseiro2023' <<< "$ob" \
+   && (( n >= 3 )) \
+   && sec_body sec:limitations | grep -q 'ref{sec:onlinebound}'; then
+  gate 6 "online-rule bound engaged (M8)" pass "$n obstacles"
+else
+  gate 6 "online-rule bound engaged (M8)" fail
+fi
+
+# M6: the convex-hull limit sits where the legitimacy claim is made, and the
+# Limitations section points at it instead of restating it.
+if sec_body sec:feedback | grep -q 'convex hull' \
+   && ! sec_body sec:limitations | grep -q 'aggregation function' \
+   && sec_body sec:limitations | grep -q 'ref{sec:feedback}'; then
+  gate 6 "scalarization limit in sec:feedback (M6)" pass
+else
+  gate 6 "scalarization limit in sec:feedback (M6)" fail
+fi
+
+# \extraAuth must keep pace with the figure count.
+nfig=$(grep -c 'begin{figure}' "$MAIN.tex")
+decl=$(grep -oE 'Number of figures:\} *[0-9]+' "$MAIN.tex" | tr -dc '0-9')
+[[ "$nfig" == "$decl" ]] \
+  && gate 6 "declared figure count matches" pass "$nfig" \
+  || gate 6 "declared figure count matches" fail "declared $decl, found $nfig"
+
 # -------------------------------------------------------------- numbers ----
 echo
 echo "Arithmetic and artifact"
