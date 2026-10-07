@@ -1,4 +1,4 @@
-"""Sustainable Civic Value (SCV): Paper Sec. 4.3, Eq. 15.
+"""Sustainable Civic Value (SCV): Paper sec:math, eq:scv.
 
     SCV_{i,m} = w1*Q + w2*S + w3*P + w4*Eq_srv + w5*Tr
               - w6*Cost - w7*En - w8*Pr - w9*CAD_{i,m}
@@ -6,7 +6,7 @@
 The per-task objective: five terms rewarded, four penalized, plus the
 single largest weight (w9 = 0.22 by default) on Civic Automation Debt.
 
-Normalization (Paper Sec. 4.3) is deliberately NOT uniform: the six
+Normalization (Paper sec:math) is deliberately NOT uniform: the six
 operational terms (Q, S, P, Cost, En, Pr) use trailing-window min-max
 normalization (civicworkos.scoring.normalize_windowed), while the four
 long-horizon terms (the CAD components' anchors, Eq_srv, D_trans) are
@@ -32,7 +32,7 @@ def _check_unit_interval(name: str, value: float) -> None:
 
 @dataclass(frozen=True)
 class TermVector:
-    """The eight flow terms of Eq. 15, each normalized to [0,1].
+    """The eight flow terms of eq:scv, each normalized to [0,1].
 
     Q: service quality (+).            S: safety (+).
     P: productivity (+).               Eq_srv: service equity (+).
@@ -56,7 +56,7 @@ class TermVector:
 
 @dataclass(frozen=True)
 class ScoreWeights:
-    """w1..w9 of Eq. 15. Paper default (Sec. 6.4):
+    """w1..w9 of eq:scv. Paper default (sec:weights):
 
     (0.15, 0.18, 0.14, 0.10, 0.05, 0.08, 0.03, 0.05, 0.22)
     for (Q, S, P, Eq_srv, Tr, Cost, En, Pr, CAD) respectively.
@@ -92,7 +92,7 @@ class ScoreWeights:
 
     @classmethod
     def paper_default(cls) -> ScoreWeights:
-        """The illustrative defaults of Paper Sec. 6.4. Not fitted estimates."""
+        """The illustrative defaults of Paper sec:weights. Not fitted estimates."""
         return cls(
             w1_quality=0.15,
             w2_safety=0.18,
@@ -106,7 +106,7 @@ class ScoreWeights:
         )
 
     def effective_weights(self, debt_weights: DebtWeightsLike) -> dict[str, float]:
-        """Table 4: decompose w9 across the five debt components.
+        """tab:weights: decompose w9 across the five debt components.
 
         Returns the effective weight each construct carries in the
         composed objective, e.g. "skill formation" = w9 * alpha.
@@ -136,7 +136,7 @@ class DebtWeightsLike(Protocol):
 
 
 def sustainable_civic_value(terms: TermVector, cad: float, weights: ScoreWeights) -> float:
-    """SCV_{i,m} (Eq. 15)."""
+    """SCV_{i,m} (eq:scv)."""
     _check_unit_interval("CAD", cad)
     return (
         weights.w1_quality * terms.Q

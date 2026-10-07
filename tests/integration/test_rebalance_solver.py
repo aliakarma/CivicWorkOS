@@ -1,14 +1,19 @@
 """Integration test: civicworkos.program + civicworkos.solver against the
-worked example, scaled to its actual task population (Paper Sec. 5.3:
-"The domain processes 340 comparable inspections a year").
+worked example of Paper sec:worked, at its actual task population.
 
-This exercises the GENERAL Eq. 16 MIP builder (civicworkos.program.city_program)
-and the two-solve dual-extraction strategy (civicworkos.solver.rebalance),
-not the hand-rolled LP in tests/smoke -- i.e. it is the actual production
-code path a real rebalance would use. Report Sec. 7's stated Phase 7
-validation criterion: "the solver must return the H/H+R mix at
-20.8%/79.2% and lambda_k = 0.0250" -- checked here via the general
-solver rather than a bespoke script.
+This exercises the GENERAL eq:program MIP builder
+(civicworkos.program.city_program) and the two-solve dual-extraction strategy
+(civicworkos.solver.rebalance), not the hand-rolled LP in tests/smoke -- it is
+the production code path a real rebalance would use. The property under test is
+that the general solver recovers the article's constrained optimum: a mix of the
+two staffed modes of tab:worked-mix, priced at the lambda_k of eq:lambdaworked.
+
+Like tests/smoke and scripts/verify_worked_example.py, this file was rebuilt in
+Phase 3 of the revision programme (finding N2). It previously scored four
+*execution* modes against an earlier draft's parameters -- h_k = 600, B_k =
+2073.6, 340 tasks, lambda_k = 0.0250 -- and asserted them. All manuscript inputs
+now come from `manuscript_values`, which re-exports the single definition in
+`Paper/Frontiers/audit_numbers.py`.
 """
 
 from __future__ import annotations
@@ -20,66 +25,79 @@ from civicworkos.program.city_program import CandidatePair, ProgramInputs, TaskI
 from civicworkos.scoring.cad import DebtComponents, DebtWeights, civic_automation_debt
 from civicworkos.scoring.scv import ScoreWeights, TermVector, sustainable_civic_value
 from civicworkos.solver.rebalance import solve_rebalance
+from manuscript_values import MODES, WORKED
 
 DOMAIN = "structural_inspection"
-# The worked example (Paper Sec. 5.3) scales to 340 tasks/year, but 340
-# near-IDENTICAL binary candidates make the MIP combinatorially
-# SYMMETRIC (every permutation of "which 71 tasks get mode H" is an
-# equivalent optimum), which is a documented, known difficulty for
-# generic branch-and-bound solvers independent of problem difficulty in
-# the LP sense -- see civicworkos.solver.rebalance's default time limit
-# and docs/troubleshooting.md. This test uses a reduced task count
-# (still large enough to approximate the paper's 20.8%/79.2% continuous
-# split within integer rounding) so the GENERAL solver code path is
-# exercised quickly and deterministically; it does not claim CivicWorkOS
-# solves a real 340-task rebalance quickly, which report Sec. 8.1 and
-# Sec. 18.2 both name as an open, paper-unaddressed question.
-N_TASKS = 12
 
-_TABLE3 = {
-    "H": dict(Q=0.72, S=0.55, P=0.40, Eq_srv=0.70, Tr=0.80, Cost=0.85, En=0.20, Pr=0.10,
-              D=(0.00, 0.00, 0.00, 0.00, 0.00), phi=1.00),
-    "H+A": dict(Q=0.86, S=0.60, P=0.62, Eq_srv=0.72, Tr=0.74, Cost=0.62, En=0.28, Pr=0.25,
-                D=(0.25, 0.15, 0.07, 0.30, 0.10), phi=0.75),
-    "H+R": dict(Q=0.80, S=0.88, P=0.70, Eq_srv=0.70, Tr=0.72, Cost=0.58, En=0.55, Pr=0.30,
-                D=(0.30, 0.25, 0.05, 0.35, 0.20), phi=0.70),
-    "H+A+R": dict(Q=0.91, S=0.90, P=0.88, Eq_srv=0.74, Tr=0.68, Cost=0.50, En=0.60, Pr=0.38,
-                  D=(0.45, 0.35, 0.13, 0.50, 0.30), phi=0.55),
-}
+# The worked example runs 2,100 inspections a year, but 2,100 near-identical
+# binary candidates make the MIP combinatorially SYMMETRIC -- every permutation
+# of "which 594 tasks take the lead-only roster" is an equivalent optimum --
+# which is a known difficulty for generic branch-and-bound independent of any
+# difficulty in the LP sense. See civicworkos.solver.rebalance's default time
+# limit and docs/troubleshooting.md. This test therefore uses a reduced task
+# count at the same per-task budget intensity, which preserves the mode
+# economics exactly and so preserves both the optimal mix and the dual. It does
+# NOT claim that CivicWorkOS solves a 2,100-task rebalance quickly; the
+# pre-release audit names problem-size behaviour as an open question the article
+# does not address, and sec:limitations says the same.
+N_TASKS = 60
 
 
 def _build_inputs() -> ProgramInputs:
+    w = WORKED
+    ell = w["ell_i"]
     dw = DebtWeights.paper_default()
     sw = ScoreWeights.paper_default()
 
     tasks = [
-        TaskInstance(task_id=f"insp-{i}", domain=DOMAIN, service="structural_inspection_service",
-                     ell_i=8.0, duration_hours=10.0)
+        TaskInstance(
+            task_id=f"insp-{i}",
+            domain=DOMAIN,
+            service="structural_inspection_service",
+            ell_i=ell,
+            duration_hours=w["d_i"],
+        )
         for i in range(N_TASKS)
     ]
+
     candidates = []
     for task in tasks:
-        for mode, row in _TABLE3.items():
-            dc = DebtComponents(D_skill=row["D"][0], D_fall=row["D"][1], D_acct=row["D"][2],
-                                 D_dep=row["D"][3], D_trans=row["D"][4])
+        for name, m in MODES.items():
+            dc = DebtComponents(
+                D_skill=m.D_skill,
+                D_fall=m.D_fall,
+                D_acct=m.D_acct,
+                D_dep=m.D_dep,
+                D_trans=m.D_trans,
+            )
             cad = civic_automation_debt(dc, dw)
-            tv = TermVector(Q=row["Q"], S=row["S"], P=row["P"], Eq_srv=row["Eq_srv"], Tr=row["Tr"],
-                             Cost=row["Cost"], En=row["En"], Pr=row["Pr"])
-            scv = sustainable_civic_value(tv, cad, sw)
-            candidates.append(CandidatePair(task_id=task.task_id, mode=mode, scv=scv, phi_m=row["phi"]))
+            tv = TermVector(
+                Q=m.Q, S=m.S, P=m.P, Eq_srv=m.Eq, Tr=m.Tr, Cost=m.Cost, En=m.En, Pr=m.Pr
+            )
+            candidates.append(
+                CandidatePair(
+                    task_id=task.task_id,
+                    mode=name,
+                    scv=sustainable_civic_value(tv, cad, sw),
+                    # The CREDITED share phi_m * psi_a, not a bare phi_m: eq:hcpb
+                    # accrues practice only below independent competence, so the
+                    # a0 (competent) staffed modes credit zero.
+                    phi_m=m.credited,
+                )
+            )
 
-    # The worked example's HCPB (N_k=24, r_k=0.12, h_k=600, ...) implies
-    # B_k=2073.6 h/yr against ITS 340-task population. Scaling the same
-    # per-task budget intensity (B_k / 340) to this test's reduced N_TASKS
-    # keeps the identical mode economics -- and therefore the identical
-    # 20.8%/79.2% optimal split -- while making the MIP tractable; using
-    # the unscaled 2073.6 h budget against only N_TASKS candidates would
-    # make the program infeasible outright (not enough tasks to deliver
-    # that much practice), which is a scaling artifact of this test, not
-    # a property of Eq. 9.
-    hcpb = HCPBParameters(N_k=24, r_k=0.12, h_k=600, eta_k=1.2, B_k_min=1200)
-    budget_per_task = capability_budget(hcpb) / 340
-    budget = budget_per_task * N_TASKS
+    # eq:bkworked gives B_k = 4,976.64 hours against the domain's 2,100 tasks.
+    # Scaling the same per-task intensity to N_TASKS keeps the mode economics
+    # and therefore the same optimal split and the same dual; using the
+    # unscaled budget against 60 candidates would be infeasible outright, which
+    # would be an artifact of this test rather than a property of
+    # eq:hcpb-estimator.
+    b_k = capability_budget(
+        HCPBParameters(
+            N_k=w["N_k"], r_k=w["r_k"], h_k=w["h_k"], eta_k=w["eta_k"], B_k_min=w["B_min"]
+        )
+    )
+    budget = (b_k / w["n_k"]) * N_TASKS
 
     return ProgramInputs(
         tasks=tasks,
@@ -96,42 +114,70 @@ def solved():
     return solve_rebalance(_build_inputs())
 
 
+@pytest.fixture(scope="module")
+def scaled_budget():
+    w = WORKED
+    b_k = capability_budget(
+        HCPBParameters(
+            N_k=w["N_k"], r_k=w["r_k"], h_k=w["h_k"], eta_k=w["eta_k"], B_k_min=w["B_min"]
+        )
+    )
+    return (b_k / w["n_k"]) * N_TASKS
+
+
 def test_solve_status_optimal(solved):
     assert solved.status == "Optimal"
 
 
-def test_aggregate_mode_shares_are_dominated_by_h_and_h_plus_r(solved):
-    """At small N_TASKS, integer rounding of the HCPB constraint can push
-    one or two tasks to a third mode at the margin -- a real MIP-vs-LP
-    integrality gap (the continuous optimum is exactly two modes; see
-    tests/smoke's LP-based check for that exact 20.8%/79.2% split). This
-    test checks the robust, N-independent property instead: H and H+R
-    together account for nearly all tasks, H+A+R (the unconstrained
-    winner, but the most debt-laden) is used rarely if at all, and the
-    HCPB is actually satisfied by the chosen mix.
+def test_the_two_active_staffed_modes_carry_the_assignment(solved, scaled_budget):
+    """tab:worked-mix: the optimum is a mix of two staffed modes, both at the
+    developing career stage.
+
+    At finite N_TASKS, integer rounding of the budget constraint can push a task
+    or two to a third mode at the margin -- a genuine MIP-vs-LP integrality gap
+    (tests/smoke checks the exact continuous split). The N-independent properties
+    are checked instead: the two active modes of tab:worked-mix carry nearly
+    everything, the unconstrained winner is used rarely if at all, and the
+    budget is actually met.
     """
-    counts = {"H": 0, "H+A": 0, "H+R": 0, "H+A+R": 0}
-    phi = {"H": 1.00, "H+A": 0.75, "H+R": 0.70, "H+A+R": 0.55}
+    w = WORKED
+    counts = {name: 0 for name in MODES}
     delivered = 0.0
-    for (task_id, mode), value in solved.assignment.items():
+    for (_task_id, mode), value in solved.assignment.items():
         if value and value > 0.5:
             counts[mode] += 1
-            delivered += 8.0 * phi[mode]
+            delivered += w["ell_i"] * MODES[mode].credited
 
-    assert counts["H"] + counts["H+R"] >= N_TASKS - 1
-    assert counts["H+A+R"] <= 1
+    active = counts[w["mode_lo"]] + counts[w["mode_hi"]]
+    assert active >= N_TASKS - 2, counts
+    # H+A+R/a0 maximizes SCV but credits no practice at all, so the budget
+    # should keep it almost entirely out of the solution.
+    assert counts[w["mode_unc"]] <= 2, counts
+    assert delivered >= scaled_budget - 1e-6
 
-    hcpb = HCPBParameters(N_k=24, r_k=0.12, h_k=600, eta_k=1.2, B_k_min=1200)
-    budget = capability_budget(hcpb) / 340 * N_TASKS
-    assert delivered >= budget - 1e-6
+
+def test_the_budget_binds(solved, scaled_budget):
+    """The constraint is what makes the instance interesting: it should be
+    tight, not slack, which is why it carries a non-zero price."""
+    w = WORKED
+    delivered = sum(
+        w["ell_i"] * MODES[mode].credited
+        for (_t, mode), value in solved.assignment.items()
+        if value and value > 0.5
+    )
+    # Tight to within one task's developmental credit.
+    assert delivered - scaled_budget < w["ell_i"] * MODES[w["mode_lo"]].credited
 
 
 def test_dual_price_reproduces_worked_example(solved):
-    assert solved.lambda_k[DOMAIN] == pytest.approx(0.0250, abs=2e-3)
+    """eq:lambdaworked: the general solver recovers 0.0454 objective units per
+    qualified-practice hour, the same price the hand-rolled LP in tests/smoke
+    and scripts/verify_worked_example.py obtain."""
+    assert solved.lambda_k[DOMAIN] == pytest.approx(0.045353, abs=2e-3)
 
 
 def test_objective_value_scales_with_task_count(solved):
-    # 116.1 units/yr at 340 tasks (Paper Sec. 5.3) scales linearly with
-    # task count since every task carries the same SCV structure.
-    expected = 116.1 * N_TASKS / 340
-    assert solved.objective_value == pytest.approx(expected, rel=0.1)
+    """sec:costs reports 688.3 objective units a year over 2,100 tasks; every
+    task carries the same SCV structure, so the total scales linearly."""
+    expected = 688.3 * N_TASKS / WORKED["n_k"]
+    assert solved.objective_value == pytest.approx(expected, rel=0.05)

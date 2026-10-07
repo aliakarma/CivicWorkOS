@@ -6,7 +6,7 @@ governance configuration, decide the execution mode. It uses the
 [INVENTED] HeuristicMarket (civicworkos.market.agents) as the estimator
 backend by default -- see that module's docstring for what it is and is
 not. For the paper-traceable worked example, use
-scripts/verify_worked_example.py instead, which uses the literal Table 3
+scripts/verify_worked_example.py instead, which uses the literal tab:worked-terms
 values rather than this heuristic estimator.
 
 Usage:
@@ -80,7 +80,7 @@ def main() -> int:
         worker_groups={domain: domain_cfg.groups},
         score_weights=score_weights,
         debt_weights=debt_weights,
-        duals=Duals(lambda_k={domain: 0.0250}, rebalance_timestamp=datetime.now(timezone.utc)),
+        duals=Duals(lambda_k={domain: 0.045353}, rebalance_timestamp=datetime.now(timezone.utc)),
         audit_store=EvidentiaryRecordStore(),
         feedback_bus=FeedbackBus(),
         config_version=weights.version,
@@ -89,11 +89,11 @@ def main() -> int:
 
     # A moderate-risk demo task (deliberately NOT the worked example's
     # high-risk/high-criticality profile, which was calibrated against
-    # the paper's literal Table 3 estimates -- see
+    # the paper's literal tab:worked-terms estimates -- see
     # scripts/verify_worked_example.py). Combined with the invented
     # HeuristicMarket and default_safety_floor(), a high-risk task here
     # can legitimately route every mode below the safety floor and fall
-    # back to Z4; that is the framework doing what Fig. 2 says it should
+    # back to Z4; that is the framework doing what fig:workflow says it should
     # ("either filtering stage may empty the candidate set"), not a bug.
     task = TaskProfile(
         task_id="demo-task-1", service=service, domain=domain,

@@ -3,7 +3,7 @@
 The literal YAML string "UNSET" is parsed into the `Unset` sentinel, not
 into `None` or a numeric default -- so a panel that has not yet set
 theta_{k,g} or tau_g gets a flagged, unbound constraint rather than a
-silently-defaulted one (Paper Sec. 5.1; see schema.py's docstring).
+silently-defaulted one (Paper sec:feedback; see schema.py's docstring).
 """
 
 from __future__ import annotations

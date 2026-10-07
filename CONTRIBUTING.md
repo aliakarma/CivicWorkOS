@@ -18,18 +18,34 @@ style preference.**
    ```
    python scripts/verify_worked_example.py
    ```
-   Every number it prints must still reproduce the paper's Sec. 5.3 worked
-   example and Sec. 7.1 / Fig. 3 analytic model. A change that breaks this
+   Every number it prints must still reproduce the paper's sec:worked worked
+   example and sec:cadmodel / fig:cad-trend analytic model. A change that breaks this
    check is a regression regardless of what else it improves.
+
+## How this repository cites the article
+
+Docstrings and documentation refer to the manuscript by its **LaTeX label** --
+`sec:worked`, `eq:cad`, `tab:cadparams`, `fig:cad-trend`, `prop:intake` -- and
+never by section or equation number. Labels are stable across revisions;
+numbers are not. The repository twice ended up documenting a paper that no
+longer existed because section and equation numbers had moved underneath it, so
+numbered citations are now treated as a defect. Every label cited here resolves
+in `Paper/Frontiers/CivicWorkOS.tex`, and `Paper/Frontiers/check.sh` fails the
+build if one does not.
+
+References to **"the pre-release audit"** mean an internal review of this
+implementation against the manuscript, conducted before release. It is not
+distributed with the repository, so it is cited by name rather than by section
+number; the design rationale it prompted is recorded inline where it applies and
+in `docs/assumptions.md`.
 
 ## Rules for equation-level code
 
-- **Do not silently change the form of an equation** (Eq. 1-21 in
+- **Do not silently change the form of an equation** (every numbered equation in
   `src/civicworkos/`) to make it easier to implement. If the paper's form is
-  genuinely ambiguous or broken (see `docs/assumptions.md` and the source
-  `PROJECT_REPORT.md` §20 for the ones already found), document the
-  discrepancy and the fix in the same PR, in both the code docstring and
-  `docs/assumptions.md`.
+  genuinely ambiguous or broken (see `docs/assumptions.md` for the ones
+  already found), document the discrepancy and the fix in the same PR, in
+  both the code docstring and `docs/assumptions.md`.
 - **Label every invention.** If you add a computation the paper does not
   specify (an estimator, a default parameter, a linearization), mark it
   `[INVENTED]` or `[REC]` in the docstring, in the same style as
@@ -47,7 +63,7 @@ style preference.**
   green.
 - New behavior needs a unit test; new cross-module wiring needs an
   integration test. See `tests/unit/test_admissibility.py` for the style
-  expected of anything touching Eq. 18 — both feasibility-restoration
+  expected of anything touching eq:admis — both feasibility-restoration
   branches must stay explicitly exercised.
 - Run the full suite before opening a PR:
   ```
@@ -63,7 +79,7 @@ do not add:
 - A database, message broker, or web framework the paper does not require
   (see `docs/architecture.md` for what is and isn't justified).
 - A machine-learning model. The paper contains exactly one optional,
-  unspecified learned surrogate (Sec. 6.4) and nothing else is trained —
+  unspecified learned surrogate (sec:weights) and nothing else is trained —
   see `docs/training.md`.
 - Fabricated experimental results. `civicworkos.sim` runs on synthetic,
   clearly-labeled demo data; it must never be extended to imply it
@@ -72,8 +88,8 @@ do not add:
 ## Commit / PR style
 
 - Reference the specific paper section or equation your change touches
-  (e.g. "Eq. 11", "Sec. 4.5") in the PR description.
+  (e.g. "eq:access", "sec:online") in the PR description.
 - If you change a governance-artifact config under `configs/weights/` or
   `configs/domains/`, bump its `version` and `effective_date` fields rather
   than editing in place — these are modeled as signed policy acts
-  (Paper Sec. 5.1), not code constants.
+  (Paper sec:feedback), not code constants.

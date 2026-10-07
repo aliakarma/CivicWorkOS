@@ -19,4 +19,4 @@ package had to invent something the paper left unspecified.
 __version__ = "0.1.0"
 
 MODES = ("H", "A", "R", "H+A", "H+R", "A+R", "H+A+R")
-"""The seven execution modes of Paper Eq. 1: M = {H, A, R, H+A, H+R, A+R, H+A+R}."""
+"""The seven execution modes of Paper eq:modeset: M = {H, A, R, H+A, H+R, A+R, H+A+R}."""

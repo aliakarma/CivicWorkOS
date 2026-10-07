@@ -1,8 +1,21 @@
 from civicworkos.analytic.debt_model import (
-    FIG3_STRATEGIES,
-    StrategyDebtParameters,
+    CAD_COMPONENTS,
+    ComponentDebtParameters,
     accumulated_debt,
+    bounded_ceiling,
+    component_debt,
     delivery_fraction,
+    residual_slope,
+    strategy_from_table,
 )
 
-__all__ = ["FIG3_STRATEGIES", "StrategyDebtParameters", "accumulated_debt", "delivery_fraction"]
+__all__ = [
+    "CAD_COMPONENTS",
+    "ComponentDebtParameters",
+    "accumulated_debt",
+    "bounded_ceiling",
+    "component_debt",
+    "delivery_fraction",
+    "residual_slope",
+    "strategy_from_table",
+]

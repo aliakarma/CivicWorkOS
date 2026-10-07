@@ -2,11 +2,11 @@
 
 **A Capability-Preserving, Policy-Aware Multi-Agent Framework for Human–AI–Robot Work Allocation and Distributional Accountability in the AI City**
 
-Author reference implementation of the theoretical framework by Toqeer Ali Syed, Ali Akarma, Shahid Kamal, Salman Jan, Ahmad B. Alkhodre, and Arshad Jamal (*Frontiers*, Hypothesis and Theory).
+Author reference implementation of the theoretical framework by Toqeer Ali Syed, Ali Akarma, Raghda M. Alqurashi, Muhammad Tayyab Naqash, and Abdulaziz Alqurashi (*Frontiers*, Hypothesis and Theory).
 
 [![CI](https://img.shields.io/badge/CI-passing-brightgreen)](.github/workflows/ci.yml)
 [![Python 3.10 | 3.11 | 3.12](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue)](pyproject.toml)
-[![Tests](https://img.shields.io/badge/Tests-164%20passed-success)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-196%20passed-success)](tests/)
 [![Type Checking: mypy](https://img.shields.io/badge/Type%20Checking-mypy%20clean-blue)](pyproject.toml)
 [![Linting: ruff](https://img.shields.io/badge/Linting-ruff-black)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -15,11 +15,11 @@ Author reference implementation of the theoretical framework by Toqeer Ali Syed,
 > [!IMPORTANT]
 > **Author-provided reference implementation.** This repository is maintained by **Ali Akarma**, a co-author of the manuscript, to translate the theoretical mathematics, the mixed-integer programming (MIP) formulation, and the online Lagrangian allocation rule of *CivicWorkOS* into an executable, independently verifiable research software package.
 >
-> As stated in the manuscript's Data Availability Statement, this *Hypothesis and Theory* article presents a normative theoretical architecture and reports **no dataset and no measured empirical result**. This repository recomputes every checkable number the article publishes — the §5.3 worked example and the §7.1 / Fig. 3 closed-form debt model — and reports the agreement explicitly, check by check, in [Verification Against the Published Worked Example](#verification-against-the-published-worked-example).
+> As stated in the manuscript's Data Availability Statement, this *Hypothesis and Theory* article presents a normative theoretical architecture and reports **no dataset and no measured empirical result**. This repository recomputes every checkable number the article publishes — the worked bridge-inspection allocation of sec:worked and the per-component debt trajectory of sec:cadmodel / fig:cad-trend — and reports the agreement explicitly, check by check, in [Verification Against the Published Worked Example](#verification-against-the-published-worked-example). Every manuscript value used in those checks is imported from a single definition, never restated here.
 >
 > Everything under [`sim/`](sim/) runs on **clearly labelled synthetic demonstration data**. It exercises the protocol's software shape and must never be cited as empirical municipal validation. See [docs/reproducibility.md](docs/reproducibility.md).
 >
-> **The evaluation protocol specified in the article has not been executed.** The article specifies it in full — six sectors, a ten-year horizon, thirty paired seeds, six strategies, and ten hypotheses with refutation criteria — so that the evaluation is fixed in advance and auditable. No outcome of it is reported anywhere, in the article or here. The article's evidence is the worked bridge-inspection allocation, its sensitivity frontier, its two parameter shocks, and the closed-form debt model, all of which are exact arithmetic reproducible from the published values.
+> **The evaluation protocol specified in the article has not been executed.** The article specifies it in full — six sectors, a ten-year horizon, thirty paired seeds, six strategies, and ten hypotheses with refutation criteria — so that the evaluation is fixed in advance and auditable. No outcome of it is reported anywhere, in the article or here. The article's evidence is the worked bridge-inspection allocation, its sensitivity frontier, its two parameter shocks, and the debt trajectory, all of which are exact arithmetic reproducible from the published values. The article cites this repository for that reproduction and for nothing else.
 
 ---
 
@@ -83,11 +83,11 @@ Cities are moving from passive sensing-and-analytics infrastructure toward auton
 
 ### Seven Execution Modes
 
-Every candidate task $i$ is evaluated across the seven execution modes of Eq. 1, enumerated in [`civicworkos.MODES`](src/civicworkos/__init__.py):
+Every candidate task $i$ is evaluated across the seven execution modes of eq:modeset, enumerated in [`civicworkos.MODES`](src/civicworkos/__init__.py):
 
 $$\mathcal{M} = \lbrace H,\; A,\; R,\; H{+}A,\; H{+}R,\; A{+}R,\; H{+}A{+}R \rbrace$$
 
-Each mode carries a **human developmental share** $\phi_m \in [0,1]$ (Eq. 7) — the fraction of the task's developmental content that accrues as qualified human practice.
+Each mode carries a **human developmental share** $\phi_m \in [0,1]$ (eq:phi) — the fraction of the task's developmental content that accrues as qualified human practice.
 
 | Mode | Composition | Operational description | $\phi_m$ |
 | :--- | :--- | :--- | :---: |
@@ -100,7 +100,7 @@ Each mode carries a **human developmental share** $\phi_m \in [0,1]$ (Eq. 7) —
 | **`H+A+R`** | Full hybrid | Tripartite team: human oversight, AI analysis, robot execution | $0.30$ — supervisory practice |
 
 > [!NOTE]
-> The four pure-mode values are fixed by Eq. 7 and hard-coded in [`constraints/hcpb.py`](src/civicworkos/constraints/hcpb.py). The three **hybrid** shares are deliberately *not* defaulted inside the fidelity modules: `phi_for_mode()` raises `KeyError` unless a domain configuration supplies them, because the manuscript specifies no elicitation instrument (see [docs/assumptions.md](docs/assumptions.md), A3). The values currently shipped in [`configs/domains/structural_inspection.yaml`](configs/domains/structural_inspection.yaml) differ from this table — see [Manuscript and Implementation Divergences](#manuscript-and-implementation-divergences).
+> The four pure-mode values are fixed by eq:phi and hard-coded in [`constraints/hcpb.py`](src/civicworkos/constraints/hcpb.py). The three **hybrid** shares are deliberately *not* defaulted inside the fidelity modules: `phi_for_mode()` raises `KeyError` unless a domain configuration supplies them, because the manuscript specifies no elicitation instrument (see [docs/assumptions.md](docs/assumptions.md), A3). The values currently shipped in [`configs/domains/structural_inspection.yaml`](configs/domains/structural_inspection.yaml) differ from this table — see [Manuscript and Implementation Divergences](#manuscript-and-implementation-divergences).
 
 ### Four Adaptive Oversight Zones
 
@@ -126,17 +126,17 @@ $Z_4$ is also the **terminal fallback**: when Algorithm 1's admissible set empti
 
 ### Task Encoding and Developmental Content
 
-A task is encoded as a nine-dimensional demand vector plus an expected duration (Eq. 3), implemented as [`TaskProfile`](src/civicworkos/twin/task.py):
+A task is encoded as a nine-dimensional demand vector plus an expected duration (eq:task), implemented as [`TaskProfile`](src/civicworkos/twin/task.py):
 
 $$T_i = \lbrace \mathrm{cog}_i, \mathrm{phy}_i, \mathrm{emp}_i, \mathrm{risk}_i, \mathrm{auth}_i, \mathrm{priv}_i, \mathrm{urg}_i, \mathrm{learn}_i, \mathrm{crit}_i ;\, d_i \rbrace$$
 
-Eq. 4 performs the framework's central unit conversion, turning a normative judgement about developmental value into a budgetable quantity in hours:
+eq:ell performs the framework's central unit conversion, turning a normative judgement about developmental value into a budgetable quantity in hours:
 
 $$\ell_i = \mathrm{learn}_i \cdot d_i \qquad \textsf{[qualified-practice hours]}$$
 
 ### Civic Automation Debt
 
-CAD (Eq. 2) prices, as one scalar in $[0,1]$, the deferred institutional, legal, and workforce liability a mode creates:
+CAD (eq:cad) prices, as one scalar in $[0,1]$, the deferred institutional, legal, and workforce liability a mode creates:
 
 $$\mathrm{CAD}_{i,m} = \alpha D_{\mathrm{skill}} + \beta D_{\mathrm{fall}} + \gamma D_{\mathrm{acct}} + \delta D_{\mathrm{dep}} + \varepsilon D_{\mathrm{trans}}, \qquad \alpha + \beta + \gamma + \delta + \varepsilon = 1$$
 
@@ -148,11 +148,11 @@ $$\mathrm{CAD}_{i,m} = \alpha D_{\mathrm{skill}} + \beta D_{\mathrm{fall}} + \ga
 | **Vendor dependency** | $D_{\mathrm{dep}}$ | Proprietary lock-in and municipal infrastructure capture | $\delta = 0.12$ |
 | **Labour transition** | $D_{\mathrm{trans}}$ | Worker displacement outpacing natural workforce attrition | $\varepsilon = 0.20$ |
 
-Only $D_{\mathrm{skill}}$ is defined by the manuscript as a computation, $D_{\mathrm{skill}} = 1 - \phi_m$ (Eq. 7). The other four are defined in prose only; this repository supplies deterministic, explicitly labelled proxy estimators in [`market/agents.py`](src/civicworkos/market/agents.py) (assumption A1).
+Only $D_{\mathrm{skill}}$ is defined by the manuscript as a computation, $D_{\mathrm{skill}} = 1 - \phi_m$ (eq:phi). The other four are defined in prose only; this repository supplies deterministic, explicitly labelled proxy estimators in [`market/agents.py`](src/civicworkos/market/agents.py) (assumption A1).
 
 ### Sustainable Civic Value
 
-The per-task objective (Eq. 15) rewards five operational terms and penalises four, placing the single largest weight on Civic Automation Debt:
+The per-task objective (eq:scv) rewards five operational terms and penalises four, placing the single largest weight on Civic Automation Debt:
 
 $$\mathrm{SCV}_{i,m} = w_1 Q + w_2 S + w_3 P + w_4 \mathrm{Eq}_{\mathrm{srv}} + w_5 \mathrm{Tr} - w_6 \mathrm{Cost} - w_7 \mathrm{En} - w_8 \mathrm{Pr} - w_9 \mathrm{CAD}_{i,m}$$
 
@@ -179,23 +179,23 @@ At $w_9 = 0.22$, debt mitigation carries the largest single weight in the defaul
 
 Four hard constraints bound the admissible dispatch space.
 
-**1 — Human Capability Preservation Budget (HCPB), Eq. 8–9.** An annual floor $B_k$ on qualified human practice hours in capability domain $k$:
+**1 — Human Capability Preservation Budget (HCPB), eq:hcpb and eq:hcpb-estimator.** An annual floor $B_k$ on qualified human practice hours in capability domain $k$:
 
 $$\sum_{i \in \mathcal{T}_k(\Delta T)} \sum_{m} x_{i,m} \, \ell_i \, \phi_m \;\ge\; B_k(t), \qquad B_k(t) = \max\left( B_k^{\min},\; \eta_k N_k(t) \, r_k(t) \, h_k \right)$$
 
 This bounds a *volume of practice hours*, not a headcount. The dimensional identity $N_k \cdot r_k \cdot h_k = \textsf{people} \times \textsf{period}^{-1} \times \textsf{hours/person} = \textsf{hours/period}$ is asserted in [`capability_budget()`](src/civicworkos/constraints/hcpb.py) and unit-tested.
 
-**2 — Capability Access Constraint, Eq. 10–11.** Eq. 8 decides *how much* developmental work is protected; Eq. 11 decides *who receives it*:
+**2 — Capability Access Constraint, eq:accessshare and eq:access.** eq:hcpb decides *how much* developmental work is protected; eq:access decides *who receives it*:
 
 $$\Pi_{k,g} = \frac{\sum_i \sum_m x_{i,m} \ell_i \phi_m \cdot \mathbb{1}\lbrace \mathrm{assignee}(i,m) \in g \rbrace}{\sum_i \sum_m x_{i,m} \ell_i \phi_m}, \qquad \Pi_{k,g} \ge \theta_{k,g} - \epsilon_k \quad \forall g \in \mathcal{G}$$
 
 $\theta_{k,g}$ is a target the oversight panel publishes — explicitly **not** the incumbent share. Without this constraint, a budget sized from incumbent headcount allocates protected practice in proportion to who already holds the posts, so the mechanism designed to protect workers would instead protect incumbents.
 
-**3 — Just Transition Constraint, Eq. 12.** Caps displacement per period and floors reskilling provision:
+**3 — Just Transition Constraint, eq:justtransition.** Caps displacement per period and floors reskilling provision:
 
 $$\Delta_g(t, t + \Delta T) \le \tau_g \quad \textsf{and} \quad \chi_g \ge \chi^{\min} \qquad \forall g \in \mathcal{G}$$
 
-**4 — Reversibility and Resilience (3R) Reserve, Eq. 13–14.** The N-1 / N-2 criterion from reliability engineering, applied to a mixed workforce of humans, AI agents, and robots:
+**4 — Reversibility and Resilience (3R) Reserve, eq:cs and eq:res3r.** The N-1 / N-2 criterion from reliability engineering, applied to a mixed workforce of humans, AI agents, and robots:
 
 $$\mathrm{Res}^{(n)}_s(t) = C_s(t) - \sum_{c \in \mathcal{C}^{(n)}_s(t)} C_{s,c}(t), \qquad \mathrm{Res}^{(n_s)}_s(t) \ge \rho_s = \kappa_s D^{\mathrm{peak}}_s$$
 
@@ -203,7 +203,7 @@ The threshold is measured against **peak demand**, not against the lost componen
 
 ### Online Allocation Rule
 
-Algorithm 1 (Eq. 17–19) dispatches a single task in real time using the shadow prices published by the most recent city-wide rebalance. The augmented score adds the Lagrangian value of the constraints each mode relieves:
+Algorithm 1 (eq:aug, eq:admis and eq:argmax) dispatches a single task in real time using the shadow prices published by the most recent city-wide rebalance. The augmented score adds the Lagrangian value of the constraints each mode relieves:
 
 $$\widetilde{\mathrm{SCV}}_{i,m} = \mathrm{SCV}_{i,m} + \lambda_{k(i)} \ell_i \phi_m + \mu_{s(i)} \Delta^{\mathrm{res}}_{s(i)}(m) + \nu_{k(i),g(i,m)} \ell_i \phi_m$$
 
@@ -211,70 +211,117 @@ $$m^{*}_i = \arg\max_{m \, \in \, \mathcal{A}(i,t)} \widetilde{\mathrm{SCV}}_{i,
 
 The dual $\lambda_k$ is *"literally what one hour of qualified practice in domain $k$ is worth to the city"* — a published, auditable price rather than an internal tuning constant.
 
-Admissibility (Eq. 18) is **not** a naive per-constraint filter. Each clause reads: *leave the constraint satisfied, **or** — if it is already violated — do not worsen it and contribute to restoring it.* Testing the constraints as literally written inside a loop over $m$ would remove either every candidate or none, and a city already below threshold would route every task to $Z_4$ — including the robot allocations that would free the human capacity needed to climb back above threshold. Both feasibility-restoration branches are exercised explicitly in [`tests/unit/test_admissibility.py`](tests/unit/test_admissibility.py) so the property cannot regress silently.
+Admissibility (eq:admis) is **not** a naive per-constraint filter. Each clause reads: *leave the constraint satisfied, **or** — if it is already violated — do not worsen it and contribute to restoring it.* Testing the constraints as literally written inside a loop over $m$ would remove either every candidate or none, and a city already below threshold would route every task to $Z_4$ — including the robot allocations that would free the human capacity needed to climb back above threshold. Both feasibility-restoration branches are exercised explicitly in [`tests/unit/test_admissibility.py`](tests/unit/test_admissibility.py) so the property cannot regress silently.
 
-The Policy Digital Twin returns the four-valued status of Eq. 6 — `allow`, `allow_with_oversight`, `restrict`, `prohibit` — and the **most restrictive** status governs when several rules apply to the same task–mode pair.
+The Policy Digital Twin returns the four-valued status of eq:policy — `allow`, `allow_with_oversight`, `restrict`, `prohibit` — and the **most restrictive** status governs when several rules apply to the same task–mode pair.
 
 ---
 
 ## Verification Against the Published Worked Example
 
-[`scripts/verify_worked_example.py`](scripts/verify_worked_example.py) recomputes every checkable number in §5.3 (bridge-inspection allocation over 340 candidate tasks) and §7.1 / Fig. 3 (the closed-form debt model), and exits non-zero if any check fails. It is the repository's ground-truth oracle and the **first gate in CI**.
+[`scripts/verify_worked_example.py`](scripts/verify_worked_example.py) recomputes every checkable number in sec:worked (the bridge-inspection allocation over 2,100 annual inspections) and sec:cadmodel / fig:cad-trend (the per-component debt trajectory), and exits non-zero if any check fails. It is the repository's ground-truth oracle and the **first gate in CI**.
 
 ```bash
 python scripts/verify_worked_example.py
 ```
 
-Tolerances are set **per check**, not globally: structural quantities that should be exact are checked at $10^{-6}$, while annual aggregates expressed in hours-scaled units are checked at $0.5$. The table below reports the paper's published value, the value this repository computes, the tolerance applied, and the observed deviation.
+It prints 82 checks and a one-line verdict. Tolerances are set **per check**, not globally: structural quantities that should be exact are checked at $10^{-6}$, values the article prints to four decimals at $10^{-4}$, and annual aggregates in objective units at $0.05$.
 
-#### §5.3 — Mode scoring
+> [!NOTE]
+> **Every manuscript input comes from one definition.** The script and the test suite import from [`manuscript_values.py`](manuscript_values.py), which re-exports the constants in `Paper/Frontiers/audit_numbers.py` — the same file that gates the manuscript's own arithmetic. Earlier releases kept a second copy here, the article moved, and the copy did not: the oracle verified `B_k = 2073.6` against a paper that computes `4976.64`, and exited 0 while doing so. There is now exactly one place where a manuscript value is written down.
 
-| Quantity | Paper | Computed | Tolerance | Deviation |
+#### sec:worked — the eight staffed modes (tab:worked-terms)
+
+The unit the article scores is a *staffed mode*: an execution mode paired with a named roster at a declared career stage, written `H+A+R/a1`. The stage is not decoration — it fixes $\psi_a$, the developmental eligibility, and so fixes the credited share $\phi_m\psi_a$ that $D^{skill}$ is defined against.
+
+| Staffed mode | CAD (paper) | CAD (computed) | SCV (paper) | SCV (computed) |
 | :--- | ---: | ---: | ---: | ---: |
-| $\mathrm{CAD}(H)$ | 0.0000 | 0.000000 | $5\times10^{-3}$ | exact |
-| $\mathrm{CAD}(H{+}A)$ | 0.1716 | 0.171600 | $5\times10^{-3}$ | exact |
-| $\mathrm{CAD}(H{+}R)$ | 0.2300 | 0.230000 | $5\times10^{-3}$ | exact |
-| $\mathrm{CAD}(H{+}A{+}R)$ | 0.3464 | 0.346400 | $5\times10^{-3}$ | exact |
-| $\mathrm{SCV}(H)$ | 0.2940 | 0.294000 | $5\times10^{-3}$ | exact |
-| $\mathrm{SCV}(H{+}A)$ | 0.3245 | 0.324548 | $5\times10^{-3}$ | $4.8\times10^{-5}$ |
-| $\mathrm{SCV}(H{+}R)$ | 0.3539 | 0.353900 | $5\times10^{-3}$ | exact |
-| $\mathrm{SCV}(H{+}A{+}R)$ | 0.3765 | 0.376492 | $5\times10^{-3}$ | $8\times10^{-6}$ |
+| `H/a0` | 0.2800 | 0.280000 | 0.2324 | 0.232400 |
+| `H/a1` | 0.1400 | 0.140000 | 0.2391 | 0.239100 |
+| `H+A/a0` | 0.3816 | 0.381600 | 0.2783 | 0.278348 |
+| `H+A/a1` | 0.2766 | 0.276600 | 0.2773 | 0.277348 |
+| `H+R/a0` | 0.4260 | 0.426000 | 0.3108 | 0.310780 |
+| `H+R/a1` | 0.3280 | 0.328000 | 0.3082 | 0.308240 |
+| `H+A+R/a0` | 0.5004 | 0.500400 | 0.3426 | 0.342612 |
+| `H+A+R/a1` | 0.4234 | 0.423400 | 0.3355 | 0.335452 |
 
-#### §5.3 — Capability budget and constrained optimum
+`H+A+R/a0` is the unconstrained winner at $\mathrm{SCV} = 0.34261$ — and it credits no developmental practice whatsoever, which is the tension the rest of the instance resolves.
 
-| Quantity | Paper | Computed | Tolerance | Deviation |
+#### sec:worked — capability budget and constrained optimum
+
+| Quantity | Paper | Computed | Tolerance |
+| :--- | ---: | ---: | ---: |
+| $h_k$, qualified-practice hours to competence (eq:hconv) | 1440 h | 1440.000000 | $10^{-6}$ |
+| $\Phi_k = n_k \ell_i$, annual developmental content | 16800 h | 16800.000000 | $10^{-6}$ |
+| HCPB annual budget $B_k$ (eq:bkworked) | 4976.64 h | 4976.640000 | $10^{-6}$ |
+| Required mean credited share | 0.2962 | 0.296229 | $10^{-4}$ |
+| $\Phi_k\bar\zeta_k$, roster-guard ceiling (prop:feasibility) | 5880 h | 5880.000000 | $10^{-6}$ |
+| Mix share on `H+R/a1` | 0.2830 | 0.282667 | $5\times10^{-4}$ |
+| Mix share on `H+A+R/a1` | 0.7170 | 0.717333 | $5\times10^{-4}$ |
+| Share on each of the other six modes | 0.0000 | 0.000000 | $10^{-6}$ |
+| Constrained mean SCV | 0.327750 | 0.327750 | $10^{-5}$ |
+| Hours delivered by 594 tasks on the lead-only roster | 4976.40 h | 4976.400000 | $10^{-6}$ |
+| Hours delivered by 595 tasks | 4977.00 h | 4977.000000 | $10^{-6}$ |
+
+The budget straddles an integer boundary: 594 tasks on the lead-only roster fall 0.24 hours short, so the integer optimum is 595.
+
+#### eq:lambdaworked — the capability price, and the ranking reversal
+
+| Quantity | Paper | Computed | Tolerance |
+| :--- | ---: | ---: | ---: |
+| $\lambda_k$, from the LP dual | 0.045353 | 0.045353 | $10^{-6}$ |
+| $\lambda_k$ at the quoted four decimals | 0.0454 | 0.045400 | $10^{-9}$ |
+| $\widetilde{\mathrm{SCV}}$(`H+R/a1`) (eq:augworked) | 0.435229 | 0.435229 | $10^{-6}$ |
+| $\widetilde{\mathrm{SCV}}$(`H+A+R/a1`) | 0.435229 | 0.435229 | $10^{-6}$ |
+| $\widetilde{\mathrm{SCV}}$(`H+A+R/a0`), the unconstrained winner | 0.3426 | 0.342612 | $10^{-4}$ |
+
+The tie between the two active modes is **exact**, not approximate, because $\lambda_k$ is *defined* by it. Both beat the unconstrained winner once practice is priced, which is the mechanism the framework exists to produce. The same dual is recovered independently by the general MIP builder in [`tests/integration/test_rebalance_solver.py`](tests/integration/test_rebalance_solver.py), through a different code path.
+
+#### sec:costs and sec:pipeline — what preservation costs, and the intake requirement
+
+| Quantity | Paper | Computed | Tolerance |
+| :--- | ---: | ---: | ---: |
+| Unconstrained annual objective | 719.5 | 719.485200 | $0.05$ |
+| Constrained annual objective | 688.3 | 688.274387 | $0.05$ |
+| Relative cost of preservation | 4.34 % | 4.3379 % | $5\times10^{-5}$ |
+| Competent-equivalents formed per year | 3.456 | 3.456000 | $10^{-6}$ |
+| Annual attrition in practitioners | 2.88 | 2.880000 | $10^{-9}$ |
+| $\bar\phi_k$ at the optimum | 0.5925 | 0.592457 | $5\times10^{-5}$ |
+| $\tau_k$, years to competence (eq:tauworked) | 4.05 | 4.050926 | $5\times10^{-3}$ |
+| Certification-implied duration $h^{raw}_k/\Theta_k$ | 1.20 | 1.200000 | $10^{-9}$ |
+| Dilution factor | 3.38 | 3.375772 | $5\times10^{-3}$ |
+| Intake requirement $\hat{n}_k$ (eq:intakeworked) | 14.0 | 14.000000 | $5\times10^{-2}$ |
+| $\hat{n}_k$, independent route (trainee hours / $\Theta_k$) | 14.0 | 14.000000 | $10^{-9}$ |
+| Naive intake from the certification figure | 4 | 4.147200 | $0.15$ |
+| Composition-blind hours to the group | 622 h | 622.080000 | $0.1$ |
+| Hours under the access constraint | 1344 h | 1343.692800 | $0.5$ |
+| Access multiplier | 2.16$\times$ | 2.160000 | $5\times10^{-3}$ |
+
+The intake result is the article's most citable, and it is reproduced here by two independent routes. Machine-assisted supervised practice dilutes a trainee's qualifying hours, so time to competence stretches from the 1.2 years the certification requirement implies to 4.05 — and a city sizing intake from certification hours provisions **four** trainee posts where **fourteen** are required.
+
+#### sec:cadmodel / fig:cad-trend — the debt trajectory
+
+eq:cadmodel sums over the **five** debt components, each with its own asymptote and time constant:
+
+$$C(t) = \sum_j w_j c_j \left[ (1 - \pi_{j,\infty}) t + \pi_{j,\infty} \tau_j (1 - e^{-t/\tau_j}) \right]$$
+
+Earlier releases of this repository implemented a single-scalar $\pi(t)$, which is $D^{skill}$ and nothing else, and plotted it as though it were CAD. The manuscript now models all five, and `civicworkos.analytic.debt_model` follows it. The parameters come from tab:cadparams, so every plotted point is recoverable by substitution:
+
+| Strategy | Residual slope (paper) | Computed | $C(10)$ (paper) | Computed |
 | :--- | ---: | ---: | ---: | ---: |
-| HCPB annual budget $B_k$ | 2073.6 h | 2073.600000 h | $10^{-6}$ | exact |
-| Total developmental content | 2720 h | 2720.000000 h | $5\times10^{-4}$ | exact |
-| Required mean practice $\bar{\phi}$ | 0.762 | 0.762353 | $10^{-3}$ | $3.5\times10^{-4}$ |
-| Optimal mix share, $H$ | 0.208 | 0.207843 | $2\times10^{-3}$ | $1.6\times10^{-4}$ |
-| Optimal mix share, $H{+}R$ | 0.792 | 0.792157 | $2\times10^{-3}$ | $1.6\times10^{-4}$ |
-| Optimal mix share, $H{+}A$ | 0.000 | 0.000000 | $10^{-6}$ | exact |
-| Optimal mix share, $H{+}A{+}R$ | 0.000 | 0.000000 | $10^{-6}$ | exact |
-| Active dual $\lambda_k$ | 0.0250 | 0.024958 | $2\times10^{-3}$ | $4.2\times10^{-5}$ |
-| $\widetilde{\mathrm{SCV}}(H)$ | 0.4937 | 0.493667 | $3\times10^{-3}$ | $3.3\times10^{-5}$ |
-| $\widetilde{\mathrm{SCV}}(H{+}R)$ | 0.4937 | 0.493667 | $3\times10^{-3}$ | $3.3\times10^{-5}$ |
-| $\widetilde{\mathrm{SCV}}(H{+}A{+}R)$ | 0.4863 | 0.486309 | $3\times10^{-3}$ | $9\times10^{-6}$ |
-| Unconstrained annual value | 128.0 | 128.007280 | $0.5$ | $7.3\times10^{-3}$ |
-| Constrained annual value | 116.1 | 116.093067 | $0.5$ | $6.9\times10^{-3}$ |
-| Annual objective trade-off | 9.3 % | 9.307450 % | $0.3$ | $7.5\times10^{-3}$ |
-
-The optimality tie $\widetilde{\mathrm{SCV}}(H) = \widetilde{\mathrm{SCV}}(H{+}R) = 0.493667$ is reproduced to within $10^{-6}$, confirming that the published $\lambda_k$ is precisely the shadow price at which the two modes become indifferent.
-
-#### §7.1 / Fig. 3 — Analytic debt model
-
-Eq. 21 admits the closed form $C(t) = c_0 \left[ (1 - \pi_\infty) t + \pi_\infty \tau (1 - e^{-t/\tau}) \right]$, evaluated at $t = 10$ for the five captioned parameter sets:
-
-| Strategy | Closed form $C(10)$ | Computed | Tolerance | Deviation |
-| :--- | ---: | ---: | ---: | ---: |
-| `automation_first` | 100.0 | 100.000000 | $0.5$ | exact |
-| `cost_performance` | 110.0 | 110.000000 | $0.5$ | exact |
-| `capability_matching` | 65.0 | 65.000000 | $0.5$ | exact |
-| `civicworkos` | 28.929780 | 28.929780 | $0.5$ | exact |
-| `human_first` | 5.0 | 5.000000 | $0.5$ | exact |
+| Automation-First | 10.00 | 10.000000 | 100.00 | 100.000000 |
+| Cost/Performance | 11.44 | 11.440000 | 114.40 | 114.400000 |
+| Capability Matching | 8.36 | 8.360000 | 88.54 | 88.544098 |
+| Ergonomics-Aware Role Allocation | 7.89 | 7.890000 | 85.02 | 85.018650 |
+| Human-First | 2.38 | 2.380000 | 28.96 | 28.956997 |
+| **CivicWorkOS** | **1.45** | **1.450000** | **31.51** | **31.510254** |
 
 > [!WARNING]
-> The manuscript's own status box is explicit that Fig. 3 *"illustrates what the model implies and establishes nothing about what a city would experience."* The curve ordering follows analytically from the chosen parameters and is not evidence. Reproducing these numbers verifies the repository's arithmetic, not the framework's empirical validity.
+> **No strategy here bounds total debt, CivicWorkOS included.** Its saturating components contribute a bounded 17.98 index units, 11.34 of that from skill formation — the component the capability budget actually governs. But a linear residual of 1.45 units a year accrues without limit, and 1.08 of those 1.45 units is vendor dependency, which the allocation mechanism does not control at all. The claim a capability budget supports is narrower than earlier presentations of this framework asserted: it converts *skill* debt from unbounded to bounded, and says nothing about the other four components except through weights that competing terms can outvote.
+>
+> **Human-First accumulates less debt than CivicWorkOS for thirteen years.** The curves cross at $t = 13.23$, both at 36.73 index units, reaching 46.89 against 52.89 by year twenty. This is not an artifact and the article does not bury it: a strategy that keeps humans on everything replenishes fallback, accountability, dependency and transition immediately, while CivicWorkOS is still filling its pipeline over a 4.05-year time constant.
+>
+> The curve ordering follows analytically from the chosen parameters and is **not evidence**. The article's own caveat: fig:cad-trend *"illustrates what the model implies and establishes nothing about what a city would experience."* Reproducing these numbers verifies this repository's arithmetic against the article, not the framework's empirical validity.
 
 ---
 
@@ -288,7 +335,7 @@ Eq. 21 admits the closed form $C(t) = c_0 \left[ (1 - \pi_\infty) t + \pi_\infty
 | **Operating system** | OS-independent — Linux, macOS, Windows |
 | **MIP solver** | None to install. `PuLP` bundles the open-source **COIN-OR Branch and Cut (CBC)** executable for all supported platforms; no commercial licence is required |
 
-Runtime dependencies are minimal and pinned to major versions in [`pyproject.toml`](pyproject.toml): `pydantic>=2,<3`, `PyYAML>=6,<7`, `PuLP>=2.7,<4`.
+Runtime dependencies are minimal and pinned to major versions in [`pyproject.toml`](pyproject.toml): `pydantic>=2,<3`, `PyYAML>=6,<7`, `PuLP>=2.7,<3`. The PuLP ceiling is deliberate: 3.x deprecates the `LpVariable` constructor the solver code uses, and `pytest.ini` promotes `DeprecationWarning` to an error, so an unpinned install fails the suite on collection.
 
 ### Linux and macOS
 
@@ -374,20 +421,67 @@ python scripts/verify_worked_example.py
 ```
 
 ```text
-=== Sec. 5.3 worked bridge-inspection allocation ===
-[PASS] CAD_H: expected=0.000000 actual=0.000000
-[PASS] SCV_H: expected=0.294000 actual=0.294000
+=== tab:worked-terms -- CAD by staffed mode (eq:cad) ===
+[PASS] CAD H+A+R/a1: printed=0.423400 computed=0.423400
 ...
-=== HCPB budget ===
-[PASS] B_k (Eq. 9): expected=2073.600000 actual=2073.600000
+=== sec:binds -- the capability budget (eq:bkworked) ===
+[PASS] B_k: printed=4976.640000 computed=4976.640000
 ...
-=== Constrained optimum (via LP; see civicworkos.solver) ===
-[PASS] dual lambda_k: expected=0.025000 actual=0.024958
+=== eq:lambdaworked -- the capability price (the LP dual) ===
+[PASS] lambda_k from the solver dual: printed=0.045353 computed=0.045353
 ...
-=== Sec. 7.1 analytic debt model (Fig. 3) ===
-[PASS] C(10) civicworkos: expected=28.929780 actual=28.929780
+=== sec:pipeline -- the intake requirement (prop:intake) ===
+[PASS] tau_k, years to competence (eq:tauworked): printed=4.050000 computed=4.050926
+[PASS] intake requirement n_hat_k (eq:intakeworked): printed=14.000000 computed=14.000000
+...
+=== tab:cadparams / fig:cad-trend -- the debt trajectory ===
+[PASS] C(10) -- CivicWorkOS: printed=31.510000 computed=31.510254
 
-All worked-example numbers reproduced within tolerance.
+All 82 checks reproduce the manuscript's printed values within tolerance.` and exits `0`.
+
+### Docker
+
+Runs the full verification suite in isolation, with no local Python configuration:
+
+```bash
+# Build the image
+docker build -t civicworkos .
+
+# Default entrypoint: the ground-truth verification oracle
+docker run --rm civicworkos
+
+# Override the entrypoint for any other script
+docker run --rm civicworkos python scripts/run_simulation.py 200 42
+```
+
+The image is built on `python:3.11-slim` and installs `libgomp1`, the one system library CBC requires on Debian-slim bases.
+
+---
+
+## Quick Start
+
+All command-line utilities run directly from the repository root and insert `src/` onto `sys.path` themselves, so they work before an editable install. Outputs below are **verbatim**.
+
+**1 — Verify the implementation against the published worked example.**
+
+```bash
+python scripts/verify_worked_example.py
+```
+
+```text
+=== tab:worked-terms -- CAD by staffed mode (eq:cad) ===
+[PASS] CAD H+A+R/a1: printed=0.423400 computed=0.423400
+...
+=== sec:binds -- the capability budget (eq:bkworked) ===
+[PASS] B_k: printed=4976.640000 computed=4976.640000
+...
+=== eq:lambdaworked -- the capability price (the LP dual) ===
+[PASS] lambda_k from the solver dual: printed=0.045353 computed=0.045353
+...
+=== tab:cadparams / fig:cad-trend -- the debt trajectory ===
+[PASS] C(10) -- CivicWorkOS: printed=31.510000 computed=31.510254
+
+All 82 checks reproduce the manuscript's printed values within tolerance.
 ```
 
 **2 — Execute a single online allocation decision (Algorithm 1).**
@@ -412,7 +506,7 @@ Evidentiary record hash: <64-character SHA-256 digest>
 > [!NOTE]
 > The evidentiary hash **changes on every run and this is by design.** `EvidentiaryRecord.decided_at` defaults to the current UTC instant and is part of the hashed payload, so the digest binds a decision to the moment it was made. The allocation itself is fully deterministic: the selected mode and every $\widetilde{\mathrm{SCV}}$ score reproduce exactly. To obtain a stable digest, pass an explicit `decided_at`.
 
-**3 — Solve the city-wide periodic MIP program (Eq. 16).**
+**3 — Solve the city-wide periodic MIP program (eq:program).**
 
 ```bash
 python scripts/run_rebalance.py 12
@@ -422,11 +516,11 @@ python scripts/run_rebalance.py 12
 Status: Optimal
 Objective value: 4.0897
 Dual lambda_k[structural_inspection]: 0.024958
-Dual extraction method: LP relaxation shadow price (constraint.pi), sign normalized to the paper's non-negative dual convention (Eq. 17: lambda,mu,nu >= 0)
+Dual extraction method: LP relaxation shadow price (constraint.pi), sign normalized to the paper's non-negative dual convention (eq:aug: lambda,mu,nu >= 0)
 Mode counts: {'H': 3, 'H+A': 0, 'H+R': 8, 'H+A+R': 1}
 ```
 
-The task count is an optional positional argument (default `12`). A reduced count is used deliberately: at the worked example's full 340-task population the MIP exhibits combinatorial symmetry across identical candidates.
+The task count is an optional positional argument (default `12`). A reduced count is used deliberately: at the worked example's full 2,100-inspection population the MIP exhibits combinatorial symmetry across identical candidates.
 
 **4 — Run the multi-strategy simulation benchmark across five seeds.**
 
@@ -450,7 +544,7 @@ Mode distribution under perturbation:
   H+A+R      1.0000
 ```
 
-This addresses the manuscript's own open question — whether the parameter set admits a stable configuration, or whether the argmax is so perturbation-sensitive that panel deliberation would be effectively arbitrary. Under $\pm 20\%$ relative perturbation of all nine weights, the unconstrained argmax over the four §5.3 candidates does not flip. The result characterises those four candidates under this specific perturbation scheme, and nothing broader.
+This addresses the manuscript's own open question — whether the parameter set admits a stable configuration, or whether the argmax is so perturbation-sensitive that panel deliberation would be effectively arbitrary. Under $\pm 20\%$ relative perturbation of all nine weights, the unconstrained argmax over the four sec:worked candidates does not flip. The result characterises those four candidates under this specific perturbation scheme, and nothing broader.
 
 ---
 
@@ -484,7 +578,7 @@ domain_cfg = load_domain_config(ROOT / "configs" / "domains" / "structural_inspe
 domain = domain_cfg.domain
 service = "structural_inspection_service"
 
-# 2. Define a candidate municipal task (Eq. 3)
+# 2. Define a candidate municipal task (eq:task)
 task = TaskProfile(
     task_id="INSPECT-BR-402",
     service=service,
@@ -493,7 +587,7 @@ task = TaskProfile(
     learn=0.60, crit=0.40, duration_hours=6.0,
 )
 
-# 3. Register statutory rules in the Policy Digital Twin (Eq. 6).
+# 3. Register statutory rules in the Policy Digital Twin (eq:policy).
 #    This rule prohibits every mode lacking a licensed human,
 #    reducing the mode set to M' = {H, H+A, H+R, H+A+R}.
 policy_twin = PolicyDigitalTwin()
@@ -501,11 +595,11 @@ policy_twin.add_rule(
     requires_licensed_human_rule("signoff", "v1", date(2020, 1, 1), "statutory sign-off requirement")
 )
 
-# 4. Initialise per-domain capability state (Eq. 5)
+# 4. Initialise per-domain capability state (eq:ledger)
 ledger = CapabilityLedger()
 ledger.initialize(LedgerSnapshot(domain=domain, H_k=0, A_k=0, R_k=0, F_k=0, E_k=0))
 
-# 5. Assemble the engine with the duals published by the last rebalance (Eq. 17)
+# 5. Assemble the engine with the duals published by the last rebalance (eq:aug)
 engine = AllocationEngine(
     policy_twin=policy_twin,
     market=HeuristicMarket(hybrid_phi={domain: domain_cfg.hybrid_phi}),
@@ -530,14 +624,14 @@ engine = AllocationEngine(
     worker_groups={domain: domain_cfg.groups},
     score_weights=ScoreWeights.paper_default(),
     debt_weights=DebtWeights.paper_default(),
-    duals=Duals(lambda_k={domain: 0.0250}, rebalance_timestamp=datetime.now(timezone.utc)),
+    duals=Duals(lambda_k={domain: 0.045353}, rebalance_timestamp=datetime.now(timezone.utc)),
     audit_store=EvidentiaryRecordStore(),
     feedback_bus=FeedbackBus(),
     config_version=weights.version,
     authorizing_panel_decision="PANEL-DECISION-2026-014",
 )
 
-# 6. Run Algorithm 1 for this task (Eq. 18-19)
+# 6. Run Algorithm 1 for this task (eq:aug, eq:admis, eq:argmax)
 result = engine.allocate(task, t=date.today(), elapsed_days_in_period=180.0)
 
 print(f"Selected mode : {result.selected_mode}")
@@ -572,7 +666,7 @@ Municipal policies and panel ratifications are decoupled from code and maintaine
 
 | Artifact | Contents |
 | :--- | :--- |
-| [`weights/default.yaml`](configs/weights/default.yaml) | Objective weights $w_1 \ldots w_9$ (Eq. 15) and debt weights $\alpha \ldots \varepsilon$ (Eq. 2) |
+| [`weights/default.yaml`](configs/weights/default.yaml) | Objective weights $w_1 \ldots w_9$ (eq:scv) and debt weights $\alpha \ldots \varepsilon$ (eq:cad) |
 | [`domains/structural_inspection.yaml`](configs/domains/structural_inspection.yaml) | HCPB, access, and transition parameters: $N_k$, $r_k$, $h_k$, $\eta_k$, $B_k^{\min}$, $\phi_m$, $\theta_{k,g}$, $\epsilon_k$, $\tau_g$, $\chi^{\min}$ |
 | [`services/structural_inspection_service.yaml`](configs/services/structural_inspection_service.yaml) | 3R Reserve parameters: component capacities, $n_s$, $\kappa_s$, $D^{\mathrm{peak}}_s$ |
 | [`groups/taxonomy.yaml`](configs/groups/taxonomy.yaml) | Worker group taxonomy — the cross product of occupational class, gender, contract status, and district |
@@ -582,7 +676,7 @@ Municipal policies and panel ratifications are decoupled from code and maintaine
 > [!IMPORTANT]
 > Changing a governance artifact means **bumping its `version` and `effective_date`**, not editing values in place. The evidentiary record binds every allocation decision to the `config_version` that produced it; in-place edits break that chain.
 
-The group taxonomy makes the framework's most consequential distributional limitation visible rather than hiding it: $N_k(t)$ is drawn from municipal workforce records and structurally does not see `contracted` or `platform_mediated` workers, so they are ineligible assignees under Eq. 10 and unprotected by Eq. 12. The contestability module ([`appeals/contestability.py`](src/civicworkos/appeals/contestability.py)) grants them appeal standing regardless of contract status, which — as the manuscript states plainly — *"does not repair the exclusion but ensures it is at least reportable."*
+The group taxonomy makes the framework's most consequential distributional limitation visible rather than hiding it: $N_k(t)$ is drawn from municipal workforce records and structurally does not see `contracted` or `platform_mediated` workers, so they are ineligible assignees under eq:accessshare and unprotected by eq:justtransition. The contestability module ([`appeals/contestability.py`](src/civicworkos/appeals/contestability.py)) grants them appeal standing regardless of contract status, which — as the manuscript states plainly — *"does not repair the exclusion but ensures it is at least reportable."*
 
 ### The UNSET Sentinel
 
@@ -591,7 +685,7 @@ Parameters not yet ratified by an oversight panel parse to a distinct `UNSET` se
 The shipped domain configuration demonstrates this with a genuine gap — the manuscript assigns no value to the Just Transition ceiling $\tau_g$ for this domain:
 
 ```yaml
-# tau_g (Just Transition displacement ceiling, Eq. 12) is NOT given
+# tau_g (Just Transition displacement ceiling, eq:justtransition) is NOT given
 # anywhere in the worked example. Left UNSET rather than defaulted.
 tau_g:
   men: UNSET
@@ -606,7 +700,7 @@ CivicWorkOS requires **no runtime secrets** — it is a library and a set of scr
 
 | Variable | Default | Purpose |
 | :--- | :---: | :--- |
-| `CIVICWORKOS_SOLVER_TIME_LIMIT_SECONDS` | `60` | Bounds worst-case wall-clock time for a rebalance solve. Eq. 16 is NP-hard and the framework gives no problem-size guidance |
+| `CIVICWORKOS_SOLVER_TIME_LIMIT_SECONDS` | `60` | Bounds worst-case wall-clock time for a rebalance solve. eq:program is NP-hard and the framework gives no problem-size guidance |
 
 ---
 
@@ -625,7 +719,7 @@ Five strategies are compared. All five are configurations of the same objective,
 | `cost_performance` | Maximises $(Q, P)$ net of Cost and Energy only | Relaxed |
 | `human_first` | Restricts $m$ to modes containing $H$ whenever available | Relaxed |
 | `capability_matching` | Task–agent fit criterion from prior human–robot collaboration work; SCV with $w_9$ renormalised to zero | Relaxed |
-| **`civicworkos`** | Full objective with active duals ($\lambda_k = 0.0250$) | **All of Eq. 16, plus $Z_1$–$Z_4$ enforcement** |
+| **`civicworkos`** | Full objective with active duals ($\lambda_k = 0.0454$) | **All of eq:program, plus $Z_1$–$Z_4$ enforcement** |
 
 Only `civicworkos` is evaluated through the constrained `AllocationEngine`; the other four are unconstrained argmax over a strategy-specific score.
 
@@ -682,7 +776,7 @@ Three independent gates, in the order CI runs them:
 # Gate 1 - Ground-truth oracle: recompute every published number
 python scripts/verify_worked_example.py
 
-# Gate 2 - Full automated test suite (164 tests, zero warnings)
+# Gate 2 - Full automated test suite (196 tests, zero warnings)
 pytest tests/ -v
 
 # Gate 3 - Static analysis and type safety
@@ -693,27 +787,27 @@ mypy src/civicworkos
 Current status on Python 3.11.9:
 
 ```text
-164 passed in 4.19s
+196 passed in 2.09s
 All checks passed!                              (ruff)
 Success: no issues found in 36 source files     (mypy)
 ```
 
 ### Test Suite
 
-**164 tests, all passing, zero warnings.**
+**196 tests, all passing, zero warnings.**
 
 | Suite | Tests | Coverage |
 | :--- | :---: | :--- |
-| [`tests/unit/`](tests/unit/) | 125 | SCV scoring, CAD components, HCPB formulation, access and transition constraints, 3R reserve, ledger invariants, policy twin, oversight zones, task twin, market agents, config loader, appeals, analytic debt model |
-| [`tests/integration/`](tests/integration/) | 14 | End-to-end Algorithm 1 pipeline, CBC MIP rebalance solver, SHA-256 audit replay |
-| [`tests/smoke/`](tests/smoke/) | 25 | CLI execution smoke tests and worked-example replication |
+| [`tests/unit/`](tests/unit/) | 135 | SCV scoring, CAD components, HCPB formulation, access and transition constraints, 3R reserve, ledger invariants, policy twin, oversight zones, task twin, market agents, config loader, appeals, analytic debt model |
+| [`tests/integration/`](tests/integration/) | 16 | End-to-end Algorithm 1 pipeline, CBC MIP rebalance solver, SHA-256 audit replay |
+| [`tests/smoke/`](tests/smoke/) | 45 | CLI execution smoke tests and worked-example replication |
 
 Run a single suite with `pytest tests/unit -v`, or the Make targets in [Developer Shortcuts](#developer-shortcuts).
 
 Two testing policies are worth noting:
 
 - **Deprecation warnings are errors.** [`pytest.ini`](pytest.ini) sets `filterwarnings = error::DeprecationWarning`. All datetime calls are timezone-aware (`datetime.now(timezone.utc)`).
-- **Admissibility restoration branches are pinned.** [`tests/unit/test_admissibility.py`](tests/unit/test_admissibility.py) exercises both feasibility-restoration branches of Eq. 18 explicitly, so the non-naive filter semantics cannot regress into a naive one silently.
+- **Admissibility restoration branches are pinned.** [`tests/unit/test_admissibility.py`](tests/unit/test_admissibility.py) exercises both feasibility-restoration branches of eq:admis explicitly, so the non-naive filter semantics cannot regress into a naive one silently.
 
 ### Continuous Integration
 
@@ -752,20 +846,20 @@ Placing the ground-truth check ahead of the test suite is deliberate: a change t
 ```text
 CivicWorkOS/
 ├── src/civicworkos/               # Core library (36 modules, mypy-clean)
-│   ├── analytic/                  # Closed-form debt dynamics (Eq. 21, Fig. 3)
+│   ├── analytic/                  # Closed-form debt dynamics (eq:cadmodel, fig:cad-trend)
 │   ├── appeals/                   # Contestability and appeal windows
 │   ├── audit/                     # SHA-256 tamper-evident evidentiary records
 │   ├── config/                    # Pydantic schemas, YAML loader, UNSET sentinel
-│   ├── constraints/               # HCPB (Eq. 8-9), access (Eq. 10-11), resilience (Eq. 13-14)
-│   ├── feedback/                  # Event bus for runtime outcome telemetry (Eq. 20)
-│   ├── ledger/                    # Civic Capability Ledger, L_k(t) (Eq. 5)
+│   ├── constraints/               # HCPB (eq:hcpb and eq:hcpb-estimator), access (eq:accessshare and eq:access), resilience (eq:cs and eq:res3r)
+│   ├── feedback/                  # Event bus for runtime outcome telemetry (eq:feedback)
+│   ├── ledger/                    # Civic Capability Ledger, L_k(t) (eq:ledger)
 │   ├── market/                    # Agent protocol + heuristic estimator backend
-│   ├── online/                    # Algorithm 1: augmented Lagrangian allocation (Eq. 17-19)
-│   ├── policy/                    # Policy Digital Twin, four-valued rule status (Eq. 6)
-│   ├── program/                   # City-wide multi-period MIP formulation (Eq. 16)
-│   ├── scoring/                   # SCV (Eq. 15) and CAD (Eq. 2)
+│   ├── online/                    # Algorithm 1: augmented Lagrangian allocation (eq:aug, eq:admis and eq:argmax)
+│   ├── policy/                    # Policy Digital Twin, four-valued rule status (eq:policy)
+│   ├── program/                   # City-wide multi-period MIP formulation (eq:program)
+│   ├── scoring/                   # SCV (eq:scv) and CAD (eq:cad)
 │   ├── solver/                    # PuLP/CBC integration and dual extraction
-│   ├── twin/                      # Urban Task Digital Twin (Eq. 3-4)
+│   ├── twin/                      # Urban Task Digital Twin (eq:task and eq:ell)
 │   └── zones/                     # Adaptive oversight zones Z1-Z4
 ├── sim/                           # Discrete-event testbed (synthetic demonstration data)
 │   ├── calibration/               # Open-data metadata catalogue, synthetic task generator
@@ -785,7 +879,7 @@ CivicWorkOS/
 │   ├── run_rebalance.py           # City-wide MIP solve and dual price extraction
 │   ├── run_simulation.py          # Multi-seed, multi-strategy benchmark
 │   └── sensitivity_sweep.py       # Monte Carlo weight perturbation sweep
-├── tests/                         # 164 automated tests
+├── tests/                         # 196 automated tests
 │   ├── unit/                      # 125 tests
 │   ├── integration/               # 14 tests
 │   └── smoke/                     # 25 tests
@@ -834,12 +928,12 @@ The manuscript itself insists on this distinction, and so does this repository. 
 
 | Dimension | Scope in the manuscript | Status in this repository |
 | :--- | :--- | :--- |
-| **Core equations (Eq. 2–15)** | Analytical definitions | Implemented and unit-tested in [`src/civicworkos/`](src/civicworkos/) |
-| **MIP formulation (Eq. 16)** | City-wide periodic program | Implemented and solved via CBC in [`solver/`](src/civicworkos/solver/) |
-| **Online rule (Eq. 17–19)** | Lagrangian augmented dispatch | Implemented with active duals in [`online/`](src/civicworkos/online/) |
-| **Worked example (§5.3)** | Analytical worked example | Reproduced within per-check tolerance by [`verify_worked_example.py`](scripts/verify_worked_example.py) |
-| **Analytic debt model (§7.1)** | Closed form, Eq. 21 | Reproduced exactly for all five Fig. 3 parameter sets |
-| **Evaluation study (§6)** | Six sectors, ten years, ≥30 seeds, 13 metrics — *not built* | Reduced-scope synthetic demonstration only, in [`sim/`](sim/) |
+| **Core equations (eq:cad–15)** | Analytical definitions | Implemented and unit-tested in [`src/civicworkos/`](src/civicworkos/) |
+| **MIP formulation (eq:program)** | City-wide periodic program | Implemented and solved via CBC in [`solver/`](src/civicworkos/solver/) |
+| **Online rule (eq:aug, eq:admis and eq:argmax)** | Lagrangian augmented dispatch | Implemented with active duals in [`online/`](src/civicworkos/online/) |
+| **Worked example (sec:worked)** | Analytical worked example | Reproduced within per-check tolerance by [`verify_worked_example.py`](scripts/verify_worked_example.py) |
+| **Analytic debt model (sec:cadmodel)** | Closed form, eq:cadmodel | Reproduced exactly for all five fig:cad-trend parameter sets |
+| **Evaluation study (sec:protocol)** | Six sectors, ten years, ≥30 seeds, 13 metrics — *not built* | Reduced-scope synthetic demonstration only, in [`sim/`](sim/) |
 | **Empirical municipal data** | None collected | None collected here either; source metadata documented only |
 
 The manuscript names seven intended open-data sources and states explicitly that no data from them has been retrieved or analysed. [`sim/calibration/sources.py`](sim/calibration/sources.py) documents them as metadata; it does not retrieve them.
@@ -860,11 +954,13 @@ Every point at which this repository had to invent, infer, or approximate someth
 | **A6** | Assignee-group selection, $g(i,m)$ |
 | **A7** | Per-task safety floor, $S^{\min}_i$ |
 | **A8** | Just Transition Constraint not embedded in the MIP |
-| **A9** | Single-driver scope of the analytic debt model (Eq. 21) |
+| **A9** | Single-driver scope of the analytic debt model (eq:cadmodel) |
 | **A10** | Simulation testbed scope reduction |
 | **A11** | Licence choice |
 
-A9 is worth surfacing here. Eq. 21 has **one** driver — the unmet developmental-practice fraction $\pi$ — but labels its output "accumulated Civic Automation Debt", which Eq. 2 defines over **five** components. The HCPB drives $\pi_\infty \to 1$ for $D_{\mathrm{skill}}$ and indirectly for $D_{\mathrm{fall}}$; it does nothing for $D_{\mathrm{dep}}$ (vendor concentration). Total CAD should therefore not saturate under CivicWorkOS the way Eq. 21 alone implies. This repository implements Eq. 21 exactly as specified and carries the caveat alongside it rather than silently correcting the model.
+A9 is worth surfacing here, because it is the one assumption on this list that has since been **resolved in the manuscript rather than merely documented here.** Earlier drafts modelled debt accumulation with a single driver — the unmet developmental-practice fraction $\pi$ — while labelling its output "accumulated Civic Automation Debt", which eq:cad defines over five components. That single driver is $D^{skill}$ and nothing else. The capability budget drives $\pi_\infty 	o 1$ for skill formation and, through the resilience reserve, for fallback; it does nothing whatsoever for vendor dependency, which is a procurement variable the allocation mechanism does not control. Total CAD therefore should not have saturated the way the one-driver form implied, and this repository carried the discrepancy as a documented caveat rather than silently correcting the article.
+
+eq:cadmodel now models all five components, each with its own asymptote and time constant, and tab:cadparams fixes those parameters for all six strategies so that fig:cad-trend is reproducible by substitution. `civicworkos.analytic.debt_model` implements that form. The consequence is reported above and is unfavourable to the framework: CivicWorkOS does not bound total debt, and Human-First accumulates less of it for the first thirteen years.
 
 ### Manuscript and Implementation Divergences
 
@@ -876,7 +972,7 @@ The tables in this README follow the **manuscript** as the authoritative source.
 | 2 | SCV term glosses | $V_3 = P$ is public trust; $V_5 = \mathrm{Tr}$ is decision transparency | `ScoreWeights` names the fields `w3_productivity` and `w5_trust`; `TermVector` documents `P` as productivity and `Tr` as agent trust |
 | 3 | Oversight zone designations | Autonomous Permissible, Supervised Operation, Real-Time Escalation, Human Statutory Fallback | `zones.Zone` names the members `Z1_AUTONOMOUS`, `Z2_AUGMENTED`, `Z3_HUMAN_AUTHORITY`, `Z4_HUMAN_RESERVED` |
 
-Divergence 1 is numerically consequential: $\phi_m$ enters Eq. 7 ($D_{\mathrm{skill}} = 1 - \phi_m$), Eq. 8 (the HCPB left-hand side), and Eq. 17 (the augmented score), so it propagates into CAD, the capability budget, and the dispatch decision. Divergences 2 and 3 are nomenclature and do not change any computed value.
+Divergence 1 is numerically consequential: $\phi_m$ enters eq:phi ($D_{\mathrm{skill}} = 1 - \phi_m$), eq:hcpb (the HCPB left-hand side), and eq:aug (the augmented score), so it propagates into CAD, the capability budget, and the dispatch decision. Divergences 2 and 3 are nomenclature and do not change any computed value.
 
 ---
 
@@ -897,7 +993,7 @@ pip install -e . --no-build-isolation
 <details>
 <summary><strong>Slow or hanging MIP rebalance solves</strong></summary>
 
-Solving Eq. 16 over hundreds of *identical* task candidates makes CBC explore a combinatorially symmetric search space. `civicworkos.solver.rebalance` therefore applies a bounded default time limit of 60 seconds, configurable via `CIVICWORKOS_SOLVER_TIME_LIMIT_SECONDS`.
+Solving eq:program over hundreds of *identical* task candidates makes CBC explore a combinatorially symmetric search space. `civicworkos.solver.rebalance` therefore applies a bounded default time limit of 60 seconds, configurable via `CIVICWORKOS_SOLVER_TIME_LIMIT_SECONDS`.
 
 For production-scale instances, pass a commercial solver:
 
@@ -925,7 +1021,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 <details>
 <summary><strong><code>AllocationEngine.allocate()</code> always routes to Z4</strong></summary>
 
-This is usually correct behaviour rather than a defect. Either filtering stage of Eq. 18 may legitimately empty the candidate set: a high-risk, high-criticality task raises `default_safety_floor()` above every mode's safety estimate, and a service already below its 3R threshold rejects modes that would worsen the reserve. Check `result.evidentiary_record` — every rejection is recorded with its reason (`safety_floor`, `resilience_clause`, or `capability_clause`).
+This is usually correct behaviour rather than a defect. Either filtering stage of eq:admis may legitimately empty the candidate set: a high-risk, high-criticality task raises `default_safety_floor()` above every mode's safety estimate, and a service already below its 3R threshold rejects modes that would worsen the reserve. Check `result.evidentiary_record` — every rejection is recorded with its reason (`safety_floor`, `resilience_clause`, or `capability_clause`).
 
 </details>
 
@@ -979,7 +1075,7 @@ Contributions are welcome, subject to one rule that overrides normal software pr
 4. **Governance artifacts.** Changing a file under `configs/weights/` or `configs/domains/` means bumping its `version` and `effective_date`, not editing in place — these are modelled as signed policy acts.
 5. **Scope.** This is a research reference implementation. Please do not add a database, message broker, web framework, or machine-learning model that the framework does not require, and never extend `sim/` in a way that implies it reproduces an evaluation study that was never run.
 
-Reference the specific section or equation your change touches (for example, "Eq. 11", "§4.5") in the pull request description. Full guidelines are in [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md); security disclosures follow [SECURITY.md](SECURITY.md).
+Reference the specific section or equation your change touches (for example, "eq:access", "sec:online") in the pull request description. Full guidelines are in [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md); security disclosures follow [SECURITY.md](SECURITY.md).
 
 ---
 

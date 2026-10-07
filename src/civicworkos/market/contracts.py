@@ -1,8 +1,8 @@
-"""Allocation Market agent interface: Paper Sec. 3.8.
+"""Allocation Market agent interface: Paper sec:layer6.
 
 The paper names ten market agents (five capability, five civic) and
 what each produces, but specifies NO interface contract: no input/output
-schema, no latency budget, no failure semantics (report Sec. 14.3, item
+schema, no latency budget, no failure semantics (the pre-release audit, item
 9). `MarketProtocol` below is this repository's own invented contract,
 built to be the smallest interface Algorithm 1 needs:
 
@@ -38,7 +38,7 @@ class MarketTimeoutError(RuntimeError):
 
     No latency budget is stated in the paper; civicworkos.online treats
     any MarketTimeoutError as grounds to drop the affected mode from the
-    admissible set for that task (report Sec. 18.2 names this an open
+    admissible set for that task (the pre-release audit names this an open
     production requirement).
     """
 

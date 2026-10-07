@@ -4,35 +4,49 @@ message: >-
   implements. This repository is an author reference implementation
   developed by Ali Akarma (co-author of the manuscript).
 title: >-
-  CivicWorkOS: A Capability-Preserving, Policy-Aware Multi-Agent
-  Framework for Human-AI-Robot Work Allocation and Distributional
-  Accountability in the AI City (reference implementation)
+  CivicWorkOS: Capability-Preserving Allocation of Municipal Work Among
+  Humans, AI Agents and Robots (reference implementation)
 type: software
-version: 0.1.0
-date-released: "2026-09-03"
+version: 0.2.0
+date-released: "2026-10-07"
 license: MIT
 preferred-citation:
   type: article
   title: >-
-    CivicWorkOS: A Capability-Preserving, Policy-Aware Multi-Agent
-    Framework for Human-AI-Robot Work Allocation and Distributional
-    Accountability in the AI City
+    CivicWorkOS: Capability-Preserving Allocation of Municipal Work Among
+    Humans, AI Agents and Robots
   authors:
     - family-names: Syed
       given-names: Toqeer Ali
+      affiliation: >-
+        AI Center, Faculty of Computer and Information Systems, Islamic
+        University of Madinah, Madinah, Saudi Arabia
     - family-names: Akarma
       given-names: Ali
-    - family-names: Kamal
-      given-names: Shahid
-    - family-names: Jan
-      given-names: Salman
-    - family-names: Alkhodre
-      given-names: Ahmad B.
-    - family-names: Jamal
-      given-names: Arshad
-  journal: Frontiers (Hypothesis and Theory article)
+      affiliation: >-
+        AI Center, Faculty of Computer and Information Systems, Islamic
+        University of Madinah, Madinah, Saudi Arabia; AI V&V Lab, King Fahd
+        University of Petroleum and Minerals, Dhahran, Saudi Arabia
+    - family-names: Alqurashi
+      given-names: Raghda M.
+      affiliation: >-
+        Department of Computer Science, Umm Al-Qura University, Jumum,
+        Saudi Arabia
+    - family-names: Naqash
+      given-names: Muhammad Tayyab
+      affiliation: >-
+        Civil Engineering Department, Islamic University of Madinah,
+        Madinah, Saudi Arabia
+    - family-names: Alqurashi
+      given-names: Abdulaziz
+      affiliation: >-
+        Civil Engineering Department, Islamic University of Madinah,
+        Madinah, Saudi Arabia
+  journal: Frontiers in Artificial Intelligence
   notes: >-
     Submitted to the Frontiers Research Topic "Robots at Work: Who Wins,
-    Who Loses in the AI City." Corresponding author: Shahid Kamal
-    (shahid.kamal@mmu.edu.my). See CivicWorkOS.tex / CivicWorkOS.pdf in
-    the parent directory of this repository for the manuscript itself.
+    Who Loses in the AI City" as a Hypothesis and Theory article.
+    Corresponding author: Raghda M. Alqurashi (rmqurashi@uqu.edu.sa).
+    The article reports no dataset and no measured empirical result; the
+    evaluation protocol it specifies has not been executed. See
+    Paper/Frontiers/CivicWorkOS.tex in this repository for the manuscript.

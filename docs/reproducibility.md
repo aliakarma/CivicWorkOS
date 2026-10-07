@@ -12,11 +12,11 @@ reproduction** (there are no scientific results in the paper to reproduce).
 > contribution, and no measured results are reported." — Data Availability
 > Statement
 
-> "[Figure 3] illustrates what the model implies and establishes nothing
-> about what a city would experience." — §7, status box
+> "[fig:cad-trend] illustrates what the model implies and establishes nothing
+> about what a city would experience." — sec:cadmodel, status box
 
 The paper's OWN reproducibility claim is narrower and true: its worked
-example (§5.3) and analytic model (§7.1, Fig. 3) are "reproducible from the
+example (sec:worked) and analytic model (sec:cadmodel, fig:cad-trend) are "reproducible from the
 article alone." This repository independently verified that claim
 (`scripts/verify_worked_example.py`) and found it correct to within
 numerical tolerance.
@@ -36,7 +36,7 @@ numerical tolerance.
 
 ## What is NOT reproducible, because it does not exist
 
-- **The paper's evaluation study** (§6): six sectors, ten years, five
+- **The paper's evaluation study** (sec:protocol): six sectors, ten years, five
   strategies, ≥30 seeds, thirteen metrics, seven stress scenarios, ten
   pre-registered predictions. The paper states this platform "has not been
   built" and "no result from it appears anywhere in this paper." This
@@ -61,10 +61,10 @@ numerical tolerance.
 
 | Dimension | Score | Why |
 | --- | --- | --- |
-| Worked-example arithmetic | Exact | Verified digit-by-digit against the paper's Table 3 and Fig. 3 caption values. |
-| Core equations as code | High | Eq. 2, 4, 7-9, 10-14, 15, 17-19, 21 implemented and unit-tested. |
+| Worked-example arithmetic | Exact | Verified digit-by-digit against the paper's tab:worked-terms and fig:cad-trend caption values. |
+| Core equations as code | High | eq:cad, 4, 7-9, 10-14, 15, 17-19, 21 implemented and unit-tested. |
 | Full system behavior | N/A | The paper describes no system to compare against — none was built. |
-| Evaluation study (§6) | Not attempted at paper scale | Reduced-scope demo only; see `docs/assumptions.md` A10. |
+| Evaluation study (sec:protocol) | Not attempted at paper scale | Reduced-scope demo only; see `docs/assumptions.md` A10. |
 | Calibration to real data | Not attempted | Consistent with the paper's own stated status (no data retrieved). |
 
 ## Determinism notes

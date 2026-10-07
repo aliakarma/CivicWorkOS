@@ -220,11 +220,28 @@ else
   gate 3 "verify_worked_example.py" fail "script not found"
 fi
 
-hits=$(grep -rnE 'Sec\. [0-9]+(\.[0-9]+)*' $REPO/README.md $REPO/scripts \
-       $REPO/sim 2>/dev/null || true)
-[[ -z "$hits" ]] && gate 3 "no stale section numbers in repo" pass \
-                 || gate 3 "no stale section numbers in repo" fail \
-                      "$(echo "$hits" | wc -l | tr -d ' ') hits"
+# Phase 3 reconciliation: labels resolve, no numbered references survive, and
+# one author list in three places. Scoped to the whole repository, not just
+# README/scripts/sim, because src/ and tests/ carried the same stale numbering.
+if python -I check_repo.py --quiet > /tmp/check_repo.out 2>&1; then
+  gate 3 "repo/manuscript reconciliation" pass
+else
+  gate 3 "repo/manuscript reconciliation" fail "see /tmp/check_repo.out"
+fi
+
+# The README advertises a test count; it has to be true. Finding N3 was that
+# the advertised suite did not run at all on a clean environment.
+if (cd $REPO && python -I -m pytest -q) > /tmp/pytest.out 2>&1; then
+  n=$(grep -oE '[0-9]+ passed' /tmp/pytest.out | head -1 | tr -dc '0-9')
+  badge=$(grep -oE 'Tests-[0-9]+' $REPO/README.md | head -1 | tr -dc '0-9')
+  if [[ "$n" == "$badge" ]]; then
+    gate 3 "pytest matches README badge" pass "$n passed"
+  else
+    gate 3 "pytest matches README badge" fail "suite $n, badge ${badge:-absent}"
+  fi
+else
+  gate 3 "pytest matches README badge" fail "see /tmp/pytest.out"
+fi
 
 # ------------------------------------------------------------- summary ----
 echo

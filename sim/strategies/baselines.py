@@ -1,10 +1,10 @@
-"""Five baseline allocation strategies: Paper Sec. 6.2.
+"""Five baseline allocation strategies: Paper sec:protocol.
 
-"Five strategies are compared, each a configuration of (Eq. 15) and its
+"Five strategies are compared, each a configuration of (eq:scv) and its
 constraints." All five are ablations of the authors' own objective, not
 independent external systems -- the paper concedes this directly
-(Sec. 7.2: "a tautology about the objective, not a discovery about
-cities") and report Sec. 20.13 flags it as a limitation: the study can
+(sec:whatworked: "a tautology about the objective, not a discovery about
+cities") and the pre-release audit flags it as a limitation: the study can
 show the mechanism does what it was built to do, not that it beats
 alternative designs.
 
@@ -15,9 +15,9 @@ alternative designs.
 - Conventional Capability Matching: the task-agent fit criterion of
   prior HRC work, without debt, budget, access, or reserve terms --
   implemented here as SCV with w9 renormalized to 0 and no constraints,
-  which is what the paper's own description reduces to (report Sec. 20.13,
+  which is what the paper's own description reduces to (the pre-release audit,
   [CRIT]: "a zeroed-out CivicWorkOS").
-- CivicWorkOS: the full objective under all constraints of Eq. 16.
+- CivicWorkOS: the full objective under all constraints of eq:program.
 
 Only CivicWorkOS is evaluated through the constrained AllocationEngine
 (civicworkos.online); the other four are unconstrained argmax over a
@@ -60,7 +60,7 @@ STRATEGIES: dict[StrategyName, StrategyConfig] = {
 def score_for_strategy(name: StrategyName, terms: TermVector, cad: float = 0.0) -> float:
     """The unconstrained score a strategy uses to rank modes.
 
-    civicworkos's own score is Eq. 15 with the paper's default weights
+    civicworkos's own score is eq:scv with the paper's default weights
     and is computed elsewhere (civicworkos.scoring.sustainable_civic_value)
     since CivicWorkOS additionally runs through the constrained engine;
     this function covers the four ablations.

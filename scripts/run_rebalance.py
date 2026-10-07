@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-"""Solve the city-wide allocation program (Eq. 16) for a small task
+"""Solve the city-wide allocation program (eq:program) for a small task
 batch and print the assignment and published dual prices.
 
-Uses the worked example's own Table 3 term values (Paper Sec. 5.3) at a
+Uses the worked example's own tab:worked-terms term values (Paper sec:worked) at a
 reduced task count -- see tests/integration/test_rebalance_solver.py for
 why a reduced count is used (combinatorial symmetry in the MIP at the
-paper's real 340-task population; civicworkos.solver.rebalance's
+paper's real 2,100-inspection population; civicworkos.solver.rebalance's
 default time limit bounds worst-case runtime regardless).
 
 Usage:
@@ -61,8 +61,8 @@ def main() -> int:
             scv = sustainable_civic_value(tv, cad, sw)
             candidates.append(CandidatePair(task_id=task.task_id, mode=mode, scv=scv, phi_m=row["phi"]))
 
-    hcpb = HCPBParameters(N_k=24, r_k=0.12, h_k=600, eta_k=1.2, B_k_min=1200)
-    budget = capability_budget(hcpb) / 340 * n_tasks  # scaled to this batch's size
+    hcpb = HCPBParameters(N_k=24, r_k=0.12, h_k=1440, eta_k=1.2, B_k_min=2000)
+    budget = capability_budget(hcpb) / 2100 * n_tasks  # scaled to this batch's size
 
     inputs = ProgramInputs(
         tasks=tasks, candidates=candidates, domain_budgets={DOMAIN: budget},

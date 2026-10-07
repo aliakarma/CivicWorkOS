@@ -149,6 +149,76 @@ WORKED = dict(
     w9_default=0.22,
 )
 
+# --------------------------------------------------------------------------
+# tab:cadparams -- per-component replenishment parameters for eq:cadmodel.
+# Hoisted to module level so that scripts/verify_worked_example.py and
+# tests/smoke/test_worked_example.py can import this one definition instead of
+# keeping copies.  Each strategy maps a CAD component to (c_j, pi_j_inf, tau_j).
+# --------------------------------------------------------------------------
+
+CAD_W = {"skill": 0.28, "fall": 0.22, "acct": 0.18, "dep": 0.12,
+         "trans": 0.20}
+
+
+def _strategy(**over):
+    """A strategy row: every component defaults to c_j=10, pi=0, tau=0."""
+    d = {j: (10.0, 0.0, 0.0) for j in CAD_W}
+    d.update(over)
+    return d
+
+
+CAD_STRATEGIES = {
+    "Automation-First": _strategy(),
+    "Cost/Performance": _strategy(acct=(14.0, 0.0, 0.0),
+                                  dep=(16.0, 0.0, 0.0)),
+    "Capability Matching": _strategy(skill=(10.0, 0.35, 4.05),
+                                     fall=(10.0, 0.30, 2.0)),
+    "Ergonomics-Aware Role Allocation": _strategy(skill=(10.0, 0.40, 4.05),
+                                                  fall=(10.0, 0.45, 2.0)),
+    "Human-First": _strategy(skill=(10.0, 0.15, 4.05),
+                             fall=(10.0, 1.0, 0.5), acct=(10.0, 1.0, 0.5),
+                             dep=(10.0, 1.0, 0.5), trans=(10.0, 1.0, 0.5)),
+    "CivicWorkOS": _strategy(skill=(10.0, 1.00, 4.05),
+                             fall=(10.0, 1.00, 1.0),
+                             acct=(10.0, 0.85, 1.5),
+                             dep=(10.0, 0.10, 2.0),
+                             trans=(10.0, 0.95, 1.0)),
+}
+
+# tab:cadparams, the two computed columns, as printed.
+CAD_PRINTED = {
+    "Automation-First": (10.00, 100.00),
+    "Cost/Performance": (11.44, 114.40),
+    "Capability Matching": (8.36, 88.54),
+    "Ergonomics-Aware Role Allocation": (7.89, 85.02),
+    "Human-First": (2.38, 28.96),
+    "CivicWorkOS": (1.45, 31.51),
+}
+
+
+def cad_C(t, params):
+    """eq:cadmodel, summed over the five components."""
+    total = 0.0
+    for j, (c_j, pi_inf, tau_j) in params.items():
+        total += CAD_W[j] * c_j * (1.0 - pi_inf) * t
+        if tau_j > 0.0:
+            total += (CAD_W[j] * c_j * pi_inf * tau_j
+                      * (1.0 - math.exp(-t / tau_j)))
+    return total
+
+
+def cad_slope(params):
+    """The unbounded linear part of eq:cadmodel: sum_j w_j c_j (1 - pi_inf)."""
+    return sum(CAD_W[j] * c * (1 - pi)
+               for j, (c, pi, tau) in params.items())
+
+
+def cad_ceiling(params):
+    """The bounded part of eq:cadmodel: sum_j w_j c_j pi_inf tau_j."""
+    return sum(CAD_W[j] * c * pi * tau
+               for j, (c, pi, tau) in params.items())
+
+
 TOL = 1e-4   # agreement tolerance for printed values
 
 
@@ -586,61 +656,11 @@ def build() -> list:
     # strategies.  Everything below is computed from that table, and every
     # plotted coordinate is checked against it, so the figure cannot drift
     # away from the prose again.
-    CAD_W = {"skill": 0.28, "fall": 0.22, "acct": 0.18, "dep": 0.12,
-             "trans": 0.20}
-
-    def _strategy(**over):
-        d = {j: (10.0, 0.0, 0.0) for j in CAD_W}
-        d.update(over)
-        return d
-
-    CAD_STRATEGIES = {
-        "Automation-First": _strategy(),
-        "Cost/Performance": _strategy(acct=(14.0, 0.0, 0.0),
-                                      dep=(16.0, 0.0, 0.0)),
-        "Capability Matching": _strategy(skill=(10.0, 0.35, 4.05),
-                                         fall=(10.0, 0.30, 2.0)),
-        "Ergonomics-Aware Role Allocation": _strategy(skill=(10.0, 0.40, 4.05),
-                                                      fall=(10.0, 0.45, 2.0)),
-        "Human-First": _strategy(skill=(10.0, 0.15, 4.05),
-                                 fall=(10.0, 1.0, 0.5), acct=(10.0, 1.0, 0.5),
-                                 dep=(10.0, 1.0, 0.5), trans=(10.0, 1.0, 0.5)),
-        "CivicWorkOS": _strategy(skill=(10.0, 1.00, 4.05),
-                                 fall=(10.0, 1.00, 1.0),
-                                 acct=(10.0, 0.85, 1.5),
-                                 dep=(10.0, 0.10, 2.0),
-                                 trans=(10.0, 0.95, 1.0)),
-    }
-
-    def cad_C(t, params):
-        """eq:cadmodel summed over the five components."""
-        total = 0.0
-        for j, (c_j, pi_inf, tau_j) in params.items():
-            total += CAD_W[j] * c_j * (1.0 - pi_inf) * t
-            if tau_j > 0.0:
-                total += (CAD_W[j] * c_j * pi_inf * tau_j
-                          * (1.0 - math.exp(-t / tau_j)))
-        return total
-
-    def cad_slope(params):
-        return sum(CAD_W[j] * c * (1 - pi)
-                   for j, (c, pi, tau) in params.items())
-
-    def cad_ceiling(params):
-        return sum(CAD_W[j] * c * pi * tau
-                   for j, (c, pi, tau) in params.items())
-
     s.add("CAD debt weights sum to one", 1.0, sum(CAD_W.values()), tol=1e-12,
           site="eq:cad, sec:weights")
 
     # tab:cadparams, the two computed columns.
-    for name, slope_p, c10 in [
-            ("Automation-First", 10.00, 100.00),
-            ("Cost/Performance", 11.44, 114.40),
-            ("Capability Matching", 8.36, 88.54),
-            ("Ergonomics-Aware Role Allocation", 7.89, 85.02),
-            ("Human-First", 2.38, 28.96),
-            ("CivicWorkOS", 1.45, 31.51)]:
+    for name, (slope_p, c10) in CAD_PRINTED.items():
         prm = CAD_STRATEGIES[name]
         s.add(f"tab:cadparams residual slope -- {name}", slope_p,
               cad_slope(prm), tol=5e-3, site="tab:cadparams")

@@ -6,13 +6,13 @@ implementation.**
 
 ## What the paper says
 
-Report §4.8, quoted directly: *"Nothing, in the ML sense, except the
-optional surrogate of Paper §6.4."* CivicWorkOS is a weighted-sum objective
-(Eq. 2, Eq. 15), a mixed-integer program (Eq. 16), and a Lagrangian
-relaxation of that program (Eq. 17-19) — an optimization-and-governance
+The pre-release audit, quoted directly: *"Nothing, in the ML sense, except the
+optional surrogate of Paper sec:weights."* CivicWorkOS is a weighted-sum objective
+(eq:cad, eq:scv), a mixed-integer program (eq:program), and a Lagrangian
+relaxation of that program (eq:aug, eq:admis and eq:argmax) — an optimization-and-governance
 framework, not a learned model.
 
-The manuscript's ONE training-adjacent mention (§6.4):
+The manuscript's ONE training-adjacent mention (sec:weights):
 
 > "An optional learned surrogate for the AI Capability Broker's quality and
 > trust predictions, if used, is a small model trained for 50 epochs at
@@ -33,20 +33,20 @@ The closest analogue to a training/calibration step is **parameter
 elicitation**, and it is explicitly a governance act, not a model-fitting
 procedure:
 
-- `w1..w9` and `alpha..epsilon` (Eq. 2, Eq. 15 weights) are panel-set design
+- `w1..w9` and `alpha..epsilon` (eq:cad, eq:scv weights) are panel-set design
   defaults (`configs/weights/default.yaml`), not fitted from data. Paper
-  §6.4: *"These are design defaults for the panel... to revise, not fitted
+  sec:weights: *"These are design defaults for the panel... to revise, not fitted
   estimates."*
 - `learn_i` and hybrid `phi_m` require practitioner elicitation the paper
   names but does not design an instrument for (`docs/assumptions.md` A2-A3).
   The paper's own proposed path is a municipal pilot with human-subjects
-  oversight (report Phase 11), not a training run.
+  oversight (the pre-release audit's Phase 11), not a training run.
 - `N_k, r_k, h_k` come from municipal HR/pension/licensing records — real
   administrative data, not a training corpus.
 
 ## If you build the optional surrogate anyway
 
-If a deployment decides to build the §6.4 surrogate, treat it as new work
+If a deployment decides to build the sec:weights surrogate, treat it as new work
 outside this repository's paper-fidelity claim:
 
 1. Implement it behind `civicworkos.market.contracts.MarketProtocol`, as a
@@ -54,6 +54,6 @@ outside this repository's paper-fidelity claim:
 2. Document its architecture, training data, and validation in a new file
    (e.g. `docs/surrogate_model.md`) — do not fold it into this document,
    since it would not be reproducing anything the paper specifies.
-3. Never claim the 50-epoch/batch-256/lr-1e-3 hyperparameters from §6.4
+3. Never claim the 50-epoch/batch-256/lr-1e-3 hyperparameters from sec:weights
    validate your architecture choice; they are the paper's only stated
    numbers and say nothing about model shape.

@@ -1,16 +1,16 @@
-# Worker group taxonomy: Paper Sec. 3.1.
+# Worker group taxonomy: Paper sec:problem.
 #
 # g in G is defined as the CROSS PRODUCT of four dimensions:
 #   occupational_class x gender x contract_status x district_of_residence
 #
 # contract_status distinguishes payroll from non-payroll workers
 # (permanent / fixed_term / contracted / platform_mediated). This
-# distinction is what makes report Sec. 20's "excluded workforce"
-# limitation visible: N_k(t) (Eq. 9) is drawn from municipal workforce
+# distinction is what makes the pre-release audit's "excluded workforce"
+# limitation visible: N_k(t) (eq:hcpb-estimator) is drawn from municipal workforce
 # records and structurally does not see `contracted` or
 # `platform_mediated` workers, so they are ineligible assignees under
-# Eq. 10 and unprotected by Eq. 12 -- "the framework's most consequential
-# distributional limitation" (Paper Sec. 5.3, Sec. 8.1).
+# eq:accessshare and unprotected by eq:justtransition -- "the framework's most consequential
+# distributional limitation" (Paper sec:worked, the pre-release audit).
 #
 # This file documents the taxonomy; it is not consumed by a typed loader
 # in this repository (see docs/assumptions.md A5) -- per-domain group

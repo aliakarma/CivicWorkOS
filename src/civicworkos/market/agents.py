@@ -1,10 +1,10 @@
 """[INVENTED -- Category C approximation, NOT paper content]
 
-Paper Sec. 3.8 names ten market agents and what each estimates
+Paper sec:layer6 names ten market agents and what each estimates
 (capability, quality, trust, cost, energy, safety, developmental share,
 debt components, service equity, transition burden) but specifies NO
-computation for any of them except D_skill = 1 - phi_m (Eq. 7) and phi_H
-= 1, phi_A = phi_R = phi_{A+R} = 0 (also Eq. 7). Report Sec. 8.1 states
+computation for any of them except D_skill = 1 - phi_m (eq:phi) and phi_H
+= 1, phi_A = phi_R = phi_{A+R} = 0 (also eq:phi). The pre-release audit states
 this plainly: "The framework's entire output is a function of numbers
 no one currently knows how to produce."
 
@@ -14,7 +14,7 @@ stand-in for those ten agents, built so the simulation testbed
 exercised end-to-end on synthetic tasks. It is NOT used by the
 worked-example oracle test (tests/smoke/test_worked_example.py), which
 instead constructs term vectors directly from the paper's published
-Table 3 values -- this heuristic estimator has no claim to reproduce
+tab:worked-terms values -- this heuristic estimator has no claim to reproduce
 those or any other paper number, and must never be cited as doing so.
 
 The method: each pure mode (H, A, R) has a fixed "archetype" vector over
@@ -63,9 +63,9 @@ _ARCHETYPES: dict[str, dict[str, float]] = {
 
 _DEFAULT_HYBRID_PHI = {"H+A": 0.75, "H+R": 0.70, "H+A+R": 0.55}
 """[INVENTED] Illustrative hybrid developmental shares, matching the
-worked example's own illustrative values (Paper Table, Sec. 5.3) as a
+worked example's own illustrative values (Paper Table, sec:worked) as a
 reasonable default -- NOT a claim that these are correct for any real
-domain. Real deployments must elicit these per Paper Sec. 3.5."""
+domain. Real deployments must elicit these per Paper sec:hcpb."""
 
 
 def _clip01(x: float) -> float:
@@ -117,9 +117,9 @@ def _combine(vectors: list[dict[str, float]]) -> dict[str, float]:
 
 @dataclass
 class HeuristicMarket:
-    """[INVENTED] Deterministic stand-in for the ten market agents of Sec. 3.8.
+    """[INVENTED] Deterministic stand-in for the ten market agents of sec:layer6.
 
-    hybrid_phi: per-domain hybrid developmental shares (Eq. 7); falls
+    hybrid_phi: per-domain hybrid developmental shares (eq:phi); falls
         back to `_DEFAULT_HYBRID_PHI` if a domain has not configured its own.
     oversight_cost_penalty: [REC] extra Cost, and oversight_phi_boost extra
         phi_m, applied when the policy status is allow_with_oversight
@@ -162,7 +162,7 @@ class HeuristicMarket:
             Pr=combined["privacy"],
         )
         debts = DebtComponents(
-            D_skill=1.0 - phi_m,  # Eq. 7: the one component the paper does specify.
+            D_skill=1.0 - phi_m,  # eq:phi: the one component the paper does specify.
             D_fall=combined["fallback"],
             D_acct=combined["acct"],
             D_dep=combined["dep"],

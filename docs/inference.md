@@ -37,7 +37,7 @@ engine = AllocationEngine(
     hcpb_params=hcpb_params, reserve_states=reserve_states,
     access_constraints=access_constraints, worker_groups=worker_groups,
     score_weights=score_weights, debt_weights=debt_weights,
-    duals=Duals(lambda_k={"structural_inspection": 0.0250}),
+    duals=Duals(lambda_k={"structural_inspection": 0.045353}),
     audit_store=audit_store, feedback_bus=feedback_bus,
     config_version="v2026-09-01", authorizing_panel_decision="PANEL-2026-001",
 )

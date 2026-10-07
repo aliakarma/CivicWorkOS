@@ -1,4 +1,4 @@
-"""Unit tests for civicworkos.constraints.resilience: Eq. 13-14, and the
+"""Unit tests for civicworkos.constraints.resilience: eq:cs and eq:res3r, and the
 invented task-granularity Delta^res_s(m) attribution."""
 
 from __future__ import annotations

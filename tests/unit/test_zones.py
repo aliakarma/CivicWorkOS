@@ -1,4 +1,4 @@
-"""Unit tests for civicworkos.zones.oversight_zones: Table 2, Suppl. S1.4.
+"""Unit tests for civicworkos.zones.oversight_zones: tab:zones, Suppl. S1.4.
 
 The load-bearing property under test: automatic DEMOTION is allowed;
 automatic RESTORATION is not, and must always carry a panel decision.

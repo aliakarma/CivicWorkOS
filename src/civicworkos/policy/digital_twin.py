@@ -1,22 +1,22 @@
-"""Policy Digital Twin: Paper Sec. 3.4, Eq. 6.
+"""Policy Digital Twin: Paper sec:policytwin, eq:policy.
 
     P(T_i, m, t) in {allow, allow-with-oversight, restrict, prohibit}
 
 Converts statute, ordinance, licensing, and collective-agreement rules
 into machine-checkable predicates, evaluated PER MODE (not per task) --
 the paper is explicit that per-task filtering is a specification error
-(report Sec. 20, Phase 3 validation criterion).
+(the pre-release audit, Phase 3 validation criterion).
 
 `allow-with-oversight` binds a designated reviewer and propagates two
 effects the paper requires and this repository implements as annotations
 on the returned PolicyDecision, for the market layer to consume: reviewer
-time enters that mode's Cost, and phi_m is raised (Paper Sec. 3.4).
+time enters that mode's Cost, and phi_m is raised (Paper sec:policytwin).
 
 `restrict` narrows candidates to modes retaining a minimum human share;
 this repository's PolicyDigitalTwin.filter_modes() applies that directly.
 
 Rule currency ("a recurring legal-engineering cost, not a one-time
-setup", Paper Sec. 5.1) is modeled by requiring every PolicyRule to carry
+setup", Paper sec:feedback) is modeled by requiring every PolicyRule to carry
 a version and an effective_date, so a rule-staleness report is possible
 (civicworkos.utils.staleness, used by docs/deployment.md's monitoring list).
 """
@@ -35,7 +35,7 @@ _SEVERITY_ORDER = ("allow", "allow_with_oversight", "restrict", "prohibit")
 
 
 class PolicyStatus(str, Enum):
-    """The four-valued status of Eq. 6."""
+    """The four-valued status of eq:policy."""
 
     ALLOW = "allow"
     ALLOW_WITH_OVERSIGHT = "allow_with_oversight"
@@ -70,7 +70,7 @@ class PolicyRule:
 
     rule_id: stable identifier for audit-trail linkage.
     version: this rule's revision (every parameter change is a signed,
-        dated policy act -- Paper Sec. 5.1).
+        dated policy act -- Paper sec:feedback).
     effective_date: when this version took effect.
     description: human-readable statement of the underlying statute,
         ordinance, licensing rule, or collective-agreement clause.
@@ -85,7 +85,7 @@ class PolicyRule:
 
 
 class PolicyDigitalTwin:
-    """Evaluates Eq. 6 per mode against a versioned rule base."""
+    """Evaluates eq:policy per mode against a versioned rule base."""
 
     def __init__(self, rules: list[PolicyRule] | None = None) -> None:
         self._rules: list[PolicyRule] = list(rules) if rules else []
@@ -98,9 +98,20 @@ class PolicyDigitalTwin:
         return list(self._rules)
 
     def status(self, task: TaskProfile, mode: str, t: date | None = None) -> PolicyStatus:
-        """P(T_i, m, t) (Eq. 6): the combined status for one (task, mode)."""
-        if mode not in MODES:
-            raise ValueError(f"unknown mode {mode!r}; must be one of {MODES}")
+        """P(T_i, m, t) (eq:policy): the combined status for one (task, mode).
+
+        `mode` may be an execution mode ("H+A+R") or a staffed mode
+        ("H+A+R/a1"), which sec:problem defines as an execution mode paired with
+        a roster at a declared career stage. Validation applies to the execution
+        mode; the roster suffix is free-form, because the set of admissible
+        rosters is a per-task property of who is available, not a fixed
+        enumeration the twin could check against.
+        """
+        family = mode.split("/", 1)[0]
+        if family not in MODES:
+            raise ValueError(
+                f"unknown execution mode {family!r} in {mode!r}; must be one of {MODES}"
+            )
         applicable = []
         for rule in self._rules:
             if t is not None and rule.effective_date > t:
@@ -128,7 +139,7 @@ class PolicyDigitalTwin:
 
 
 def requires_licensed_human_rule(rule_id: str, version: str, effective_date: date, description: str) -> PolicyRule:
-    """Factory for the worked example's statutory sign-off rule (Paper Sec. 5.3):
+    """Factory for the worked example's statutory sign-off rule (Paper sec:worked):
 
     "A structural determination of this kind carries a statutory sign-off
     requirement, so the Policy Digital Twin returns prohibit for every
@@ -136,7 +147,16 @@ def requires_licensed_human_rule(rule_id: str, version: str, effective_date: dat
     """
 
     def predicate(task: TaskProfile, mode: str) -> PolicyStatus | None:
-        if "H" not in mode.split("+"):
+        # The guard reads the execution-mode family, not the staffed-mode
+        # string: sec:problem writes a staffed mode as "H+A+R/a1", pairing a
+        # mode with a roster at a declared career stage. A statutory sign-off
+        # requirement is a property of the mode -- whether a licensed human is
+        # present at all -- and says nothing about the roster's career stage, so
+        # the suffix is stripped before the family is examined. Splitting the
+        # raw string would prohibit "H/a1", which is the one staffed mode that
+        # is entirely human.
+        family = mode.split("/", 1)[0]
+        if "H" not in family.split("+"):
             return PolicyStatus.PROHIBIT
         return None
 

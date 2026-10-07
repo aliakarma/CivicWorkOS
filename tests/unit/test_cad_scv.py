@@ -1,4 +1,4 @@
-"""Unit tests for civicworkos.scoring: Eq. 2 (CAD) and Eq. 15 (SCV)."""
+"""Unit tests for civicworkos.scoring: eq:cad (CAD) and eq:scv (SCV)."""
 
 from __future__ import annotations
 
@@ -45,7 +45,7 @@ def test_cad_all_one_components_gives_unit_debt():
 
 def test_scv_penalizes_cad():
     """Holding all flow terms fixed, higher CAD must strictly reduce SCV
-    (Eq. 15's -w9*CAD term) -- the mechanism's whole reason to exist.
+    (eq:scv's -w9*CAD term) -- the mechanism's whole reason to exist.
     """
     sw = ScoreWeights.paper_default()
     tv = TermVector(Q=0.8, S=0.8, P=0.8, Eq_srv=0.8, Tr=0.8, Cost=0.2, En=0.2, Pr=0.2)
@@ -56,7 +56,7 @@ def test_scv_penalizes_cad():
 
 
 def test_effective_weights_match_table4():
-    """Paper Table 4 prints these rounded to 3 decimals (e.g. 0.22*0.28 =
+    """Paper tab:weights prints these rounded to 3 decimals (e.g. 0.22*0.28 =
     0.0616 displays as 0.062). This test checks the EXACT arithmetic our
     code performs, with a tolerance wide enough to cover the paper's own
     rounding, rather than asserting equality with the rounded display."""
@@ -77,7 +77,7 @@ def test_effective_weights_match_table4():
     assert effective["energy"] == pytest.approx(0.030)
     assert effective["vendor_dependency"] == pytest.approx(0.0264, abs=1e-6)
     assert sum(effective.values()) == pytest.approx(1.000, abs=1e-9)
-    # Table 4's headline claim: the deferred (debt) block is the single
+    # tab:weights's headline claim: the deferred (debt) block is the single
     # largest share of the objective, larger than productivity (0.14).
     deferred_block = (
         effective["skill_formation"] + effective["fallback_capacity"]

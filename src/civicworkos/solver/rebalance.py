@@ -1,16 +1,16 @@
-"""Periodic rebalance: solve Eq. 16, publish duals.
+"""Periodic rebalance: solve eq:program, publish duals.
 
-Paper Sec. 4.4-4.5: "The relationship between the two [online rule and
+Paper sec:program and sec:online: "The relationship between the two [online rule and
 batch program] is standard for Lagrangian decomposition." The paper
-names NEITHER a solver NOR a dual-extraction method (report Sec. 9.2,
+names NEITHER a solver NOR a dual-extraction method (the pre-release audit,
 "Unspecified"). This module makes an explicit, documented choice
-(report Sec. 16.2's recommendation): solve the MIP for the assignment
+(the pre-release audit's recommendation): solve the MIP for the assignment
 x, then solve the LP RELAXATION of the SAME model to extract shadow
 prices, because integer programs do not have LP-style duals -- reading
 them off a MIP incumbent would be meaningless.
 
 Backend: PuLP with its bundled CBC solver. The paper names "a mixed-
-integer solver" without specifying one; report Sec. 17 recommends "a
+integer solver" without specifying one; the pre-release audit recommends "a
 modelling layer with pluggable open and commercial backends" so the
 formulation is not rewritten to change solvers -- PuLP already provides
 that pluggability (CBC by default; GLPK, HiGHS, Gurobi, CPLEX etc. via
@@ -39,10 +39,10 @@ class RebalanceResult:
 
 
 _DEFAULT_TIME_LIMIT_SECONDS = 60
-"""[REC, not in the paper] Eq. 16 is NP-hard in general and the paper
-gives no problem-size envelope or infeasibility/timeout policy (report
-Sec. 8.1, Sec. 18.2). A large population of near-IDENTICAL task
-candidates (as in the worked example scaled to 340 tasks) is also
+"""[REC, not in the paper] eq:program is NP-hard in general and the paper
+gives no problem-size envelope or infeasibility/timeout policy (the
+pre-release audit flags both). A large population of near-IDENTICAL task
+candidates (as in the worked example at its full 2,100 inspections) is also
 combinatorially symmetric, which can make branch-and-bound solvers
 explore far longer than the LP relaxation's triviality would suggest.
 Rather than let a rebalance hang indefinitely, this module bounds the
@@ -73,7 +73,7 @@ def _solve(problem: pulp.LpProblem, solver: pulp.LpSolver | None) -> str:
 
 
 def solve_rebalance(inputs: ProgramInputs, *, solver: pulp.LpSolver | None = None) -> RebalanceResult:
-    """Solve Eq. 16 (MIP) for the assignment, then its LP relaxation for duals."""
+    """Solve eq:program (MIP) for the assignment, then its LP relaxation for duals."""
     mip = build_program(inputs, integer=True)
     mip_status = _solve(mip.problem, solver)
     if mip_status != "Optimal":
@@ -115,7 +115,7 @@ def solve_rebalance(inputs: ProgramInputs, *, solver: pulp.LpSolver | None = Non
         nu_kg=nu_kg,
         dual_extraction_method=(
             "LP relaxation shadow price (constraint.pi), sign normalized to "
-            "the paper's non-negative dual convention (Eq. 17: lambda,mu,nu >= 0)"
+            "the paper's non-negative dual convention (eq:aug: lambda,mu,nu >= 0)"
             if lp_status == "Optimal"
             else f"LP relaxation status was {lp_status}, no duals extracted"
         ),

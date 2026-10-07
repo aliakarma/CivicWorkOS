@@ -1,4 +1,4 @@
-"""Unit tests for civicworkos.policy.digital_twin: Eq. 6."""
+"""Unit tests for civicworkos.policy.digital_twin: eq:policy."""
 
 from __future__ import annotations
 
@@ -76,8 +76,20 @@ def test_most_restrictive_status_wins_when_rules_overlap():
 
 def test_unknown_mode_rejected():
     twin = PolicyDigitalTwin()
-    with pytest.raises(ValueError, match="unknown mode"):
+    with pytest.raises(ValueError, match="unknown execution mode"):
         twin.status(_task(), "Z", date(2026, 1, 1))
+
+
+def test_staffed_mode_names_are_accepted():
+    """sec:problem writes a staffed mode as an execution mode paired with a
+    roster at a declared career stage. Validation applies to the execution mode;
+    the roster suffix is free-form, because which rosters are admissible depends
+    on who is available for the task rather than on a fixed enumeration."""
+    twin = PolicyDigitalTwin()
+    assert twin.status(_task(), "H+A+R/a1", date(2026, 1, 1)) == PolicyStatus.ALLOW
+    assert twin.status(_task(), "H/a0", date(2026, 1, 1)) == PolicyStatus.ALLOW
+    with pytest.raises(ValueError, match="unknown execution mode"):
+        twin.status(_task(), "Z/a1", date(2026, 1, 1))
 
 
 def test_rule_can_be_added_live_without_redeploying_the_market():

@@ -117,6 +117,20 @@ Every reviewer finding, plus the four this document adds, mapped to a phase. Kee
 >
 > **Phase 2 closed.** All Phase 2 gates green: `check.sh 2` reports 15 passed / 0 failed, `audit_numbers.py` exits 0 with 187 PASS and 0 FAIL. The register grew from 160 to 189 comparisons. The two remaining KNOWN entries are the pre-deletion records of M4 and M5, whose sites Phase 1 removed with Section 8; they are an audit trail, not outstanding work. The substantive change is M3: Figure 3's coordinates previously had no stated provenance and could not be recovered from any declared parameter set, so Phase 2 adds Table 11 (`tab:cadparams`), which fixes $(c_j, \pi_{j,\infty}, \tau_j)$ for all five CAD components of all six strategies, and replots the figure from it. All 116 plotted coordinates are now checked against Equation (47). Word count rose 19,390 → 19,636, which Phase 4 absorbs.
 
+> **Phase 3 closed.** All Phase 3 gates green: `check.sh 3` reports 16 passed / 0 failed, `check_repo.py` 3/3, `scripts/verify_worked_example.py` 82 checks, `pytest` 196 passed. Verified from an empty virtualenv built from `requirements.txt` alone, which is the condition that exposed N3.
+>
+> **N2 was three times larger than the register recorded, and that is the finding of this phase.** The defect was not one stale script. `scripts/verify_worked_example.py`, `tests/smoke/test_worked_example.py` (labelled "THE ORACLE") and `tests/integration/test_rebalance_solver.py` each carried their own copy of the worked example's inputs, all three had drifted to the same earlier draft, and all three passed. Beyond them the drift reached the shipped domain configuration (`h_k: 600` where `eq:hconv` gives 1,440, so `B_k` computed from the repository's own governance artifact did not match the article), the demo duals in `scripts/`, `sim/` and the README, and six further test fixtures. The repository was wholly parameterised on a superseded draft while advertising itself as the article's reproducibility artifact.
+>
+> The fix is therefore structural rather than numerical. `manuscript_values.py` re-exports the constants in `audit_numbers.py`, which is already the manuscript's own arithmetic gate, and no repository file now restates a value the article states. What the checks hold is the *printed* values, because the question they exist to answer is whether this code reproduces what was published. The capability price 0.045353 is now recovered three independent ways: by the hand-rolled LP in `tests/smoke`, by the general MIP builder through `civicworkos.program` + `civicworkos.solver`, and by closed-form algebra in `audit_numbers.py`.
+>
+> **Two substantive code changes fell out of the reconciliation.** First, `civicworkos.analytic.debt_model` implemented the superseded single-scalar debt curve; it now implements the five-component `eq:cadmodel`, which closes documented assumption A9 and carries the unflattering consequence into the artifact: CivicWorkOS does not bound total debt, and Human-First accrues less until year 13.23. Second, staffed-mode names are now valid throughout — `PolicyDigitalTwin.status` and `task_delta_resilience` validate the execution-mode family and ignore the roster suffix, so `H/a1` is no longer prohibited by the statutory sign-off guard. That let the Algorithm 1 pipeline test move onto the eight staffed modes and assert the ranking reversal at the article's own values.
+>
+> **One divergence is recorded rather than fixed.** `eq:aug` prices `\ell_i \phi_m \psi_a`, while the online rule and the MIP builder multiply by a single `phi_m` field that callers must load with the credited share. The arithmetic is identical and the gates confirm it; the typed distinction is not there. Logged as assumption A12 with the change that would close it.
+>
+> **N4 was closed by label rather than by renumbering.** The programme offered either option and noted the second was better; the whole-repository label conversion is Phase-4-proof, and `check_repo.py` gate A resolves every cited label against `CivicWorkOS.aux` so a mistyped label cannot be as silent as a stale number was. References to the undistributed `PROJECT_REPORT.md` became "the pre-release audit", since a section number in a document the reader does not have is not a citation.
+>
+> **Also closed:** the supplement's claim that archived calibration snapshots accompany the replication package (Reviewer 2 listed it among the missing essentials). No snapshots exist; App. `app:calib` now says so, names each series and its issuing body, and states that no reported result depends on them. The README's badge, dependency pin, sample output, worked-example tables and the A9 discussion are all rebuilt on the current article.
+
 | ID | Severity | Issue | Location (compiled) | Phase | Status |
 |---|---|---|---|---|---|
 | **C1** | Critical | §8 reports an unconducted study | §8, lines 1361–1583 | 1 | ☑ Closed. §8 deleted entire (388 lines). `removed_sections.tex` keeps the audit trail. |
@@ -155,10 +169,10 @@ Every reviewer finding, plus the four this document adds, mapped to a phase. Kee
 | **L6** | Low | `\correspondance{}` passed empty | line 97 | 5 | ☐ |
 | **L7** | Low | "AA" initials collide (Ali Akarma / Abdulaziz Alqurashi) | line 1724 | 5 | ☐ |
 | **L8** | Low | Intake requirement buried; deserves Abstract + a figure | §6.6 → Abstract | 6 | ☐ |
-| **N1** | **Critical (new)** | `README.md` author list does not match the manuscript | `README.md` line 5 | 3 | ☐ |
-| **N2** | **High (new)** | `verify_worked_example.py` verifies a *different* worked example (B_k = 2,073.6 vs the manuscript's 4,976.64) | `scripts/verify_worked_example.py` | 3 | ☐ |
-| **N3** | **High (new)** | The verification gate does not run: `pulp` is not installed; the script aborts at the constrained-optimum stage | repo environment | 3 | ☐ |
-| **N4** | Medium (new) | Repo and README cite a third section numbering (§5.3, §7.1) | `README.md`, `scripts/`, `sim/` docstrings | 3 | ☐ |
+| **N1** | **Critical (new)** | `README.md` author list does not match the manuscript | `README.md` line 5 | 3 | ☑ Closed. `README.md` and `CITATION.cff` rebuilt on `\def\Authors`, with affiliations and the corresponding author. `check_repo.py` gate C fails on any future divergence. |
+| **N2** | **High (new)** | `verify_worked_example.py` verifies a *different* worked example (B_k = 2,073.6 vs the manuscript's 4,976.64) | `scripts/verify_worked_example.py` | 3 | ☑ Closed, and wider than scoped — see the Phase 3 note. The defect was in **three** places, not one, and the fix is structural: `manuscript_values.py` re-exports `audit_numbers.py`, so no repository file restates a manuscript value. 82 checks, all green. |
+| **N3** | **High (new)** | The verification gate does not run: `pulp` is not installed; the script aborts at the constrained-optimum stage | repo environment | 3 | ☑ Closed. `pulp` was already in `requirements.txt`, but pinned `<4`; 3.x breaks the suite under `filterwarnings = error::DeprecationWarning`. Repinned `<3`. Verified from an empty virtualenv built from `requirements.txt` alone. |
+| **N4** | Medium (new) | Repo and README cite a third section numbering (§5.3, §7.1) | `README.md`, `scripts/`, `sim/` docstrings | 3 | ☑ Closed by label, not by renumbering, so Phase 4 cannot reopen it. 565 references across the whole repository now cite LaTeX labels; `check_repo.py` gates A and B enforce it. |
 | **N5** | **High (new)** | Every in-text citation prints its authors twice (`Author~\cite{key}` under Frontiers-Harvard renders "Author Author (year)"); parenthetical citations render unbracketed | ~30 sites throughout `CivicWorkOS.tex` | 7 | ☐ |
 
 ---
@@ -322,11 +336,11 @@ This phase is not cosmetic. The repository is the artifact that triggered the re
 
 **Success criteria**
 
-- ☐ `git clone` into a clean directory → `pip install -r requirements.txt` → `python scripts/verify_worked_example.py` exits **0** with every check PASS against the manuscript's printed values. Run this from an empty virtualenv, not your development environment.
-- ☐ `pytest` exits 0 and the reported test count matches the README badge.
-- ☐ `grep -rn "Sec\. [0-9]" README.md scripts/ sim/ docs/` returns only references that match the compiled manuscript.
-- ☐ README author list, `CITATION.cff`, and `\def\Authors` are byte-identical in names and order.
-- ☐ Either the calibration snapshots are in the repository, or no sentence in the manuscript claims they are.
+- ☑ `git clone` into a clean directory → `pip install -r requirements.txt` → `python scripts/verify_worked_example.py` exits **0** with every check PASS against the manuscript's printed values. Verified from an empty virtualenv: 82 checks, 0 failures, `PuLP 2.9.0` resolved from the repinned requirement.
+- ☑ `pytest` exits 0 and the reported test count matches the README badge. 196 passed, badge and per-suite table both updated; `check.sh` now compares the two automatically.
+- ☑ Superseded by a stronger gate. No numbered manuscript reference remains anywhere in the repository, and every cited label resolves in `CivicWorkOS.aux` — `check_repo.py` gates A and B, over 98 files rather than the four the criterion named.
+- ☑ README author list, `CITATION.cff`, and `\def\Authors` agree in names and order, checked by `check_repo.py` gate C rather than by eye.
+- ☑ No sentence claims they are. App. `app:calib` states that no archived snapshots accompany the article, names each series and its issuing body, and records that no reported result depends on them.
 
 **Effort:** 6–8 hours (1 day).
 **Compute:** clean-environment install ≈ 2–4 min; `pytest` suite — measure it, likely under 60 s for 164 unit tests; verification script < 5 s with `pulp` present. Total **under 10 minutes**.

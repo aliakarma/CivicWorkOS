@@ -1,11 +1,11 @@
-"""Unit tests for civicworkos.online.algorithm1.admissible(): Eq. 18.
+"""Unit tests for civicworkos.online.algorithm1.admissible(): eq:admis.
 
-This is the paper's most important correction (Sec. 4.5) and the one
-report Sec. 9.1's failure-mode #1 warns is easiest to get wrong:
+This is the paper's most important correction (sec:online) and the one
+the pre-release audit's failure-mode #1 warns is easiest to get wrong:
 implementing a NAIVE per-constraint filter instead of the
 feasibility-restoration form causes total collapse to Z4 in exactly the
 below-threshold state the framework exists to escape. Every branch of
-Eq. 18 is exercised explicitly below so this property cannot regress
+eq:admis is exercised explicitly below so this property cannot regress
 silently.
 """
 
@@ -51,7 +51,7 @@ def test_resilience_clause_ordinary_case_rejects_a_mode_that_breaches_threshold(
 
 
 def test_resilience_feasibility_restoration_branch_admits_improving_mode():
-    """THE KEY CORRECTION (Eq. 18, clause 2): reserve is currently BELOW
+    """THE KEY CORRECTION (eq:admis, clause 2): reserve is currently BELOW
     threshold (20 < 30). A naive filter would reject every mode here. The
     paper's actual rule admits a mode that does not worsen it
     (delta_res >= 0), even though the post-state (20+5=25) is still below
@@ -64,7 +64,7 @@ def test_resilience_feasibility_restoration_branch_admits_improving_mode():
 def test_resilience_feasibility_restoration_branch_still_rejects_a_worsening_mode():
     """Same below-threshold state, but this candidate mode WORSENS
     reserve (delta_res < 0) -- must still be rejected even though the
-    city is already below threshold, per Eq. 18's 'must not worsen it'."""
+    city is already below threshold, per eq:admis's 'must not worsen it'."""
     ok, reason = admissible(**_base_kwargs(resilience_now=20.0, rho_s=30.0, delta_res=-1.0))
     assert not ok
     assert reason == "resilience_clause"
@@ -86,7 +86,7 @@ def test_capability_clause_accrual_is_monotonic_so_a_satisfied_budget_stays_sati
 
 
 def test_capability_feasibility_restoration_branch_admits_any_phi_positive_mode():
-    """THE KEY CORRECTION (Eq. 18, clause 3): Lambda_k is currently BELOW
+    """THE KEY CORRECTION (eq:admis, clause 3): Lambda_k is currently BELOW
     the pro-rated trajectory (1000 < 1500) -- the domain is already
     behind budget. A naive filter would reject every mode that doesn't
     immediately close the gap. The paper's rule admits ANY mode with
@@ -106,7 +106,7 @@ def test_capability_feasibility_restoration_branch_rejects_phi_zero_mode():
     below threshold would have every mode removed and every task routed
     to human-reserved execution, including the robot allocations that
     would free the human capacity needed to climb back above threshold' --
-    Eq. 18 prevents routing to Z4 for OTHER modes, but a phi=0 mode
+    eq:admis prevents routing to Z4 for OTHER modes, but a phi=0 mode
     itself is correctly excluded because it cannot help."""
     ok, reason = admissible(
         **_base_kwargs(lambda_accrued_now=1000.0, b_bar_k=1500.0, ell_i=8.0, phi_m=0.0)
@@ -126,7 +126,7 @@ def test_capability_clause_satisfied_when_post_state_clears_budget():
 def test_clause_order_safety_checked_before_resilience_and_capability():
     """An unsafe mode is rejected on the safety floor even if it would
     also fail the resilience or capability clauses -- the reason
-    reported must be the FIRST failing clause (Eq. 18's stated order)."""
+    reported must be the FIRST failing clause (eq:admis's stated order)."""
     ok, reason = admissible(
         **_base_kwargs(
             safety_estimate=0.1, safety_min=0.5,

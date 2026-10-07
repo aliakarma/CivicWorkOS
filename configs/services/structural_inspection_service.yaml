@@ -1,14 +1,14 @@
-# Governance artifact: 3R Reserve (Eq. 13-14) parameters for the critical
+# Governance artifact: 3R Reserve (eq:cs and eq:res3r) parameters for the critical
 # service "structural_inspection_service". These are illustrative demo
 # values for the simulation testbed (civicworkos.sim), NOT paper data --
-# the worked example (Paper Sec. 5.3) does not instantiate the 3R Reserve
+# the worked example (Paper sec:worked) does not instantiate the 3R Reserve
 # for this domain at all, so nothing here can be checked against the paper.
 service: structural_inspection_service
 version: "v2026-09-01"
 effective_date: 2026-09-01
 
 # C_{s,c}(t): automation-dependent capacity components serving this
-# service (Paper Sec. 3.7 examples: "an AI agent pool, a robot fleet
+# service (Paper sec:layer5 examples: "an AI agent pool, a robot fleet
 # class, a vendor platform").
 component_capacities:
   ai_inspection_pool: 40.0

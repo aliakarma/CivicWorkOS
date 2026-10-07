@@ -1,4 +1,4 @@
-"""Unit tests for civicworkos.appeals.contestability: Suppl. S1.1-S1.4."""
+"""Unit tests for civicworkos.appeals.contestability: Suppl. app:contest."""
 
 from __future__ import annotations
 

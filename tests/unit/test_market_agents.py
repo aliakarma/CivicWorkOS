@@ -42,7 +42,7 @@ def test_all_terms_and_debts_are_within_unit_interval():
 
 def test_d_skill_always_equals_one_minus_phi_m():
     """The one debt component the paper DOES define as a computation
-    (Eq. 7): D_skill = 1 - phi_m, for every mode."""
+    (eq:phi): D_skill = 1 - phi_m, for every mode."""
     market = HeuristicMarket()
     task = _task()
     for mode in ("H", "A", "R", "H+A", "H+R", "A+R", "H+A+R"):

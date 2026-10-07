@@ -1,4 +1,4 @@
-"""Simulation engine: a REDUCED-SCOPE stand-in for Paper Sec. 6.1's "city
+"""Simulation engine: a REDUCED-SCOPE stand-in for Paper sec:protocol's "city
 digital twin and multi-agent discrete-event simulation."
 
 Scope reduction (documented in docs/assumptions.md A10, not hidden):
@@ -6,17 +6,17 @@ this is a TIME-STEPPED sequential task processor, not a priority-queue
 discrete-event engine, and it runs over a short demo horizon (a
 configurable number of synthetic tasks) rather than the paper's ten
 simulated years across six sectors. It computes a SUBSET of the
-paper's thirteen metrics (Sec. 6.3):
+paper's thirteen metrics (sec:protocol):
 
     IMPLEMENTED (approximated on synthetic data):
       - productivity_index, operating_cost_index (raw means; the paper
         normalizes both to Automation-First = 100, done by the caller)
-      - accumulated_cad (running sum of Eq. 2)
+      - accumulated_cad (running sum of eq:cad)
       - capability_formation_index (delivered practice hours / B_k)
       - z4_routing_rate (CivicWorkOS only -- the other four strategies
         have no Z4 fallback concept in this reduced model)
 
-    NOT IMPLEMENTED here (report Sec. 12.4 items 4-5, 10-13):
+    NOT IMPLEMENTED here (the pre-release audit items 4-5, 10-13):
       safety incidents, energy use index, mean recovery time (no stress-
       scenario injection wired into this loop -- see sim.stress for the
       scenario definitions themselves), realized dual reporting beyond a
@@ -87,7 +87,7 @@ def _run_unconstrained_strategy(
     market: HeuristicMarket,
     reference_date: date,
 ) -> SimulationMetrics:
-    """Run one of the four ablation strategies (no Eq. 8/11/12/14 enforcement)."""
+    """Run one of the four ablation strategies (no eq:hcpb/11/12/14 enforcement)."""
     metrics = SimulationMetrics(strategy=strategy)
     if not tasks:
         return metrics
@@ -146,8 +146,8 @@ def run_strategy(
     """Run one strategy over a batch of tasks and return reduced-scope metrics.
 
     CivicWorkOS runs through the real constrained AllocationEngine
-    (Eq. 8, 11-12, 14, 17-19); the other four strategies run through the
-    unconstrained ablation scorer above, matching Paper Sec. 6.2's own
+    (eq:hcpb, 11-12, 14, 17-19); the other four strategies run through the
+    unconstrained ablation scorer above, matching Paper sec:protocol's own
     description of them as constraint-relaxed configurations.
     """
     reference_date = reference_date or date.today()
@@ -163,7 +163,7 @@ def run_strategy(
     ledger.initialize(LedgerSnapshot(domain=domain, H_k=0, A_k=0, R_k=0, F_k=0, E_k=0))
 
     active_duals = duals or Duals(
-        lambda_k={domain: 0.0250},
+        lambda_k={domain: 0.045353},
         rebalance_timestamp=datetime.now(timezone.utc),
     )
 
