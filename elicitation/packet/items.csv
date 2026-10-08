@@ -1,0 +1,18 @@
+item_bank,item_id,description,risk,crit,status
+learn_phi,T01,"One cycle of fatigue-crack assessment on a steel girder span (the article's worked task)",0.70,0.90,fixed by the article
+learn_phi,T02,"Visual inspection of bearing condition at an expansion joint",0.40,0.60,DRAFT - domain expert to set
+learn_phi,T03,"Concrete deck delamination survey by hammer sounding",0.35,0.55,DRAFT - domain expert to set
+learn_phi,T04,"Scour assessment at a pier foundation after a flood event",0.65,0.85,DRAFT - domain expert to set
+learn_phi,T05,"Review and sign-off of a routine inspection report",0.30,0.70,DRAFT - domain expert to set
+learn_phi,T06,"Corrosion mapping of a steel truss member",0.50,0.65,DRAFT - domain expert to set
+learn_phi,T07,"Load-rating recalculation after a section-loss finding",0.60,0.90,DRAFT - domain expert to set
+learn_phi,T08,"Post-tensioning tendon anchorage inspection",0.75,0.90,DRAFT - domain expert to set
+learn_phi,T09,"Routine measurement of crack width against a monitored gauge",0.25,0.40,DRAFT - domain expert to set
+learn_phi,T10,"Underwater inspection of a submerged substructure element",0.80,0.75,DRAFT - domain expert to set
+learn_phi,T11,"Assessment of a retrofit weld repair",0.55,0.80,DRAFT - domain expert to set
+learn_phi,T12,"Initial condition survey of a previously uninspected structure",0.45,0.70,DRAFT - domain expert to set
+psi_ratio,C1,"Low-risk, low-criticality routine tasks (e.g. T09)",0.30,0.40,DRAFT - domain expert to set
+psi_ratio,C2,"Moderate-risk tasks (e.g. T02, T03, T06)",0.45,0.60,DRAFT - domain expert to set
+psi_ratio,C3,"High-criticality tasks (e.g. T01, T07, T11)",0.65,0.90,DRAFT - domain expert to set
+psi_ratio,C4,"High-risk, high-criticality tasks (e.g. T04, T08, T10)",0.78,0.85,DRAFT - domain expert to set
+h_raw,R1,"The certification route to independent competence in structural inspection in the participating body",,,single target; see analysis-plan.md section 6

@@ -438,6 +438,42 @@ else
   gate 8 "default branch carries the revision (N6)" fail "origin/main ${main_sha:0:7} lacks HEAD"
 fi
 
+# -------------------------------------------------- evidence upgrade (Phase 9) ----
+echo
+echo "Evidence upgrade (Phase 9a: elicitation readiness)"
+
+# The elicitation pipeline's own tests: ICC against the published example, the
+# re-solver against the printed sensitivity table, and the data guards.
+if (cd $REPO && python -I -m pytest -q elicitation/tests -p no:cacheprovider) \
+     > /tmp/elicit.out 2>&1; then
+  gate 9 "elicitation pipeline tests" pass "$(grep -oE '[0-9]+ passed' /tmp/elicit.out)"
+else
+  gate 9 "elicitation pipeline tests" fail "see /tmp/elicit.out"
+fi
+
+# Nothing synthetic may reach either manuscript source. The synthetic outputs
+# are also built to error a LaTeX run; this catches the \input before a build.
+if grep -nE 'SYNTHETIC|elicitation/(out|fixtures)' "$MAIN.tex" "$SUPP.tex" > /tmp/syn.out; then
+  gate 9 "no synthetic elicitation output in the manuscript" fail "$(head -1 /tmp/syn.out)"
+else
+  gate 9 "no synthetic elicitation output in the manuscript" pass
+fi
+
+# The manuscript's claim about the protocol must match the evidence on disk.
+# No real results file: the Limitations bullet must still say the protocol has
+# not been run. A real results file: the bullet must have been revised.
+real_results=$(ls $REPO/elicitation/out/results.json 2>/dev/null)
+claims_unrun=$(grep -c 'has not been run' "$MAIN.tex")
+if [[ -z "$real_results" ]]; then
+  (( claims_unrun >= 1 )) \
+    && gate 9 "elicitation claim matches the evidence" pass "no real data; manuscript says not run" \
+    || gate 9 "elicitation claim matches the evidence" fail "no real data, yet 'has not been run' is gone"
+else
+  (( claims_unrun == 0 )) \
+    && gate 9 "elicitation claim matches the evidence" pass "real results present; bullet revised" \
+    || gate 9 "elicitation claim matches the evidence" fail "real results exist; 'has not been run' still printed"
+fi
+
 # ------------------------------------------------------------- summary ----
 echo
 echo "======================================================================"
