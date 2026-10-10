@@ -44,7 +44,9 @@ def main(argv):
     for name in ("Acknowledgment", "Funding"):
         m = re.search(r"\\section\*\{" + name + r"\}(.*?)(?=\\section)", src, re.S)
         if m is None:
-            sys.exit(f"count_words.py: no \\section*{{{name}}} in {path}")
+            if name == "Funding":
+                sys.exit(f"count_words.py: no \\section*{{{name}}} in {path}")
+            continue  # the Acknowledgment section is optional
         excluded[name.lower()] = m.group(1)
 
     total = texcount(path)

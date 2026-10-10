@@ -2,7 +2,7 @@
 
 **Manuscript:** *CivicWorkOS: Capability-Preserving Allocation of Municipal Work Among Humans, AI Agents and Robots*
 **Article type:** Hypothesis and Theory, Frontiers in Artificial Intelligence
-**Revised main text:** 11,491 words on the journal's counting basis (11,769 by `texcount`, which includes the abstract, acknowledgment and funding statement), 4 figures, 10 tables. A 22-page Supplementary Material document accompanies it.
+**Revised main text:** 11,507 words on the journal's counting basis (11,785 by `texcount`, which includes the abstract, acknowledgment and funding statement), 4 figures, 10 tables. A 22-page Supplementary Material document accompanies it.
 
 Section, table and figure numbers below are those of the **revised** manuscript. The review was written against a draft with two more top-level sections, so its numbering is one or two higher than ours. Where it helps, the reviewers' number is given in brackets, for example "§6.8 [R: §7.7]".
 
@@ -26,7 +26,7 @@ During the revision we found six further defects that the review did not reach. 
 | C2 | R1 W1; R2 C1: "will be lodged … before the simulation is executed" vs reported results | The future-tense statement now governs. §7.4 and Appendix S2 both say the protocol has not been executed and that OSF lodgement precedes execution. | §7.4; App. S2.7 |
 | C3 | R1 C2: Abstract leads with 63.2%, 86.8%, 0.97 | Abstract rebuilt. Every number in it traces to §6, and it leads with the intake requirement. | Abstract |
 | C4 | R1 W2: Data Availability Statement self-contradictory, misdescribes repository, wrong cross-reference | Rewritten in the repository README's own terms, with cross-references corrected. It states that `sim/` is synthetic demonstration data and that the protocol has not been executed. | Data Availability Statement |
-| C5 | R1 W10(b); AC: ~21,050 words against 12,000 | 11,491 words on the journal's basis. Relocated material is in the Supplement (S6–S10). | whole manuscript |
+| C5 | R1 W10(b); AC: ~21,050 words against 12,000 | 11,507 words on the journal's basis. Relocated material is in the Supplement (S6–S10). | whole manuscript |
 | C6 | R1 W10(a): no keywords | Eight keywords. | p. 1 |
 | C7 | R1 W10(d): funding placeholder | **Open at the time of writing:** the grant code is awaited from Umm Al-Qura University. See Section 4. | Funding; Acknowledgment |
 | C8 | R1 W10(e): no Ethics Statement | Added. It records that no human participants or personal data were involved and that the elicitation protocol of App. S5 would require approval before execution. | Ethics Statement |
