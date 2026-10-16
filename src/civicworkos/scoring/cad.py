@@ -1,4 +1,4 @@
-"""Civic Automation Debt (CAD): Paper Sec. 3.1, Eq. 2.
+"""Civic Automation Debt (CAD): Paper sec:problem, eq:cad.
 
     CAD_{i,m} = alpha * D_skill + beta * D_fall + gamma * D_acct
               + delta * D_dep   + epsilon * D_trans
@@ -12,8 +12,8 @@ estimators this repository invents, and docs/assumptions.md for why
 they must be invented).
 
 D_skill is the one component the paper defines as a computation
-(D_skill = 1 - phi_m, Eq. 7) rather than a prose description; the other
-four are defined only in prose (report Sec. 8.1).
+(D_skill = 1 - phi_m, eq:phi) rather than a prose description; the other
+four are defined only in prose (the pre-release audit).
 """
 
 from __future__ import annotations
@@ -38,9 +38,9 @@ def _check_weights_sum_to_one(name: str, values: tuple[float, ...]) -> None:
 
 @dataclass(frozen=True)
 class DebtComponents:
-    """The five debt components of Eq. 2, each a scalar in [0,1].
+    """The five debt components of eq:cad, each a scalar in [0,1].
 
-    D_skill: skill-formation loss, defined as 1 - phi_m (Eq. 7).
+    D_skill: skill-formation loss, defined as 1 - phi_m (eq:phi).
     D_fall: fractional reduction in fallback capacity if mode m were
         generalized across the domain. No estimator specified in the paper.
     D_acct: share of decision steps lacking a designated accountable
@@ -68,7 +68,7 @@ class DebtComponents:
 
 @dataclass(frozen=True)
 class DebtWeights:
-    """alpha..epsilon of Eq. 2. Paper default (Sec. 6.4): (0.28, 0.22, 0.18, 0.12, 0.20)."""
+    """alpha..epsilon of eq:cad. Paper default (sec:weights): (0.28, 0.22, 0.18, 0.12, 0.20)."""
 
     alpha: float
     beta: float
@@ -84,10 +84,10 @@ class DebtWeights:
 
     @classmethod
     def paper_default(cls) -> DebtWeights:
-        """The illustrative defaults of Paper Sec. 6.4. Not fitted estimates."""
+        """The illustrative defaults of Paper sec:weights. Not fitted estimates."""
         return cls(alpha=0.28, beta=0.22, gamma=0.18, delta=0.12, epsilon=0.20)
 
 
 def civic_automation_debt(components: DebtComponents, weights: DebtWeights) -> float:
-    """CAD_{i,m} (Eq. 2): a convex combination of the five debt components."""
+    """CAD_{i,m} (eq:cad): a convex combination of the five debt components."""
     return sum(w * c for w, c in zip(weights.as_tuple(), components.as_tuple()))

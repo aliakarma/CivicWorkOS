@@ -1,39 +1,39 @@
-r"""The city-wide allocation program: Paper Sec. 4.4, Eq. 16.
+r"""The city-wide allocation program: Paper sec:program, eq:program.
 
     max_x   sum_i sum_m  x_{i,m} * SCV_{i,m}                                  (16a)
     s.t.    sum_m x_{i,m} = 1                                       for all i  (16b)  assignment
             x_{i,m} = 0  if P(T_i,m,t) = prohibit                              (16c)  policy
             x_{i,m} = 0  if S_{i,m} < S^min_i                                  (16d)  safety floor
-            sum_{i in T_k} sum_m x_{i,m}*ell_i*phi_m >= B_k(t)      for all k  (16e)  HCPB
-            Pi_{k,g}(x) >= theta_{k,g} - epsilon_k              for all k,g   (16f)  access
-            Res^(n_s)_s(x) >= kappa_s*D_peak_s                   for all s    (16h)  3R reserve
-            sum_i sum_m x_{i,m}*u_{i,m,r} <= U_r                  for all r   (16i)  resource
-            x_{i,m} in {0,1}                                                  (16j)
+            sum_{i in T_k} sum_m x_{i,m}*ell_i*phi_m*psi_a >= B_k(t) for all k  eq:prog-hcpb  HCPB
+            Pi_{k,g}(x) >= theta_{k,g} - epsilon_k              for all k,g   eq:prog-access  access
+            Res^(n_s)_s(x) >= kappa_s*D_peak_s                   for all s    eq:prog-res  3R reserve
+            sum_i sum_m x_{i,m}*u_{i,m,r} <= U_r                  for all r   eq:prog-cap  resource
+            x_{i,m} in {0,1}                                                  eq:prog-int
 
-Complexity (Sec. 4.4): "A binary multi-dimensional assignment problem
+Complexity (sec:program): "A binary multi-dimensional assignment problem
 with side constraints, NP-hard in general -- it reduces to a generalized
-assignment problem when only (16i) binds -- which is why the framework
+assignment problem when only eq:prog-cap binds -- which is why the framework
 solves it periodically over a window rather than continuously."
 
 Scope of this builder (documented, not hidden -- see docs/assumptions.md A8):
   - (16c)/(16d) are enforced by NOT INCLUDING a variable for a
     policy-prohibited or unsafe (task, mode) pair, rather than as an
     explicit zero constraint -- equivalent, smaller model.
-  - (16f) is linear-fractional in x (Eq. 10's ratio); this builder
+  - eq:prog-access is linear-fractional in x (eq:accessshare's ratio); this builder
     linearizes it by multiplying through the constant
     (theta_{k,g} - epsilon_k) rather than the variable denominator,
     which is valid because the denominator's coefficients are also
-    linear in x -- report Sec. 8.4 flags this linearization as [INFER],
+    linear in x -- the pre-release audit flags this linearization as [INFER],
     not stated by the paper.
-  - (16h) uses the same invented task-granularity resilience attribution
+  - eq:prog-res uses the same invented task-granularity resilience attribution
     as the online rule (civicworkos.constraints.resilience.task_delta_resilience),
     for internal consistency between the batch and online paths.
-  - (16g), the Just Transition Constraint, is DELIBERATELY NOT embedded
+  - eq:prog-just, the Just Transition Constraint, is DELIBERATELY NOT embedded
     as a MIP constraint here. Delta_g requires a baseline allocation of
     ALL task-hours (not just protected-practice hours) to each group,
     which needs an assignee mapping for every mode -- not only the
-    phi_m > 0 modes (16f) needs -- compounding an already-invented
-    assumption. This repository instead evaluates (16g) POST HOC against
+    phi_m > 0 modes eq:prog-access needs -- compounding an already-invented
+    assumption. This repository instead evaluates eq:prog-just POST HOC against
     a realized solution via civicworkos.constraints.access.JustTransitionConstraint,
     so the assumption stays visible rather than buried inside solver output.
 """
@@ -63,9 +63,16 @@ class TaskInstance:
 class CandidatePair:
     """One policy-admissible, safety-admissible (task, mode) pair.
 
-    scv: SCV_{i,m} (Eq. 15), already composed.
-    phi_m: human developmental share of this mode (Eq. 7).
-    assignee_group: [INFER] the worker group Eq. 10/16f attributes this
+    scv: SCV_{i,m} (eq:scv), already composed.
+    phi_m: the CREDITED developmental share this pair delivers -- phi_m * psi_a,
+        the human developmental share of the mode times the developmental
+        eligibility of its roster (eq:phi, eq:psi). The field keeps its
+        historical name, but eq:hcpb accrues practice only to practitioners
+        below independent competence, so a staffed mode at a fully competent
+        career stage credits ZERO however high its phi_m. Passing a bare phi_m
+        here overstates the practice delivered and makes the budget look
+        satisfiable when it is not.
+    assignee_group: [INFER] the worker group eq:accessshare/16f attributes this
         pair's protected-practice hours to. The paper does not specify
         who chooses this; see civicworkos.online.algorithm1.select_assignee_group
         for the online-rule analogue, and docs/assumptions.md A6.
@@ -84,7 +91,7 @@ class CandidatePair:
 class ProgramInputs:
     tasks: list[TaskInstance]
     candidates: list[CandidatePair]
-    domain_budgets: dict[str, float]  # B_k(t), Eq. 9, per domain
+    domain_budgets: dict[str, float]  # B_k(t), eq:hcpb-estimator, per domain
     access_constraints: dict[tuple[str, str], CapabilityAccessConstraint]  # (domain, group)
     reserve_states: dict[str, ReserveState]  # per service
     resource_capacities: dict[str, float]  # U_r
@@ -100,11 +107,11 @@ class BuiltProgram:
 
 
 def build_program(inputs: ProgramInputs, *, integer: bool = True) -> BuiltProgram:
-    """Construct Eq. 16 as a PuLP problem.
+    """Construct eq:program as a PuLP problem.
 
     `integer=False` builds the LP relaxation (x continuous in [0,1]),
     used by civicworkos.solver.rebalance for dual extraction, since
-    integer programs do not have LP-style duals (report Sec. 16.2's
+    integer programs do not have LP-style duals (the pre-release audit's
     recommendation, followed here rather than reading duals off a MIP
     incumbent).
     """
@@ -130,7 +137,7 @@ def build_program(inputs: ProgramInputs, *, integer: bool = True) -> BuiltProgra
             f"assignment_{task_id}",
         )
 
-    # (16e) HCPB per domain.
+    # eq:prog-hcpb HCPB per domain.
     hcpb_names: dict[str, str] = {}
     domains = {t.domain for t in inputs.tasks}
     for domain in domains:
@@ -148,7 +155,7 @@ def build_program(inputs: ProgramInputs, *, integer: bool = True) -> BuiltProgra
         problem += (pulp.lpSum(terms) >= inputs.domain_budgets[domain], name)
         hcpb_names[domain] = name
 
-    # (16f) Capability Access Constraint, linearized (report Sec. 8.4, [INFER]):
+    # eq:prog-access Capability Access Constraint, linearized (the pre-release audit, [INFER]):
     #   sum_{assignee in g} x*ell*phi  >=  (theta_kg - eps_k) * sum_{all} x*ell*phi
     access_names: dict[tuple[str, str], str] = {}
     for (domain, group), constraint in inputs.access_constraints.items():
@@ -171,7 +178,7 @@ def build_program(inputs: ProgramInputs, *, integer: bool = True) -> BuiltProgra
         )
         access_names[(domain, group)] = name
 
-    # (16h) 3R Reserve per service, using the same invented per-task
+    # eq:prog-res 3R Reserve per service, using the same invented per-task
     # attribution as the online rule for consistency.
     reserve_names: dict[str, str] = {}
     for service, state in inputs.reserve_states.items():
@@ -189,7 +196,7 @@ def build_program(inputs: ProgramInputs, *, integer: bool = True) -> BuiltProgra
         problem += (baseline + pulp.lpSum(deltas) >= state.rho_s, name)
         reserve_names[service] = name
 
-    # (16i) resource capacity.
+    # eq:prog-cap resource capacity.
     resources = {r for c in inputs.candidates for r in c.resource_usage}
     for resource in resources:
         cap = inputs.resource_capacities.get(resource)

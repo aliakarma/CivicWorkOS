@@ -1,4 +1,4 @@
-"""Adaptive Oversight Zones: Paper Sec. 4.7, Table 2.
+"""Adaptive Oversight Zones: Paper sec:zones, tab:zones.
 
 Four zones classify tasks by how much autonomy they may be given:
 
@@ -13,7 +13,7 @@ Zone membership is conditioned on continuously updated SCV/CAD evidence
 and incidents/appeals, not assigned once as a static risk category. A
 class moves Z2->Z1 after sustained safety performance, and back to Z3
 after incidents, drift, cyber risk, public concern, or lost fallback
-capacity (Paper Sec. 4.7). Upheld-appeal rate above threshold triggers
+capacity (Paper sec:zones). Upheld-appeal rate above threshold triggers
 AUTOMATIC one-zone demotion; restoration requires an affirmative panel
 decision and cannot occur automatically (Suppl. S1.4) -- that asymmetry
 is enforced in code below, not left to caller discipline.

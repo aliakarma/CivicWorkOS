@@ -1,8 +1,8 @@
-"""Reversibility and Resilience (3R) Reserve: Paper Sec. 3.7, Eq. 13-14.
+"""Reversibility and Resilience (3R) Reserve: Paper sec:layer5, eq:cs and eq:res3r.
 
-    Res^(n)_s(t) = C_s(t) - sum_{c in C^(n)_s(t)} C_{s,c}(t)     (Eq. 13)
+    Res^(n)_s(t) = C_s(t) - sum_{c in C^(n)_s(t)} C_{s,c}(t)     (eq:cs)
 
-    Res^(n_s)_s(t) >= rho_s ,  rho_s = kappa_s * D_peak_s         (Eq. 14)
+    Res^(n_s)_s(t) >= rho_s ,  rho_s = kappa_s * D_peak_s         (eq:res3r)
 
 The N-1/N-2 criterion from reliability engineering, applied to a
 workforce of humans, AI agents, and robots. The paper is explicit that
@@ -10,11 +10,11 @@ this is "not a novel invention but an adaptation of a decades-old
 reliability paradigm" and corrects a common error: the threshold is
 against PEAK DEMAND, not against the lost component's own capacity.
 
-Eq. 13-14 are stated at FLEET granularity (components C_{s,c}). Eq. 17
-and Eq. 18 need Delta^res_s(m), the change in surviving capacity
+eq:cs and eq:res3r are stated at FLEET granularity (components C_{s,c}). eq:aug
+and eq:admis need Delta^res_s(m), the change in surviving capacity
 attributable to a SINGLE task's mode -- a mapping the paper never
-defines (report Sec. 20.8 / H2). `task_delta_resilience` below is this
-repository's own invented attribution, clearly separated from Eq. 13-14
+defines (the pre-release audit / H2). `task_delta_resilience` below is this
+repository's own invented attribution, clearly separated from eq:cs and eq:res3r
 themselves, which are exact.
 """
 
@@ -39,7 +39,7 @@ _AUTOMATION_DEPENDENCE = {
 
 @dataclass(frozen=True)
 class ReserveState:
-    """Fleet-scale inputs to Eq. 13-14 for one critical service s.
+    """Fleet-scale inputs to eq:cs and eq:res3r for one critical service s.
 
     component_capacities: {component_id: C_{s,c}(t)} -- the automation-
         dependent capacity components serving s (an AI-agent pool, a
@@ -80,28 +80,28 @@ class ReserveState:
 
     @property
     def rho_s(self) -> float:
-        """rho_s = kappa_s * D_peak_s, the RHS of Eq. 14."""
+        """rho_s = kappa_s * D_peak_s, the RHS of eq:res3r."""
         return self.kappa_s * self.peak_demand
 
 
 def resilience_reserve(state: ReserveState) -> float:
-    """Res^(n_s)_s(t) (Eq. 13): total capacity minus the n_s largest components."""
+    """Res^(n_s)_s(t) (eq:cs): total capacity minus the n_s largest components."""
     lost = sum(state.component_capacities[c] for c in state.largest_n_components)
     return state.total_capacity - lost
 
 
 def reserve_satisfied(state: ReserveState) -> bool:
-    """Eq. 14 as a boolean check."""
+    """eq:res3r as a boolean check."""
     return resilience_reserve(state) >= state.rho_s
 
 
 def task_delta_resilience(mode: str, task_duration_hours: float, component_capacity_baseline: float) -> float:
     """[INVENTED -- not in the paper] Delta^res_s(m) at single-task granularity.
 
-    Res^(n)_s(t) is defined only at fleet scale (Eq. 13); the paper gives
-    no rule for how one task's mode moves it (report Sec. 20.8, blocker H2).
+    Res^(n)_s(t) is defined only at fleet scale (eq:cs); the paper gives
+    no rule for how one task's mode moves it (the pre-release audit, blocker H2).
     This repository defines an explicit, documented attribution so that
-    Eq. 17's mu_s term and Eq. 18's second admissibility clause are
+    eq:aug's mu_s term and eq:admis's second admissibility clause are
     computable, and labels it as an engineering addition:
 
         Delta^res_s(m) = -task_duration_hours / component_capacity_baseline
@@ -115,8 +115,14 @@ def task_delta_resilience(mode: str, task_duration_hours: float, component_capac
     service's total automation-dependent capacity (ReserveState.total_capacity),
     used to express the single task's commitment as a fraction of it.
     """
-    if mode not in _AUTOMATION_DEPENDENCE:
-        raise ValueError(f"unknown mode {mode!r}")
+    # Automation dependence is a property of the execution mode. A staffed mode
+    # ("H+A+R/a1") carries a roster suffix that says which practitioners hold the
+    # human slots and at what career stage, which does not change how much
+    # automated capacity the mode commits, so the suffix is stripped here.
+    family = mode.split("/", 1)[0]
+    if family not in _AUTOMATION_DEPENDENCE:
+        raise ValueError(f"unknown execution mode {family!r} in {mode!r}")
+    mode = family
     if task_duration_hours <= 0:
         raise ValueError(f"task_duration_hours must be positive, got {task_duration_hours!r}")
     if component_capacity_baseline <= 0:

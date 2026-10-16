@@ -1,22 +1,22 @@
 r"""Algorithm 1 -- Online Policy-Aware Sustainable Civic Value Allocation.
 
-Paper Sec. 4.5, Eq. 17-19; control flow in Fig. 2 (Sec. 4.2).
+Paper sec:online, eq:aug, eq:admis and eq:argmax; control flow in fig:workflow (sec:workflow).
 
     SCV~_{i,m} = SCV_{i,m} + lambda_{k(i)}*ell_i*phi_m
                + mu_{s(i)}*Delta^res_{s(i)}(m)
-               + nu_{k(i),g(i,m)}*ell_i*phi_m                                (Eq. 17)
+               + nu_{k(i),g(i,m)}*ell_i*phi_m                                (eq:aug)
 
     m in A(i,t) iff
         P(T_i,m,t) != prohibit  AND  S_{i,m} >= S^min_i  AND
         [ Res^(n_s)_s(t+|m) >= rho_s  OR  (Res^(n_s)_s(t) < rho_s AND Delta^res_s(m) >= 0) ]  AND
-        [ Lambda_k(t+|m) >= Bbar_k(t)  OR  (Lambda_k(t) < Bbar_k(t) AND phi_m > 0) ]           (Eq. 18)
+        [ Lambda_k(t+|m) >= Bbar_k(t)  OR  (Lambda_k(t) < Bbar_k(t) AND phi_m > 0) ]           (eq:admis)
 
-    m*_i = argmax_{m in A(i,t)} SCV~_{i,m}                                    (Eq. 19)
+    m*_i = argmax_{m in A(i,t)} SCV~_{i,m}                                    (eq:argmax)
 
 with Bbar_k(t) = B_k(t) * t/DeltaT, the pro-rated budget trajectory.
 
-Eq. 18's admissibility test is NOT a naive per-constraint filter. The
-paper is explicit about why (Sec. 4.5): testing (16e)/(16h) as written
+eq:admis's admissibility test is NOT a naive per-constraint filter. The
+paper is explicit about why (sec:online): testing eq:prog-hcpb / eq:prog-res as written
 inside a loop over m would remove either every candidate or none, and a
 city already below threshold would route every task to Z4 -- "including
 the robot allocations that would free the human capacity needed to climb
@@ -28,7 +28,7 @@ branches explicitly so this property cannot regress silently.
 
 Three quantities Algorithm 1 needs have no computation specified by the
 paper, and are supplied here as explicit, overridable, documented
-inventions rather than hidden defaults (report Sec. 14.3, items 3-4):
+inventions rather than hidden defaults (the pre-release audit, items 3-4):
 
   - S^min_i, the per-task safety floor -- `default_safety_floor()`.
   - Delta^res_s(m) at task granularity -- civicworkos.constraints.resilience.task_delta_resilience.
@@ -86,10 +86,10 @@ def select_assignee_group(
 ) -> str:
     """[INVENTED] g(i,m): which group's member performs this task.
 
-    The paper needs assignee(i,m) for Eq. 10 and Eq. 17's nu term but
-    never specifies how the assignee is chosen within a mode (report
-    Sec. 14.3 item 4). This greedy heuristic assigns to whichever group
-    is furthest BELOW its target share theta_{k,g} (Eq. 11), which is
+    The paper needs assignee(i,m) for eq:accessshare and eq:aug's nu term but
+    never specifies how the assignee is chosen within a mode (the
+    pre-release audit, item 4). This greedy heuristic assigns to whichever group
+    is furthest BELOW its target share theta_{k,g} (eq:access), which is
     the natural policy the access constraint's dual nu_{k,g} is meant to
     price -- but it is this repository's invention, not the paper's.
     """
@@ -107,12 +107,12 @@ def select_assignee_group(
 
 @dataclass(frozen=True)
 class Duals:
-    """The most recent solution of Eq. 16's dual prices.
+    """The most recent solution of eq:program's dual prices.
 
-    lambda_k: HCPB dual (16e) per domain -- "literally what one hour of
+    lambda_k: HCPB dual eq:prog-hcpb per domain -- "literally what one hour of
         qualified practice in domain k is worth to the city," published.
-    mu_s: 3R Reserve dual (16h) per service.
-    nu_kg: access-constraint dual (16f) per (domain, group).
+    mu_s: 3R Reserve dual eq:prog-res per service.
+    nu_kg: access-constraint dual eq:prog-access per (domain, group).
     """
 
     lambda_k: dict[str, float] = field(default_factory=dict)
@@ -133,7 +133,7 @@ def admissible(
     phi_m: float,
     b_bar_k: float,
 ) -> tuple[bool, str | None]:
-    """Eq. 18, all three clauses, with both feasibility-restoration branches.
+    """eq:admis, all three clauses, with both feasibility-restoration branches.
 
     Returns (is_admissible, rejection_reason). `rejection_reason` is one
     of "safety_floor", "resilience_clause", "capability_clause", or None.
@@ -169,8 +169,8 @@ class AllocationResult:
 class AllocationEngine:
     """Orchestrates Algorithm 1 end to end using the paper's own components.
 
-    Every collaborator below corresponds to a named component in Fig. 1 /
-    Table in report Sec. 5.2; the engine itself performs no pricing or
+    Every collaborator below corresponds to a named component in fig:architecture /
+    Table in the pre-release audit; the engine itself performs no pricing or
     constraint logic of its own beyond composing them in the order
     Algorithm 1 specifies.
     """
@@ -216,7 +216,7 @@ class AllocationEngine:
         self._group_hours: dict[str, dict[str, float]] = {}
         self.policy_compliance_log: list[Outcome] = []
 
-        # Fig. 1's required property: the SAME bus event updates BOTH
+        # fig:architecture's required property: the SAME bus event updates BOTH
         # governance services -- the Ledger (practice accrual) and the
         # Policy Twin's compliance-monitoring side (here, a log that
         # zone-transition and rule-staleness monitoring can read). Wiring
@@ -227,10 +227,10 @@ class AllocationEngine:
         self.feedback_bus.subscribe(self._log_for_policy_compliance)
 
     def _accrue_ledger_on_outcome(self, outcome: Outcome) -> None:
-        """Ledger side of Eq. 20: accrue Lambda_k from the emitted outcome.
+        """Ledger side of eq:feedback: accrue Lambda_k from the emitted outcome.
 
         Machine outcomes (AI/robot channels) update the ledger exactly
-        like human ones -- Fig. 1's caption is explicit that the Ledger
+        like human ones -- fig:architecture's caption is explicit that the Ledger
         holds AI and robot capability terms that cannot be maintained if
         machine outcomes bypass it.
         """
@@ -241,10 +241,10 @@ class AllocationEngine:
             self.ledger.accrue_practice(outcome.domain, ell_times_phi)
 
     def _log_for_policy_compliance(self, outcome: Outcome) -> None:
-        """Policy-Twin side of Eq. 20: compliance monitoring depends on
-        human outcomes as much as machine ones (Fig. 1 caption). This
+        """Policy-Twin side of eq:feedback: compliance monitoring depends on
+        human outcomes as much as machine ones (fig:architecture caption). This
         repository does not mutate the rule base from outcomes (rule
-        changes are versioned policy acts per Sec. 5.1); it records the
+        changes are versioned policy acts per sec:feedback); it records the
         outcome stream that a rule-staleness or zone-transition monitor
         (civicworkos.zones) would consume.
         """

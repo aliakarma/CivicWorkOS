@@ -1,5 +1,5 @@
 """Unit tests for civicworkos.config: weight validation and the UNSET
-sentinel required by Paper Sec. 5.1 ("an unset theta_{k,g} or tau_g must
+sentinel required by Paper sec:feedback ("an unset theta_{k,g} or tau_g must
 leave its constraint unbound and flagged, never silently defaulted").
 """
 
@@ -34,11 +34,28 @@ def test_weights_config_rejects_bad_sum(tmp_path):
 
 
 def test_domain_config_loads_worked_example_fixture():
+    """The shipped domain config must be the worked example's own inputs, so
+    that B_k computed from it is the article's 4,976.64 hours (eq:bkworked)."""
+    from civicworkos.constraints.hcpb import HCPBParameters, capability_budget
+    from manuscript_values import WORKED
+
+    w = WORKED
     config = load_domain_config(CONFIGS / "domains" / "structural_inspection.yaml")
-    assert config.N_k == 24
-    assert config.r_k == pytest.approx(0.12)
-    assert config.h_k == pytest.approx(600)
-    assert config.theta_kg == {"men": 0.68, "women": 0.32}
+    assert config.N_k == w["N_k"]
+    assert config.r_k == pytest.approx(w["r_k"])
+    assert config.h_k == pytest.approx(w["h_k"])
+    assert config.eta_k == pytest.approx(w["eta_k"])
+    assert config.theta_kg["women"] == pytest.approx(w["pool_women"])
+    assert config.theta_kg["men"] == pytest.approx(1 - w["pool_women"])
+    assert config.epsilon_k == pytest.approx(w["epsilon_k"])
+
+    b_k = capability_budget(
+        HCPBParameters(
+            N_k=config.N_k, r_k=config.r_k, h_k=config.h_k,
+            eta_k=config.eta_k, B_k_min=config.B_k_min,
+        )
+    )
+    assert b_k == pytest.approx(4976.64, abs=1e-6)
 
 
 def test_unset_sentinel_is_parsed_not_a_string_or_none():

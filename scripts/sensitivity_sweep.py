@@ -1,6 +1,8 @@
 #!/usr/bin/env python
-"""Parameter-sensitivity sweep of the unconstrained SCV argmax (report
-Sec. 16.2 recommendation M1; targets Paper Sec. 7.2's open question 3:
+"""Parameter-sensitivity sweep of the unconstrained SCV argmax.
+
+Addresses the pre-release audit's recommendation M1 and the open question
+sec:whatworked raises:
 "whether the parameter set admits any stable configuration, or whether
 [the argmax] is so sensitive to small perturbations that a panel's
 deliberation is effectively arbitrary").
@@ -12,9 +14,9 @@ the paper's default weights.
 
 This is REPORT SEC. 22's proposed experiment E1, run here at reduced
 scale as a demonstration of the harness, not as the full pre-registered
-study the paper's own Sec. 6 never conducted. Nothing this script prints
+study the paper's own sec:protocol never conducted. Nothing this script prints
 should be read as a claim about the real framework's stability -- only
-about the stability of the worked example's four Table 3 candidates
+about the stability of the worked example's four tab:worked-terms candidates
 under this specific perturbation scheme.
 
 Usage:

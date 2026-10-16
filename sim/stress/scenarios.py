@@ -1,4 +1,4 @@
-"""Stress-scenario injectors: Paper Sec. 6.6, Suppl. Table S2.
+"""Stress-scenario injectors: Paper sec:protocol, Suppl. Table S2.
 
 Reads configs/scenarios/stress_scenarios.yaml (the paper's own protocol
 specification, reproduced as data) and provides one small, real,
@@ -50,7 +50,7 @@ def remove_capacity(state: ReserveState, fraction: float, component_ids: list[st
     """Scenarios i/ii/iii: remove `fraction` of capacity from the named
     components (or all components if none named), for the duration of
     the injection. Returns a NEW ReserveState; the caller re-checks
-    Eq. 14 against it and measures recovery time by how long it takes
+    eq:res3r against it and measures recovery time by how long it takes
     capacity to be restored in subsequent state updates.
     """
     if not 0.0 <= fraction <= 1.0:
@@ -65,7 +65,7 @@ def remove_capacity(state: ReserveState, fraction: float, component_ids: list[st
 
 def retirement_wave(params: HCPBParameters, r_k_override: float) -> HCPBParameters:
     """Scenario v: r_k raised to `r_k_override` (paper: 0.25) for the
-    scenario's duration. Paper Sec. 6.6: "raises r_k, hence B_k through
+    scenario's duration. Paper sec:protocol: "raises r_k, hence B_k through
     (9), hence lambda_k, pushing allocation toward human-inclusive modes
     at exactly the moment fewer humans are available." Whether that
     feedback is stabilizing or oscillatory is P7 -- this function only

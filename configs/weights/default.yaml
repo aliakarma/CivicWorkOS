@@ -1,14 +1,14 @@
-# Governance artifact: SCV (Eq. 15) and CAD (Eq. 2) weights.
-# These are the paper's own illustrative defaults (Sec. 6.4), reproduced
+# Governance artifact: SCV (eq:scv) and CAD (eq:cad) weights.
+# These are the paper's own illustrative defaults (sec:weights), reproduced
 # verbatim -- NOT fitted estimates. "These are design defaults for the
-# panel of Section 5.1 to revise, not fitted estimates." A real
+# panel of sec:feedback to revise, not fitted estimates." A real
 # deployment MUST replace this file only via a signed, dated panel
-# decision (Paper Sec. 5.1); do not edit weights in place without
+# decision (Paper sec:feedback); do not edit weights in place without
 # creating a new version.
 version: "v2026-09-01"
 effective_date: 2026-09-01
 
-# Eq. 15 (SCV), sums to 1.0
+# eq:scv (SCV), sums to 1.0
 w1_quality: 0.15
 w2_safety: 0.18
 w3_productivity: 0.14
@@ -19,7 +19,7 @@ w7_energy: 0.03
 w8_privacy: 0.05
 w9_cad: 0.22
 
-# Eq. 2 (CAD), sums to 1.0
+# eq:cad (CAD), sums to 1.0
 alpha_skill: 0.28
 beta_fallback: 0.22
 gamma_accountability: 0.18

@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """Run the reduced-scope simulation testbed (sim.des) over synthetic
-demo tasks for all five baseline strategies (Paper Sec. 6.2) and print
-the subset of metrics it computes (Paper Sec. 6.3 -- see sim/des/engine.py
+demo tasks for all five baseline strategies (Paper sec:protocol) and print
+the subset of metrics it computes (Paper sec:protocol -- see sim/des/engine.py
 for exactly which of the thirteen are implemented here).
 
 THIS IS NOT THE PAPER'S EVALUATION STUDY. It runs on synthetic,
 uncalibrated demo data over a short horizon, not the six-sector,
-ten-year, seed-replicated protocol of Paper Sec. 6.1 / Suppl. S2-S4.
+ten-year, seed-replicated protocol of Paper sec:protocol / Suppl. S2-S4.
 See docs/reproducibility.md for what this script does and does not
 demonstrate.
 
@@ -161,7 +161,7 @@ def main() -> int:
     print(
         "\nNotes:"
         "\n  - Productivity and Operating Cost indices are normalized per allocated task (excluding Z4 fallbacks)."
-        "\n  - CivicWorkOS runs with active dual shadow price lambda_k=0.0250 (Eq. 17)."
+        "\n  - CivicWorkOS runs with active dual shadow price lambda_k=0.0454 (eq:aug)."
         "\n  - Accumulated CAD represents raw sums over synthetic tasks for relative comparison."
     )
     return 0

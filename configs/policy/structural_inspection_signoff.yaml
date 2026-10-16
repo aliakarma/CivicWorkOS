@@ -1,8 +1,8 @@
-# Machine-checkable rule metadata (Paper Sec. 3.4): rule currency is "a
-# recurring legal-engineering cost, not a one-time setup" (Paper Sec. 5.1).
+# Machine-checkable rule metadata (Paper sec:policytwin): rule currency is "a
+# recurring legal-engineering cost, not a one-time setup" (Paper sec:feedback).
 # This file documents ONE rule's provenance; the executable predicate
 # itself lives in code (civicworkos.policy.digital_twin.requires_licensed_human_rule)
-# because Eq. 6's predicates are evaluated per (task, mode, time) and the
+# because eq:policy's predicates are evaluated per (task, mode, time) and the
 # paper specifies no declarative rule language to express that in data
 # alone -- see docs/assumptions.md A4.
 rule_id: structural_inspection_statutory_signoff
@@ -11,9 +11,9 @@ effective_date: 2026-09-01
 description: >
   A structural determination on public infrastructure carries a
   statutory sign-off requirement: every execution mode lacking a
-  licensed human is PROHIBITED for this task class (Paper Sec. 5.3).
+  licensed human is PROHIBITED for this task class (Paper sec:worked).
   Reduces the mode set to M' = {H, H+A, H+R, H+A+R}.
 applies_to_domain: structural_inspection
 status_if_no_licensed_human: prohibit
 source_authority: "illustrative -- paper does not name a specific statute"
-owner: "municipal legal / procurement office (Paper Sec. 5.1)"
+owner: "municipal legal / procurement office (Paper sec:feedback)"

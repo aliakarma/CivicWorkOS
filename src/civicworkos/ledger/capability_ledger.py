@@ -1,4 +1,4 @@
-"""Civic Capability Ledger: Paper Sec. 3.3, Eq. 5.
+"""Civic Capability Ledger: Paper sec:layer2, eq:ledger.
 
     L_k(t) = { H_k, A_k, R_k, F_k, E_k, {E_{k,g}} }
 
@@ -6,9 +6,9 @@ Per-domain capability state: human/AI/robot capacity, fallback capacity
 F_k, human expertise pipeline E_k, and its GROUP DECOMPOSITION E_{k,g}.
 
 The group decomposition is NOT optional reporting: without it the
-Capability Access Constraint (Eq. 11) cannot be evaluated (Paper Sec. 3.3).
+Capability Access Constraint (eq:access) cannot be evaluated (Paper sec:layer2).
 This module enforces that invariant (Sigma_g E_{k,g} = E_k) and accepts
-feedback from BOTH machine and human outcomes, per Fig. 1's caption: "the
+feedback from BOTH machine and human outcomes, per fig:architecture's caption: "the
 Ledger holds AI and robot capability terms that cannot be maintained if
 machine outcomes bypass it."
 """
@@ -29,7 +29,7 @@ class LedgerSnapshot:
         if automated channels fail.
     E_k: size of the human expertise pipeline (competent + in-formation).
     E_kg: {group_id: expertise_share} decomposing E_k by worker group.
-        Required to sum to E_k (Paper Sec. 3.3).
+        Required to sum to E_k (Paper sec:layer2).
     accrued_practice_hours: Lambda_k(t), qualified-practice hours
         delivered so far in the current budget period.
     """
@@ -59,11 +59,11 @@ class LedgerSnapshot:
 class CapabilityLedger:
     """Mutable per-domain L_k(t) time series, keyed by domain.
 
-    This is an in-process reference implementation of Eq. 5's state.
+    This is an in-process reference implementation of eq:ledger's state.
     civicworkos.audit provides the append-only, disclosable record of
     the decisions that drive these updates; this class holds only the
     current and historical *state*, reconstructable from that record
-    (report Sec. 5.2's stated validation criterion for Phase 4).
+    (the pre-release audit's stated validation criterion for Phase 4).
     """
 
     def __init__(self) -> None:
@@ -94,7 +94,7 @@ class CapabilityLedger:
         return updated
 
     def reset_budget_period(self, domain: str) -> LedgerSnapshot:
-        """Zero Lambda_k at the start of a new budget period (Paper Sec. 3.5)."""
+        """Zero Lambda_k at the start of a new budget period (Paper sec:hcpb)."""
         current = self.current(domain)
         updated = replace(current, accrued_practice_hours=0.0)
         self._current[domain] = updated

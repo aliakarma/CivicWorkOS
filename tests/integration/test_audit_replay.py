@@ -1,6 +1,6 @@
 """Integration test: every stored decision replays to the same m*.
 
-Report Sec. 5.2 states this as Phase 9's validation criterion: "every
+The pre-release audit states this as Phase 9's validation criterion: "every
 stored decision can be replayed from its record to the same m*." This
 test runs Algorithm 1 via AllocationEngine, then reconstructs the
 argmax purely from the stored EvidentiaryRecord (not from re-running the
@@ -62,7 +62,7 @@ def _engine(lambda_k: float) -> AllocationEngine:
         policy_twin=policy_twin,
         market=FixtureMarket(),
         ledger=ledger,
-        hcpb_params={DOMAIN: HCPBParameters(N_k=24, r_k=0.12, h_k=600, eta_k=1.2, B_k_min=1200)},
+        hcpb_params={DOMAIN: HCPBParameters(N_k=24, r_k=0.12, h_k=1440, eta_k=1.2, B_k_min=2000)},
         reserve_states={SERVICE: reserve},
         access_constraints={},
         worker_groups={DOMAIN: ["men", "women"]},
@@ -108,7 +108,7 @@ def test_decision_replays_from_its_own_record_with_capability_price():
 
 def test_stored_record_exposes_rejected_candidates_not_only_the_winner():
     """A record that omitted rejected candidates would make it impossible
-    to show what was NOT chosen -- report Sec. 8.9's named failure mode."""
+    to show what was NOT chosen -- the pre-release audit's named failure mode."""
     engine = _engine(lambda_k=0.0)
     result = engine.allocate(_task(), date(2026, 1, 1), elapsed_days_in_period=0.0)
     record = result.evidentiary_record

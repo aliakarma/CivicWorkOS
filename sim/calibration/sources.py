@@ -1,4 +1,4 @@
-"""Calibration sources: Paper Sec. 6.1, Suppl. Section S4.
+"""Calibration sources: Paper sec:protocol, Suppl. Section S4.
 
 "No data from them has yet been retrieved or analyzed for this article"
 (Suppl. Table S3 caption). `INTENDED_CALIBRATION_SOURCES` below

@@ -1,20 +1,25 @@
 # Governance artifact: per-domain HCPB / access / transition parameters
 # for the "structural_inspection" capability domain -- the domain of the
-# worked bridge-inspection example (Paper Sec. 5.3).
+# worked bridge-inspection example (Paper sec:worked).
 #
-# N_k, r_k, h_k, eta_k, B_k_min, theta_kg (0.68/0.32) reproduce the
-# worked example's stated inputs exactly, so this file doubles as a
-# fixture for tests/smoke/test_worked_example.py. hybrid_phi values are
-# the worked example's illustrative phi_m for H+A, H+R, H+A+R.
+# N_k, r_k, h_k, eta_k, B_k_min and theta_kg reproduce the worked example's
+# stated inputs exactly, so this file doubles as a fixture. hybrid_phi values
+# are the worked example's illustrative phi_m for H+A, H+R and H+A+R.
 domain: structural_inspection
-version: "v2026-09-01"
-effective_date: 2026-09-01
+version: "v2026-10-07"
+effective_date: 2026-10-07
 
-N_k: 24          # practising inspectors (Paper Sec. 5.3)
+N_k: 24          # competent practitioners (sec:workedsetup)
 r_k: 0.12        # annual attrition
-h_k: 600         # hours to independent competence
+# h_k is QUALIFIED-PRACTICE hours, not supervised clock hours. Certification
+# requires 1,800 clock hours; eq:hconv converts through the task's learning
+# value, h_k = learn_i * h_raw_k = 0.8 * 1800 = 1440. Setting h_k to the clock
+# figure, or to an earlier draft's 600, changes B_k and every number
+# downstream of it.
+h_k: 1440        # qualified-practice hours to independent competence (eq:hconv)
 eta_k: 1.2       # replacement-generation factor
-B_k_min: 1200    # hours/year floor
+B_k_min: 2000    # hours/year floor; the attrition estimate dominates it here,
+                 # giving B_k = 1.2 * 24 * 0.12 * 1440 = 4976.64 (eq:bkworked)
 
 hybrid_phi:
   H+A: 0.75
@@ -25,15 +30,15 @@ groups: [men, women]
 
 # theta_kg: TARGET composition from the qualified local labour pool
 # (0.68/0.32), explicitly NOT the incumbent share (0.875/0.125) -- Paper
-# Sec. 5.3's "who receives the protected work" example.
+# sec:worked's "who receives the protected work" example.
 theta_kg:
   men: 0.68
   women: 0.32
 epsilon_k: 0.05
 
-# tau_g (Just Transition displacement ceiling, Eq. 12) is NOT given
+# tau_g (Just Transition displacement ceiling, eq:justtransition) is NOT given
 # anywhere in the worked example -- the paper never assigns it a value
-# for this domain. Left UNSET rather than defaulted, per Paper Sec. 5.1:
+# for this domain. Left UNSET rather than defaulted, per Paper sec:feedback:
 # an unset parameter must be unbound and FLAGGED for the panel, not
 # silently assumed. See DomainConfig.unset_parameters().
 tau_g:

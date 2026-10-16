@@ -1,15 +1,15 @@
 """Configuration schema: governance artifacts, not code constants.
 
-Paper Sec. 5.1: every allocation must trace to "the configuration that
+Paper sec:feedback: every allocation must trace to "the configuration that
 authorized it," and weight/threshold changes are signed, dated policy
 acts, not silent code edits. This module models that:
 
-  - WeightsConfig: w1..w9 and alpha..epsilon (Eq. 15, Eq. 2), versioned.
-  - DomainConfig: per-domain HCPB/access/transition parameters (Eq. 9-12),
+  - WeightsConfig: w1..w9 and alpha..epsilon (eq:scv, eq:cad), versioned.
+  - DomainConfig: per-domain HCPB/access/transition parameters (eq:hcpb-estimator through eq:justtransition),
     versioned, with an explicit UNSET sentinel.
 
-UNSET sentinel (report Sec. 16.2's recommendation, directly required by
-Paper Sec. 5.1): "an unset theta_{k,g} or tau_g must leave its
+UNSET sentinel (the pre-release audit's recommendation, directly required by
+Paper sec:feedback): "an unset theta_{k,g} or tau_g must leave its
 constraint unbound and flagged, never silently defaulted." A bare YAML
 omission or a numeric default (e.g. 0.0) would either crash unexpectedly
 or silently authorize an unintended policy. `Unset` is a distinct
@@ -30,7 +30,7 @@ class Unset:
 
     Distinct from any numeric default (including 0.0). A constraint whose
     parameter is UNSET must be treated as unbound and flagged for panel
-    attention, never silently defaulted (Paper Sec. 5.1).
+    attention, never silently defaulted (Paper sec:feedback).
     """
 
     _instance: Unset | None = None
@@ -51,11 +51,11 @@ UNSET = Unset()
 
 
 class WeightsConfig(BaseModel):
-    """w1..w9 (Eq. 15) and alpha..epsilon (Eq. 2), one versioned artifact.
+    """w1..w9 (eq:scv) and alpha..epsilon (eq:cad), one versioned artifact.
 
-    Defaults below are the paper's own illustrative values (Sec. 6.4),
+    Defaults below are the paper's own illustrative values (sec:weights),
     reproduced verbatim as the config's factory default -- NOT fitted
-    estimates, and the panel of Sec. 5.1 is the paper's stated authority
+    estimates, and the panel of sec:feedback is the paper's stated authority
     to revise them.
     """
 
@@ -105,11 +105,11 @@ class WeightsConfig(BaseModel):
 
 @dataclass(frozen=True)
 class DomainConfig:
-    """Per-domain HCPB (Eq. 9), access (Eq. 11), and transition (Eq. 12)
+    """Per-domain HCPB (eq:hcpb-estimator), access (eq:access), and transition (eq:justtransition)
     parameters. `theta_kg` and `tau_g` entries may be `UNSET`.
 
     version / effective_date: this configuration is itself a versioned
-        policy act (Paper Sec. 5.1).
+        policy act (Paper sec:feedback).
     """
 
     domain: str

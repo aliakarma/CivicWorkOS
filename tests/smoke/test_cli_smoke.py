@@ -26,7 +26,11 @@ def _run(*args: str, timeout: int = 60) -> subprocess.CompletedProcess:
 def test_verify_worked_example_script_passes():
     result = _run("scripts/verify_worked_example.py")
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "All worked-example numbers reproduced within tolerance." in result.stdout
+    assert "reproduce the manuscript's printed values within" in result.stdout
+    # Guard against the failure mode of finding N2: a gate that exits 0 having
+    # checked nothing, or having checked an earlier draft's parameterisation.
+    assert "[FAIL]" not in result.stdout
+    assert "printed=4976.640000" in result.stdout
 
 
 def test_run_allocation_script_runs():

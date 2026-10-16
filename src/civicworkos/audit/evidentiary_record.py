@@ -1,4 +1,4 @@
-"""Evidentiary record: Paper Sec. 5.2, Suppl. S1.3.
+"""Evidentiary record: Paper sec:contest, Suppl. S1.3.
 
 Every allocation decision writes an append-only, disclosable record with
 SEVEN items (Suppl. S1.3), reproduced here field-by-field:
@@ -8,14 +8,14 @@ SEVEN items (Suppl. S1.3), reproduced here field-by-field:
        returned for each REMOVED mode (not just a pass/fail flag)
     3. per-candidate full term vector, five debt components, composed
        CAD, base SCV, and augmented SCV~
-    4. admissibility outcome, and WHICH bracket of Eq. 18 excluded each
+    4. admissibility outcome, and WHICH bracket of eq:admis excluded each
        rejected candidate
     5. the duals in force plus the rebalance timestamp they came from
     6. the configuration version and the authorizing panel decision
     7. the accountable human, where one is designated (Z3/Z4)
 
 Items 5-6 are what make a POLICY appeal possible, not only a decision
-appeal (report Sec. 25.9's engineering note on Phase 9) -- they are
+appeal (the pre-release audit's engineering note on Phase 9) -- they are
 therefore stored as resolvable pointers (a version string and a panel
 decision id), not compressed into a hash.
 
@@ -51,7 +51,7 @@ class RejectionRecord:
 
     mode: str
     stage: str  # "policy_filter" or "admissibility_test"
-    reason: str  # e.g. the policy status, or which Eq. 18 clause failed
+    reason: str  # e.g. the policy status, or which eq:admis clause failed
 
 
 @dataclass(frozen=True)
@@ -75,7 +75,7 @@ class EvidentiaryRecord:
     decided_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     def content_hash(self) -> str:
-        """Content address for tamper-evidence (report Sec. 17's recommended
+        """Content address for tamper-evidence (the pre-release audit's recommended
         audit-store property: "content-addressed append-only log")."""
         payload = asdict(self)
         payload["decided_at"] = payload["decided_at"].isoformat()
@@ -104,7 +104,7 @@ class EvidentiaryRecordStore:
         """Check that `recompute_argmax(record)` reproduces `record.selected_mode`.
 
         `recompute_argmax` is caller-supplied because replaying the argmax
-        requires re-running Eq. 17-19 against the stored candidates, which
+        requires re-running eq:aug, eq:admis and eq:argmax against the stored candidates, which
         this module (a storage layer) does not itself implement -- see
         civicworkos.online.algorithm1 for that logic and
         tests/integration/test_audit_replay.py for the exercised check.

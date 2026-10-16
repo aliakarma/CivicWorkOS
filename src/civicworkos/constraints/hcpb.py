@@ -1,20 +1,20 @@
-"""Human Capability Preservation Budget: Paper Sec. 3.5, Eq. 7-9.
+"""Human Capability Preservation Budget: Paper sec:hcpb, eq:phi, eq:hcpb and eq:hcpb-estimator.
 
     phi_H = 1, phi_A = phi_R = phi_{A+R} = 0,
-    phi_{H+A}, phi_{H+R}, phi_{H+A+R} in [0,1], set per domain          (Eq. 7)
+    phi_{H+A}, phi_{H+R}, phi_{H+A+R} in [0,1], set per domain          (eq:phi)
 
-    sum_{i in T_k(DeltaT)} sum_m x_{i,m} * ell_i * phi_m >= B_k(t)      (Eq. 8)
+    sum_{i in T_k(DeltaT)} sum_m x_{i,m} * ell_i * phi_m >= B_k(t)      (eq:hcpb)
 
-    B_k(t) = max( B_k^min , eta_k * N_k(t) * r_k(t) * h_k )             (Eq. 9)
+    B_k(t) = max( B_k^min , eta_k * N_k(t) * r_k(t) * h_k )             (eq:hcpb-estimator)
 
 This is the framework's ONLY capability constraint. The paper is
 emphatic that "formulations that additionally compare a capability
 stock against B_k conflate two different objects, and (8) is the
-operative form" (Sec. 3.5). It is not a jobs quota: it bounds a volume
+operative form" (sec:hcpb). It is not a jobs quota: it bounds a volume
 of qualified-practice hours, not a headcount.
 
-Dimensional check (Sec. 3.5): N_k * r_k * h_k = people * period^-1 *
-hours/person = hours/period, matching Eq. 8's left side. Verified below
+Dimensional check (sec:hcpb): N_k * r_k * h_k = people * period^-1 *
+hours/person = hours/period, matching eq:hcpb's left side. Verified below
 in capability_budget() and exercised by tests/unit/test_hcpb.py.
 """
 
@@ -22,7 +22,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-# Eq. 7: fixed shares for pure modes. Hybrid shares are domain-configured
+# eq:phi: fixed shares for pure modes. Hybrid shares are domain-configured
 # (see configs/domains/*.yaml) because the paper gives no formula for them.
 FIXED_PHI = {
     "H": 1.0,
@@ -34,11 +34,11 @@ HYBRID_MODES = ("H+A", "H+R", "H+A+R")
 
 
 def phi_for_mode(mode: str, hybrid_phi: dict[str, float]) -> float:
-    """phi_m (Eq. 7): human developmental share of mode m.
+    """phi_m (eq:phi): human developmental share of mode m.
 
     Pure-mode values are fixed by the paper. Hybrid values must be
     supplied from a domain configuration (elicited from practitioners
-    per Paper Sec. 3.5 -- the paper names no elicitation instrument;
+    per Paper sec:hcpb -- the paper names no elicitation instrument;
     see docs/assumptions.md A3).
     """
     if mode in FIXED_PHI:
@@ -49,7 +49,7 @@ def phi_for_mode(mode: str, hybrid_phi: dict[str, float]) -> float:
         except KeyError as exc:
             raise KeyError(
                 f"phi_{mode} not configured; hybrid developmental shares must be "
-                "elicited per-domain (Paper Sec. 3.5) and supplied explicitly"
+                "elicited per-domain (Paper sec:hcpb) and supplied explicitly"
             ) from exc
         if not 0.0 <= value <= 1.0:
             raise ValueError(f"phi_{mode} must lie in [0,1], got {value!r}")
@@ -59,7 +59,7 @@ def phi_for_mode(mode: str, hybrid_phi: dict[str, float]) -> float:
 
 @dataclass(frozen=True)
 class HCPBParameters:
-    """Inputs to Eq. 9, one capability domain, one budget period.
+    """Inputs to eq:hcpb-estimator, one capability domain, one budget period.
 
     N_k: practitioners active in the domain (people).
     r_k: fraction lost to attrition per budget period (period^-1).
@@ -89,7 +89,7 @@ class HCPBParameters:
 
 
 def capability_budget(params: HCPBParameters) -> float:
-    """B_k(t) = max(B_k_min, eta_k * N_k * r_k * h_k)  (Eq. 9), hours/period.
+    """B_k(t) = max(B_k_min, eta_k * N_k * r_k * h_k)  (eq:hcpb-estimator), hours/period.
 
     Units close: people * period^-1 * hours/person = hours/period.
     """
@@ -100,11 +100,11 @@ def hcpb_shortfall(delivered_hours: float, budget_hours: float) -> float:
     """max(0, B_k(t) - delivered) -- how far a domain is below its budget.
 
     Not itself in the paper; a convenience used by the online rule's
-    admissibility test (Eq. 18) and by monitoring (report Sec. 18.3).
+    admissibility test (eq:admis) and by monitoring (the pre-release audit).
     """
     return max(0.0, budget_hours - delivered_hours)
 
 
 def hcpb_satisfied(delivered_hours: float, budget_hours: float) -> bool:
-    """Eq. 8 as a boolean check for a given accumulation of practice hours."""
+    """eq:hcpb as a boolean check for a given accumulation of practice hours."""
     return delivered_hours >= budget_hours

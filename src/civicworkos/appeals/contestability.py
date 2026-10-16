@@ -1,10 +1,10 @@
-"""Contestability: Paper Sec. 5.2, Suppl. S1.1-S1.4.
+"""Contestability: Paper sec:contest, Suppl. app:contest.
 
 Standing (S1.1): any resident or worker affected by an allocation
 decision may appeal, EXPLICITLY IRRESPECTIVE OF CONTRACT STATUS -- the
 paper grants this to non-payroll workers even though they are otherwise
 invisible to N_k(t), ineligible as assignees, and unprotected by the
-Just Transition Constraint (Eq. 12). The paper is candid that standing
+Just Transition Constraint (eq:justtransition). The paper is candid that standing
 "does not repair the exclusion but ensures it is at least reportable."
 
 Windows (Suppl. Table S1) are asymmetric by appeal type:

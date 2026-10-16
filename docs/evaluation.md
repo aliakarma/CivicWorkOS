@@ -7,7 +7,7 @@ demo** (illustrative, synthetic, not the paper's study).
 
 ## 1. The worked-example oracle (real verification)
 
-The paper's §5.3 worked bridge-inspection allocation is the ONLY part of the
+The paper's sec:worked worked bridge-inspection allocation is the ONLY part of the
 manuscript with a checkable ground truth. This repository verifies it two
 ways:
 
@@ -16,20 +16,30 @@ python scripts/verify_worked_example.py     # standalone script, human-readable 
 pytest tests/smoke/test_worked_example.py -v  # the same checks as pytest assertions
 ```
 
-Both recompute, from the paper's own stated inputs (Table 3, the HCPB
-parameters, Fig. 3's caption parameters) and **without reference to the
-paper's printed outputs**: all four `CAD`/`SCV` values, the HCPB budget
-(2073.6 h/yr), the constrained-optimum mix (20.8%/79.2%), the dual price
-(`lambda_k = 0.0250`), the augmented-score tie/reversal (`SCV~_H =
-SCV~_{H+R} = 0.4937 > 0.4863 > 0.4743`), the 9.3% objective cost, and all
-five Fig. 3 curves. See
-[docs/reproducibility.md](reproducibility.md) for the distinction between
+Both recompute, from the paper's own stated inputs (tab:worked-terms, the HCPB
+parameters, tab:cadparams) and **without reference to the paper's printed
+outputs**: all eight staffed modes' `CAD` and `SCV` values, the HCPB budget
+(4,976.64 h/yr from eq:bkworked), the constrained-optimum mix (28.30%/71.70%,
+tab:worked-mix), the dual price (`lambda_k = 0.045353`, eq:lambdaworked), the
+augmented-score tie and reversal (both active staffed modes at 0.435229, above
+the unconstrained winner's 0.342612), the 4.34% objective cost of preservation,
+the intake requirement (`tau_k = 4.05` years, `n_hat_k = 14`) by two independent
+routes, the access arithmetic (622 h against 1,344 h, a 2.16x multiplier), and
+all six fig:cad-trend trajectories under the five-component eq:cadmodel.
+
+Every manuscript input is imported from `manuscript_values`, which re-exports the
+single definition in `Paper/Frontiers/audit_numbers.py`. Neither the script nor
+the test suite restates a value the article states; what they hold is the
+*printed* values, because the question they answer is whether this code
+reproduces what was published.
+
+See [docs/reproducibility.md](reproducibility.md) for the distinction between
 this and "reproducing the paper's results" (there are no other results to
-reproduce — see the manuscript's Data Availability Statement).
+reproduce -- see the manuscript's Data Availability Statement).
 
 ## 2. Metrics implemented by the simulation demo
 
-The paper specifies thirteen metrics (§6.3). The reduced-scope demo
+The paper specifies thirteen metrics (sec:protocol). The reduced-scope demo
 (`sim.des.engine`) computes five of them, approximately, on synthetic data:
 
 | # | Paper metric | Implemented? | Where |
@@ -47,7 +57,7 @@ The paper specifies thirteen metrics (§6.3). The reduced-scope demo
 | 11 | Displacement by group `Delta_g` | Not implemented (see `docs/assumptions.md` A8) | — |
 | 12 | Service-equity dispersion | Not implemented | — |
 | 13 | Contestability throughput | Not implemented in the demo loop (the appeals workflow itself IS implemented — `civicworkos.appeals`) | — |
-| — | Z4-routing rate | Implemented (not a paper metric; this repository's own monitoring signal, report §18.3) | `SimulationMetrics.z4_routing_rate` |
+| — | Z4-routing rate | Implemented (not a paper metric; this repository's own monitoring signal, the pre-release audit) | `SimulationMetrics.z4_routing_rate` |
 
 Run it:
 
@@ -65,17 +75,17 @@ seeds. See [reproducibility.md](reproducibility.md).
 python scripts/run_rebalance.py 12
 ```
 
-Solves Eq. 16 as a MIP (assignment) and its LP relaxation (duals) over a
+Solves eq:program as a MIP (assignment) and its LP relaxation (duals) over a
 small task batch scaled from the worked example's own per-task budget
 intensity. See `tests/integration/test_rebalance_solver.py` for why a
-reduced task count is used (MIP symmetry at the paper's real 340-task
+reduced task count is used (MIP symmetry at the paper's real 2,100-inspection
 population — documented, not hidden, in that test's own docstring).
 
 ## 4. Baselines
 
-The five strategies of Paper §6.2 are implemented in `sim.strategies.baselines`.
-As the paper itself concedes (§7.2), all five are ablations of the same
-objective, not independent external systems — report §20.13 names this
+The five strategies of Paper sec:protocol are implemented in `sim.strategies.baselines`.
+As the paper itself concedes (sec:whatworked), all five are ablations of the same
+objective, not independent external systems — the pre-release audit names this
 limitation directly, and this repository's baseline implementation
 (`Conventional Capability Matching` as SCV with `w9` renormalized away) makes
 that structural fact explicit in code rather than hiding it behind a
@@ -87,7 +97,7 @@ differently-named scoring function.
 python scripts/sensitivity_sweep.py 2000 0.20
 ```
 
-Targets report §16.2's recommendation M1 / Paper §7.2's open question 3
+Targets the pre-release audit's recommendation M1 / Paper sec:whatworked's open question 3
 ("whether a panel's deliberation is effectively arbitrary" under small
 weight perturbations). Runs entirely on the four worked-example candidates —
 see the script's own docstring for scope.

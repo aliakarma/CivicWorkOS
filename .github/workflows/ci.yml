@@ -32,7 +32,7 @@ jobs:
       - name: Type check (mypy)
         run: mypy src/civicworkos
 
-      - name: Ground-truth check (worked example, Paper Sec. 5.3)
+      - name: Ground-truth check (worked example, Paper sec:worked)
         run: python scripts/verify_worked_example.py
 
       - name: Unit tests

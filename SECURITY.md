@@ -42,10 +42,10 @@ specify them:
 - No authentication/authorization layer exists (the paper describes no API).
 - No cross-validation of self-reported agent signals (`Q`, `Tr`) against
   independent outcomes — the paper states this is a requirement it does not
-  design (Sec. 8.1).
+  design (the pre-release audit).
 - Governance-artifact configs (`configs/weights/`, `configs/domains/`) are
   plain YAML with no signing/verification in this reference implementation,
-  though the schema models them as versioned policy acts (Paper Sec. 5.1).
+  though the schema models them as versioned policy acts (Paper sec:feedback).
   A production deployment should add signature verification before loading.
 
 Do not deploy this repository against real municipal data or real automation

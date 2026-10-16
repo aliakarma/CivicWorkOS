@@ -1,4 +1,4 @@
-"""Unit tests for civicworkos.twin.task: Eq. 3-4."""
+"""Unit tests for civicworkos.twin.task: eq:task and eq:ell."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from civicworkos.twin.task import TaskProfile, developmental_content
 
 
 def test_ell_matches_worked_example():
-    """Paper Sec. 5.3: learn=0.80, d_i=10h -> ell_i = 8 qualified-practice hours."""
+    """Paper sec:worked: learn=0.80, d_i=10h -> ell_i = 8 qualified-practice hours."""
     assert developmental_content(0.80, 10.0) == pytest.approx(8.0)
 
 
@@ -53,7 +53,7 @@ def test_zero_duration_rejected():
 
 
 def test_linearity_in_duration_is_a_named_modelling_assumption():
-    """Report Sec. 8.2 [CRIT]: the multiplicative form makes a 10h task at
+    """The pre-release audit, [CRIT]: the multiplicative form makes a 10h task at
     learn=0.8 and a 20h task at learn=0.4 identical developmental goods.
     This test documents that this is what the equation actually does, not
     an endorsement that it should."""

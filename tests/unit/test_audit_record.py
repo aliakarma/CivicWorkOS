@@ -25,12 +25,17 @@ def _record(task_id="t1", selected_mode="H+R") -> EvidentiaryRecord:
             RejectionRecord(mode="R", stage="policy_filter", reason="prohibit"),
             RejectionRecord(mode="A+R", stage="policy_filter", reason="prohibit"),
         ),
+        # The two active staffed modes of tab:worked-mix, at the values
+        # eq:augworked prints. These are a hashing fixture, but there is no
+        # reason for a fixture to carry numbers the article does not contain.
         candidates=(
-            CandidateRecord(mode="H", terms={}, debts={}, cad=0.0, scv=0.294, scv_tilde=0.4937),
-            CandidateRecord(mode="H+R", terms={}, debts={}, cad=0.23, scv=0.3539, scv_tilde=0.4937),
+            CandidateRecord(mode="H+R/a1", terms={}, debts={}, cad=0.3280,
+                            scv=0.308240, scv_tilde=0.435229),
+            CandidateRecord(mode="H+A+R/a1", terms={}, debts={}, cad=0.4234,
+                            scv=0.335452, scv_tilde=0.435229),
         ),
         selected_mode=selected_mode,
-        duals_in_force={"lambda_structural_inspection": 0.0250},
+        duals_in_force={"lambda_structural_inspection": 0.045353},
         rebalance_timestamp=datetime(2026, 1, 1),
         config_version="v2026-09-01",
         authorizing_panel_decision="PANEL-2026-001",

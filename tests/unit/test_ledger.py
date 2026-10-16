@@ -1,4 +1,4 @@
-"""Unit tests for civicworkos.ledger.capability_ledger: Eq. 5."""
+"""Unit tests for civicworkos.ledger.capability_ledger: eq:ledger."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from civicworkos.ledger.capability_ledger import CapabilityLedger, LedgerSnapsho
 
 
 def test_e_kg_must_reconcile_to_e_k():
-    """Paper Sec. 3.3: the group decomposition is required, not optional
+    """Paper sec:layer2: the group decomposition is required, not optional
     reporting -- E_kg summing to something other than E_k is a fixed data
     error, not a valid state."""
     with pytest.raises(ValueError, match="does not reconcile"):

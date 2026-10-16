@@ -5,18 +5,18 @@
 The source paper is a *Hypothesis and Theory* article and makes no
 production-readiness claim. This document separates what the paper's own
 architecture requires from what a real municipal deployment would ALSO
-need — clearly marking which is which, per report §18.
+need — clearly marking which is which, per the pre-release audit.
 
 ## Required by the paper (implemented here)
 
 | Requirement | Paper evidence | Where in this repository |
 | --- | --- | --- |
-| Event-driven architecture; governance services persistent behind pub/sub | §4.1 | `civicworkos.feedback.bus.FeedbackBus`, subscribed by `AllocationEngine` at construction |
-| Market instantiates a short-lived per-task negotiation | §4.1 | `AllocationEngine.allocate()` queries the market fresh per task |
-| Rebalancing solver as a scheduled batch job | §4.1 | `civicworkos.solver.solve_rebalance` — this repository does not itself provide a scheduler; call it periodically from cron/Airflow/etc. |
-| Feedback bus updates BOTH ledger and policy-compliance monitoring | §4.1, Fig. 1 caption | `AllocationEngine` registers both subscribers together, so a caller cannot wire only one |
-| Versioned parameter updates; every allocation traces to its authorizing config | §5.1 | `civicworkos.config` (Pydantic schema with `version`/`effective_date`); `EvidentiaryRecord.config_version` |
-| Published dual prices | §4.5 | `RebalanceResult.lambda_k/.mu_s/.nu_kg` — printing/publishing them is the caller's responsibility |
+| Event-driven architecture; governance services persistent behind pub/sub | sec:refarch | `civicworkos.feedback.bus.FeedbackBus`, subscribed by `AllocationEngine` at construction |
+| Market instantiates a short-lived per-task negotiation | sec:refarch | `AllocationEngine.allocate()` queries the market fresh per task |
+| Rebalancing solver as a scheduled batch job | sec:refarch | `civicworkos.solver.solve_rebalance` — this repository does not itself provide a scheduler; call it periodically from cron/Airflow/etc. |
+| Feedback bus updates BOTH ledger and policy-compliance monitoring | sec:refarch, fig:architecture caption | `AllocationEngine` registers both subscribers together, so a caller cannot wire only one |
+| Versioned parameter updates; every allocation traces to its authorizing config | sec:feedback | `civicworkos.config` (Pydantic schema with `version`/`effective_date`); `EvidentiaryRecord.config_version` |
+| Published dual prices | sec:online | `RebalanceResult.lambda_k/.mu_s/.nu_kg` — printing/publishing them is the caller's responsibility |
 | Append-only, disclosable evidentiary record per decision | Suppl. S1.3 | `EvidentiaryRecordStore` (no update/delete method exists) |
 | Appeal windows with outcome/displacement suspension | Suppl. Table S1 | `civicworkos.appeals.contestability.APPEAL_WINDOWS` |
 | Automatic one-zone demotion; restoration requires a panel decision | Suppl. S1.4 | `civicworkos.zones.oversight_zones.ZoneRegistry` enforces this asymmetry in code (raises if violated) |
@@ -44,13 +44,13 @@ reproduction. A team deploying this repository must build:
   under `configs/weights/` and `configs/domains/` are loaded as plain
   files; nothing verifies they were actually authorized by "the panel."
 - **Cross-validation of self-reported signals** (`Q`, `Tr`) against
-  independent outcomes — the paper names this requirement (§8.1) and states
+  independent outcomes — the paper names this requirement (the pre-release audit) and states
   it does NOT design it either. See [SECURITY.md](../SECURITY.md).
 - **Cold-start handling** for the trailing-12-month normalization windows
   (not implemented at all — see `docs/architecture.md`) and for
   `Lambda_k`'s pro-rated trajectory at a domain's first budget period.
-- **Infeasibility policy** for Eq. 16 at rebalance (e.g. if Eq. 11's access
-  constraint has no eligible supply — report §20.4). `solve_rebalance`
+- **Infeasibility policy** for eq:program at rebalance (e.g. if eq:access's access
+  constraint has no eligible supply — the pre-release audit). `solve_rebalance`
   currently returns an empty result with `status != "Optimal"`; a real
   deployment needs an operational response to that state.
 - **Robot fleet middleware enforcing ISO 10218-1:2025.** Explicitly outside
@@ -58,13 +58,13 @@ reproduction. A team deploying this repository must build:
   allocation path so a policy bug cannot defeat a hardware interlock) — a
   real deployment must supply this middleware independently.
 
-## Monitoring (report §18.3's recommendation, not built here)
+## Monitoring (the pre-release audit's recommendation, not built here)
 
 If deploying for real, instrument at minimum:
 
-- Z4-routing rate per domain (degeneration into Human-First — Paper §7.2's
+- Z4-routing rate per domain (degeneration into Human-First — Paper sec:whatworked's
   own named failure mode)
-- Admissibility-rejection reason histogram (which Eq. 18 clause is binding)
+- Admissibility-rejection reason histogram (which eq:admis clause is binding)
 - `lambda_k` trajectory and volatility (retirement-wave oscillation, P7)
 - `Pi_{k,g}` drift vs. `theta_{k,g}` (access constraint inert or violated, P8)
 - Rule staleness per policy rule (`PolicyRule.effective_date` age)
@@ -75,7 +75,7 @@ real monitoring pipeline.
 
 ## What this repository explicitly does not scale to
 
-No problem-size envelope is given by the paper (report §8.1), and this
+No problem-size envelope is given by the paper (the pre-release audit), and this
 repository does not invent one. `civicworkos.solver.rebalance` bounds MIP
 solve time via a configurable timeout rather than assume any city's real
 task volume is tractable — see

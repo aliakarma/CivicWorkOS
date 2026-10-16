@@ -25,14 +25,14 @@ This was hit and fixed during this repository's own build — see
 `civicworkos.program.city_program` builds a binary variable per (task,
 mode) pair. If your task population contains many **near-identical**
 candidates (the same SCV values repeated across tasks — e.g. the worked
-example scaled to its real 340 tasks/year), the resulting MIP is
+example at its real 2,100 inspections a year), the resulting MIP is
 **combinatorially symmetric**: every permutation of "which N tasks get mode
 H" is an equally-good optimum, and generic branch-and-bound solvers (CBC
 included) can spend a very long time distinguishing between symmetric
 solutions even though the LP relaxation solves instantly.
 
 This was observed directly while building this repository:
-`civicworkos.solver.solve_rebalance` on 340 identical worked-example
+`civicworkos.solver.solve_rebalance` on 2,100 identical worked-example
 candidates did not return within several minutes; on 12-30 identical
 candidates it returns in under a second (see
 `tests/integration/test_rebalance_solver.py`'s docstring and
@@ -54,8 +54,8 @@ observed).
    commercial solver (Gurobi, CPLEX) if you need an exact integer solution
    at real scale — PuLP supports this without changing the model.
 
-The paper itself gives no problem-size envelope for Eq. 16 and names this
-as an open question (report §8.1); this is not a defect specific to this
+The paper itself gives no problem-size envelope for eq:program and names this
+as an open question (the pre-release audit); this is not a defect specific to this
 implementation.
 
 ## `PulpSolverError` mentioning `cbc.exe`
@@ -85,7 +85,7 @@ This repository's defaults are calibrated so a moderate-risk task usually
 clears the floor (see `docs/assumptions.md` A7); a HIGH-risk/HIGH-criticality
 task, or a custom market estimator with lower safety outputs, can
 legitimately push every mode below the floor — that is the framework working
-as specified (Fig. 2: "either filtering stage may empty the candidate set"),
+as specified (fig:workflow: "either filtering stage may empty the candidate set"),
 not a bug. If it happens unexpectedly, print each candidate's
 `terms.S` and compare against `default_safety_floor(task)` (or your custom
 `safety_floor_fn`) to see which clause is excluding every mode.
@@ -95,6 +95,6 @@ not a bug. If it happens unexpectedly, print each candidate's
 `civicworkos.config.load_weights_config` / `load_domain_config` raise if
 `w1..w9` or `alpha..epsilon` do not sum to 1.0 (within `1e-6`), or if a
 domain config is missing a required field. This is intentional — Paper
-§5.1 requires weight vectors to be exact governance artifacts; there is no
+sec:feedback requires weight vectors to be exact governance artifacts; there is no
 silent renormalization. Fix the YAML file's values rather than relaxing the
 validator.

@@ -1,4 +1,4 @@
-# The seven stress scenarios of Paper Sec. 6.6 / Suppl. Table S2.
+# The seven stress scenarios of Paper sec:protocol / Suppl. Table S2.
 # This is a DESIGN ARTIFACT reproduced from the paper's protocol
 # specification, not a used or executed study. civicworkos.sim.stress
 # reads this file to parameterize the scenario injectors it implements;

@@ -33,7 +33,7 @@ pip install -r requirements.txt
 ## Verify the installation
 
 Run the repository's one ground-truth check — it recomputes every checkable
-number in the paper's worked example (§5.3) and analytic model (§7.1, Fig. 3)
+number in the paper's worked example (sec:worked) and analytic model (sec:cadmodel, fig:cad-trend)
 independently from the article's own stated inputs:
 
 ```bash
