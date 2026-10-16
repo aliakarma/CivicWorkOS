@@ -1,0 +1,107 @@
+# Pre-specified hypotheses for the CivicWorkOS reference evaluation.
+#
+# This file was written, and its thresholds fixed, BEFORE the evaluation
+# code existed and before any run on the reporting seeds. Development and
+# debugging use seeds 1000-1009 only; the reported execution uses seeds
+# 0-29, run once. A threshold changed after that run must be recorded in
+# DEVIATIONS below with its date and reason, and reported in the article.
+#
+# Policies: static, efficiency, civicworkos, civicworkos_nolearn,
+#           civicworkos_noretention
+# Scenarios: routine, surge, disruption
+#
+# Decision rule (all hypotheses): a paired, two-sided Wilcoxon signed-rank
+# test over the 30 reporting seeds, with Holm-Bonferroni step-down control
+# at family-wise alpha = 0.05 over every test listed below. A hypothesis is
+# SUPPORTED when (a) its Holm-adjusted p-value is below 0.05, (b) the mean
+# paired difference has the predicted sign, and (c) where a threshold is
+# given, the mean paired difference meets it. Non-inferiority hypotheses
+# (H4, H5) are instead decided on the 95% t-interval of the mean paired
+# difference, which must lie inside the stated margin; they enter the
+# Holm family only through their superiority complement and are reported
+# with that interval.
+
+alpha: 0.05
+seeds_reported: [0, 29]
+seeds_development: [1000, 1009]
+
+hypotheses:
+  H1:
+    claim: >-
+      Skill retention. At the end of the horizon in the routine scenario, the
+      share of certified practitioners who are current (proficiency at or
+      above the competence threshold) is higher under civicworkos than under
+      efficiency and than under static.
+    metric: current_share_end
+    scenario: routine
+    comparisons: [efficiency, static]
+    direction: greater
+    threshold: 0.15          # absolute difference in share
+  H2:
+    claim: >-
+      Capability formation. civicworkos ends the routine horizon with more
+      certified practitioners than efficiency.
+    metric: certified_end
+    scenario: routine
+    comparisons: [efficiency]
+    direction: greater
+    threshold: null
+  H3:
+    claim: >-
+      Takeover performance. In the automation-disruption window, the share of
+      takeover requests recovered by a human is higher under civicworkos than
+      under efficiency and than under static.
+    metric: takeover_success_window
+    scenario: disruption
+    comparisons: [efficiency, static]
+    direction: greater
+    threshold: 0.10
+  H4:
+    claim: >-
+      Cost of preservation (non-inferiority). In routine operations,
+      civicworkos service cost per completed task is at most 115% of
+      efficiency.
+    metric: cost_per_completed_ratio_to_efficiency
+    scenario: routine
+    comparisons: [efficiency]
+    direction: noninferior_upper
+    margin: 1.15
+  H5:
+    claim: >-
+      Service delivery (non-inferiority). In routine operations, civicworkos
+      task completion is within 2 percentage points of efficiency.
+    metric: completion_rate
+    scenario: routine
+    comparisons: [efficiency]
+    direction: noninferior_lower
+    margin: -0.02
+  H6:
+    claim: >-
+      Workload. In every scenario, the share of practitioner-days above the
+      workload ceiling is lower under civicworkos than under efficiency.
+    metric: overload_share
+    scenario: [routine, surge, disruption]
+    comparisons: [efficiency]
+    direction: less
+    threshold: null
+  H7:
+    claim: >-
+      Adaptive learning. In the disruption scenario, civicworkos completes a
+      larger share of the tasks arriving in the disruption window than its
+      no-learning ablation.
+    metric: completion_rate_window
+    scenario: disruption
+    comparisons: [civicworkos_nolearn]
+    direction: greater
+    threshold: null
+  H8:
+    claim: >-
+      Periodic human-led tasks. Removing the retention mechanism lowers the
+      end-of-horizon current share in the routine scenario by at least 0.10.
+    metric: current_share_end
+    scenario: routine
+    comparisons: [civicworkos_noretention]
+    direction: greater
+    threshold: 0.10
+
+DEVIATIONS: []
