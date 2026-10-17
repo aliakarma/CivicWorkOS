@@ -102,10 +102,18 @@ Targets the pre-release audit's recommendation M1 / Paper sec:whatworked's open 
 weight perturbations). Runs entirely on the four worked-example candidates —
 see the script's own docstring for scope.
 
+## The article's evaluation protocol
+
+The protocol the article reports (three domains, five policies, three
+scenarios, 30 paired seeds, pre-specified hypotheses H1–H8) is implemented in
+`sim/protocol/` and executed by `scripts/run_protocol.py`. See the README
+section "Reference Evaluation Protocol" and [reproducibility.md](reproducibility.md).
+
 ## What NOT to report from this repository
 
 Do not present any number from `scripts/run_simulation.py`,
 `scripts/sensitivity_sweep.py`, or the `HeuristicMarket` estimator as
-evidence about the real framework's behavior. They are software-pipeline
-demonstrations. The paper reports no measured results (see its Data
-Availability Statement), and this repository does not manufacture any.
+evidence about the framework's behavior; they are software-pipeline
+demonstrations. Numbers from `scripts/run_protocol.py` are the article's
+synthetic reference execution: cite them as such, with the seeds and
+configuration, and never as measurements of a municipality.

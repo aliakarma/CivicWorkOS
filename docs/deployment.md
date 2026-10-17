@@ -2,8 +2,8 @@
 
 ## Framing
 
-The source paper is a *Hypothesis and Theory* article and makes no
-production-readiness claim. This document separates what the paper's own
+The source paper is a *Methods* article whose evaluation runs on a synthetic
+testbed, and it makes no production-readiness claim. This document separates what the paper's own
 architecture requires from what a real municipal deployment would ALSO
 need — clearly marking which is which, per the pre-release audit.
 

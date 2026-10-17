@@ -3,3 +3,5 @@ PyYAML>=6.0,<7
 # PuLP 3.x emits DeprecationWarning from LpVariable(), which pytest.ini
 # promotes to an error; the solver code targets the 2.x API.
 PuLP>=2.7,<3
+numpy>=1.24
+scipy>=1.10

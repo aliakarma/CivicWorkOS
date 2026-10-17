@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
+from typing import Any
 
 import numpy as np
 
@@ -161,11 +162,17 @@ class Metrics:
     takeover_time_n: int = 0
     mrc: int = 0
     incidents: int = 0
+    incidents_w: int = 0
+    arrived_window_days: int = 0
     trainee_credit: float = 0.0
     retention_reservations: int = 0
     oversight_routings: int = 0
     relaxations: int = 0
     graduations: int = 0
+    mach_err_sum: float = 0.0
+    mach_err_n: int = 0
+    mach_err_w_sum: float = 0.0
+    mach_err_w_n: int = 0
     trajectory: list = field(default_factory=list)
 
 
@@ -317,7 +324,8 @@ class Run:
         catchup = max(0.0, budget - self.lam[k]) / remaining
         behind = F.capability_terms and self.lam[k] < trajectory
 
-        cands = []
+        cands: list[dict[str, Any]] = []
+        rosters: list[tuple[Practitioner | None, Practitioner | None]]
         for mode in spec.modes:
             hours = req_hours * mode.duration_mult
             if mode.machine and self.mach_left[k] < hours - 1e-9:
@@ -405,7 +413,9 @@ class Run:
             cap_ok = [c for c in admissible if c["credit"] >= catchup - 1e-12]
             stages.insert(0, cap_ok)
         if F.retention:
-            ret_first = [c for c in stages[0]
+            # drawn from the whole admissible set: a refresher carries no trainee
+            # credit, so filtering the catch-up subset would starve it
+            ret_first = [c for c in admissible
                          if (due and c["due_lead"] and c["led_ok"]) or c["restores"]]
             stages.insert(0, ret_first)
         for i, s in enumerate(stages):
@@ -473,6 +483,7 @@ class Run:
                 p.demand += demand
         if mode.machine:
             self.mach_left[k] -= hours
+        incidents_before = M.incidents
         cost = 0.0
         if lead is not None:
             cost += hours * P.wage_certified
@@ -566,13 +577,15 @@ class Run:
                     j += 1
                 self.req_m[k], self.req_v[k] = nm[j], nv[j]
         # multimodal skill probes (learning policies only, where available)
-        if F.learning and u[U_PROBE] < P.probe_prob:
+        if F.learning and F.multimodal and u[U_PROBE] < P.probe_prob:
             for idx, p in enumerate((lead, tr)):
                 if p is not None:
                     obs = self.theta_true(k, p) + P.probe_sd * zs[idx]
                     m_new, v_new = kalman_scalar(p.off_m, p.off_v, obs - self.theta_nominal(k, p), P.probe_sd ** 2)
                     p.off_m, p.off_v = m_new, v_new
         M.cost += cost
+        if window:
+            M.incidents_w += M.incidents - incidents_before
         return success
 
     # ---- main loop --------------------------------------------------------
@@ -592,10 +605,17 @@ class Run:
                 self.mach_left[k] = cap * (sc.disruption_capacity if in_disruption else 1.0)
                 if F.learning:
                     self.mach_v[k] += P.machine_process_var
-                    if w.telemetry_ok[k, day]:
+                    if F.multimodal and w.telemetry_ok[k, day]:
                         obs = w.machine_rel[k, day] + P.telemetry_sd * w.telemetry_z[k, day]
                         self.mach_m[k], self.mach_v[k] = kalman_scalar(self.mach_m[k], self.mach_v[k], obs,
                                                                        P.telemetry_sd ** 2)
+                # read-only accuracy metric: does not affect any decision
+                err = abs(self.mach_m[k] - w.machine_rel[k, day])
+                M.mach_err_sum += err
+                M.mach_err_n += 1
+                if win and win[0] <= day < win[1]:
+                    M.mach_err_w_sum += err
+                    M.mach_err_w_n += 1
                 if day % P.days_per_year == 0:
                     self.lam[k] = 0.0
                 for p in self.pract[k]:
@@ -638,7 +658,8 @@ class Run:
                     M.load_sum += index
                     if index > P.workload_ceiling:
                         M.overload_days += 1
-                    if F.learning and p.demand > 0.5 and w.sensor_u[k, p.slot, day] < P.workload_sensor_prob:
+                    if (F.learning and F.multimodal and p.demand > 0.5
+                            and w.sensor_u[k, p.slot, day] < P.workload_sensor_prob):
                         obs = p.load_mult + P.workload_sensor_sd * w.sensor_z[k, p.slot, day]
                         p.load_m, p.load_v = kalman_scalar(p.load_m, p.load_v, obs, P.workload_sensor_sd ** 2)
                     p.gap = 0.0 if p.led_today else p.gap + 1.0
@@ -653,6 +674,12 @@ class Run:
             if day % 5 == 4 or day == P.days - 1:
                 M.trajectory.append((day + 1, *self.snapshot()))
         return M
+
+    def proficiency_error(self) -> float:
+        """Mean absolute error of the allocator's proficiency estimate, active practitioners, end of run."""
+        errs = [abs(self.theta_est(k, p) - self.theta_true(k, p))
+                for k in range(len(self.D)) for p in self.pract[k] if p.active]
+        return sum(errs) / len(errs) if errs else float("nan")
 
     def snapshot(self) -> tuple[int, int, float]:
         n_cert = n_curr = 0
@@ -693,8 +720,12 @@ def run_one(seed: int, scenario_name: str, policy: str, cfg: RunConfig | None = 
         "takeover_time_mean": M.takeover_time_sum / M.takeover_time_n if M.takeover_time_n else float("nan"),
         "mrc": M.mrc,
         "incidents_per_1000": 1000.0 * M.incidents / max(M.arrived, 1),
+        "incidents_per_1000_window": (1000.0 * M.incidents_w / M.arrived_w) if M.arrived_w else float("nan"),
         "trainee_credit_per_year": M.trainee_credit * cfg.params.days_per_year / cfg.params.days,
         "graduations": M.graduations,
+        "proficiency_mae_end": r.proficiency_error(),
+        "machine_mae": M.mach_err_sum / max(M.mach_err_n, 1),
+        "machine_mae_window": (M.mach_err_w_sum / M.mach_err_w_n) if M.mach_err_w_n else float("nan"),
         "retention_reservations": M.retention_reservations,
         "oversight_routings": M.oversight_routings,
         "relaxations": M.relaxations,

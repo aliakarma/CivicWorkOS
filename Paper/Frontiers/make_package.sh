@@ -13,7 +13,7 @@ cd "$(dirname "$0")"
 
 OUT=submission
 rm -rf "$OUT" CivicWorkOS-submission.zip
-mkdir -p "$OUT/images"
+mkdir -p "$OUT"
 
 SOURCES=(
   CivicWorkOS.tex
@@ -23,13 +23,9 @@ SOURCES=(
   frontiers_suppmat.cls
   Frontiers-Harvard.bst
   logo1.eps
-  images/arch.png
-  images/runtime.png
 )
 DOCS=(
   cover-letter.md
-  response-to-reviewers.md
-  CivicWorkOS-diff.pdf
 )
 
 for f in "${SOURCES[@]}" "${DOCS[@]}"; do

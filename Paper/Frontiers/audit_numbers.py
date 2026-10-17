@@ -850,6 +850,185 @@ def build() -> list:
                "the best-performing comparator is Human-First, giving 66")
     out.append(s)
 
+    out.extend(build_neurorobotics())
+    return out
+
+
+# --------------------------------------------------------------------------
+# Neurorobotics revision: recency arithmetic and the reference execution.
+# --------------------------------------------------------------------------
+
+DATA_DIR = __import__("pathlib").Path(__file__).resolve().parent / "data"
+
+
+def build_neurorobotics() -> list:
+    """Checks added for the Frontiers in Neurorobotics version.
+
+    The recency arithmetic of sec:costs is recomputed from Proposition 1.
+    Every simulation number quoted in the prose of sec:simresults, the
+    Discussion and the Conclusions is checked against the JSON that
+    scripts/run_protocol.py --paper wrote; the tables and Figure 4 are
+    generated from the same JSON by make_sim_tables.py and need no check.
+    """
+    import json
+
+    out = []
+    w = WORKED
+
+    # -- Proposition 1 in the worked domain ------------------------------
+    s = Section("Recency interval in the worked domain (prop:recency, sec:costs)")
+    th0, thc, thr, tau = 0.30, 0.70, 0.45, 120.0
+    c0 = w["h_k"] / math.log((1 - th0) / (1 - thc)) if "h_k" in w else 1440.0 / math.log(0.7 / 0.3)
+    th_inf = 1 - (1 - th0) * math.exp(-2.0 * 1440.0 / c0)
+    s.add("attainable proficiency at c = 2 h_k", 0.8714, th_inf, tol=5e-5, site="sec:costs")
+    s.add("recency interval (working days)", 62.7, tau * math.log((th_inf - thr) / (thc - thr)), tol=0.05,
+          site="sec:costs")
+    s.add("mean interval between a lead's inspections", 2.86, 250.0 / (w["n_k"] / w["N_k"]), tol=0.005,
+          site="sec:costs")
+    out.append(s)
+
+    summ_path, hyp_path = DATA_DIR / "summary.json", DATA_DIR / "hypotheses.json"
+    if not summ_path.is_file():
+        s = Section("Reference execution (data/summary.json)")
+        s.add("data/summary.json present", 1.0, 0.0, site="run scripts/run_protocol.py --paper")
+        out.append(s)
+        return out
+    S = json.loads(summ_path.read_text(encoding="utf-8"))
+    H = {(t["id"], t["scenario"], t["comparison"]): t for t in json.loads(hyp_path.read_text(encoding="utf-8"))}
+
+    def m(sc, pol, metric, k="mean"):
+        return S[sc][pol][metric][k]
+
+    s = Section("Reference execution, prose of sec:simresults (data/summary.json)")
+    R, SU, D = "routine", "surge", "disruption"
+    E, C, ST, NL, NR = "efficiency", "civicworkos", "static", "civicworkos_nolearn", "civicworkos_noretention"
+    prose = [
+        ("current at end, efficiency", 9.6, m(R, E, "current_end"), 0.05),
+        ("current at end, static", 14.2, m(R, ST, "current_end"), 0.05),
+        ("current at end, CivicWorkOS", 27.5, m(R, C, "current_end"), 0.05),
+        ("current share, CivicWorkOS", 0.84, m(R, C, "current_share_end"), 0.005),
+        ("current share, efficiency", 0.42, m(R, E, "current_share_end"), 0.005),
+        ("current share, static", 0.56, m(R, ST, "current_share_end"), 0.005),
+        ("certifications, CivicWorkOS", 10.9, m(R, C, "graduations"), 0.05),
+        ("certifications, efficiency", 0.0, m(R, E, "graduations"), 0.05),
+        ("no retention: certifications", 10.9, m(R, NR, "graduations"), 0.05),
+        ("no retention: certified at end", 32.9, m(R, NR, "certified_end"), 0.05),
+        ("no retention: current at end", 14.1, m(R, NR, "current_end"), 0.05),
+        ("no retention: current share", 0.43, m(R, NR, "current_share_end"), 0.005),
+        ("mean workload, CivicWorkOS", 0.41, m(R, C, "mean_workload"), 0.005),
+        ("mean workload, efficiency", 0.15, m(R, E, "mean_workload"), 0.005),
+        ("overload %, CivicWorkOS", 0.04, 100 * m(R, C, "overload_share"), 0.005),
+        ("overload %, efficiency", 4.18, 100 * m(R, E, "overload_share"), 0.005),
+        ("overload %, no learning", 6.49, 100 * m(R, NL, "overload_share"), 0.005),
+        ("cost index, CivicWorkOS", 173.4, m(R, C, "cost_index"), 0.05),
+        ("cost index CI low", 166.4, m(R, C, "cost_index", "ci_low"), 0.05),
+        ("cost index CI high", 180.4, m(R, C, "cost_index", "ci_high"), 0.05),
+        ("routine completion %, CivicWorkOS", 97.8, 100 * m(R, C, "completion_rate"), 0.05),
+        ("routine completion %, efficiency", 99.3, 100 * m(R, E, "completion_rate"), 0.05),
+        ("surge window completion %, CivicWorkOS", 92.7, 100 * m(SU, C, "completion_rate_window"), 0.05),
+        ("surge window completion %, efficiency", 87.7, 100 * m(SU, E, "completion_rate_window"), 0.05),
+        ("surge window completion %, static", 88.2, 100 * m(SU, ST, "completion_rate_window"), 0.05),
+        ("surge overload %, CivicWorkOS", 0.04, 100 * m(SU, C, "overload_share"), 0.005),
+        ("surge overload %, efficiency", 3.09, 100 * m(SU, E, "overload_share"), 0.005),
+        ("surge window completion %, no learning", 96.6, 100 * m(SU, NL, "completion_rate_window"), 0.05),
+        ("surge overload %, no learning", 5.60, 100 * m(SU, NL, "overload_share"), 0.005),
+        ("window takeover requests, CivicWorkOS", 36.7, m(D, C, "takeover_requests_window"), 0.05),
+        ("window takeover requests, efficiency", 23.5, m(D, E, "takeover_requests_window"), 0.05),
+        ("window takeover requests, static", 306.3, m(D, ST, "takeover_requests_window"), 0.05),
+        ("window takeover requests, no learning", 290.5, m(D, NL, "takeover_requests_window"), 0.05),
+        ("window incidents, CivicWorkOS", 5.0, m(D, C, "incidents_per_1000_window"), 0.05),
+        ("window incidents, efficiency", 3.8, m(D, E, "incidents_per_1000_window"), 0.05),
+        ("window incidents, static", 35.8, m(D, ST, "incidents_per_1000_window"), 0.05),
+        ("window incidents, no learning", 31.0, m(D, NL, "incidents_per_1000_window"), 0.05),
+        ("window completion %, efficiency", 26.8, 100 * m(D, E, "completion_rate_window"), 0.05),
+        ("window completion %, CivicWorkOS", 71.9, 100 * m(D, C, "completion_rate_window"), 0.05),
+        ("window completion %, no learning", 93.5, 100 * m(D, NL, "completion_rate_window"), 0.05),
+        ("window completion ratio CivicWorkOS / efficiency", 2.7,
+         m(D, C, "completion_rate_window") / m(D, E, "completion_rate_window"), 0.05),
+        ("incident ratio no learning / CivicWorkOS ('six times')", 6.0,
+         m(D, NL, "incidents_per_1000_window") / m(D, C, "incidents_per_1000_window"), 0.5),
+        ("window takeover success, CivicWorkOS", 0.812, m(D, C, "takeover_success_window"), 0.0005),
+        ("window takeover success, efficiency", 0.734, m(D, E, "takeover_success_window"), 0.0005),
+        ("window takeover success, static", 0.874, m(D, ST, "takeover_success_window"), 0.0005),
+        ("minimal-risk stops per run, CivicWorkOS, disruption", 29.4, m(D, C, "mrc"), 0.05),
+        ("minimal-risk stops per run, static, disruption", 0.0, m(D, ST, "mrc"), 0.05),
+        ("no retention: window takeover success", 0.720, m(D, NR, "takeover_success_window"), 0.0005),
+        ("no retention: window completion %", 52.4, 100 * m(D, NR, "completion_rate_window"), 0.05),
+    ]
+    for label, printed, computed, tol in prose:
+        s.add(label, printed, computed, tol=tol, site="sec:simresults")
+    out.append(s)
+
+    s = Section("Reference execution, hypothesis estimates quoted in prose (data/hypotheses.json)")
+    quoted = [
+        (("H1", R, E), 0.42, 0.38, 0.46),
+        (("H1", R, ST), 0.28, 0.24, 0.32),
+        (("H2", R, E), 9.8, 9.0, 10.7),
+        (("H8", R, NR), 0.41, 0.38, 0.44),
+        (("H5", R, E), -0.016, -0.026, -0.005),
+        (("H7", D, NL), -0.215, -0.246, -0.185),
+        (("H3", D, E), 0.078, 0.036, 0.120),
+    ]
+    for key, est, lo, hi in quoted:
+        t = H[key]
+        dec = 0.005 if abs(est) < 1 else 0.05
+        if key[0] in ("H5", "H7", "H3"):
+            dec = 0.0005
+        s.add(f"{key[0]} vs {key[2]} estimate", est, t["estimate"], tol=dec, site="sec:simresults")
+        s.add(f"{key[0]} vs {key[2]} CI low", lo, t["ci_low"], tol=dec, site="sec:simresults")
+        s.add(f"{key[0]} vs {key[2]} CI high", hi, t["ci_high"], tol=dec, site="sec:simresults")
+    s.add("H4 cost ratio ('1.73 times')", 1.73, H[("H4", R, E)]["estimate"], tol=0.005, site="sec:conclusion")
+    s.add("hypotheses supported (of 8)", 4,
+          sum(all(t["supported"] for k, t in H.items() if k[0] == hid) for hid in {k[0] for k in H}), tol=0,
+          site="sec:simresults")
+    s.add("tests supported (of 12)", 7, sum(t["supported"] for t in H.values()), tol=0, site="sec:simresults")
+    s.add("tests in the Holm family", 12, len(H), tol=0, site="sec:stats")
+    out.append(s)
+
+    s = Section("Reference execution, accuracy of learned estimates (data/summary.json)")
+    acc = [
+        ("proficiency MAE end, CivicWorkOS", 0.023, m(R, C, "proficiency_mae_end"), 0.0005),
+        ("proficiency MAE end, no learning", 0.035, m(R, NL, "proficiency_mae_end"), 0.0005),
+        ("'a third less error' (1 - CW/NL)", 0.33, 1 - m(R, C, "proficiency_mae_end") / m(R, NL, "proficiency_mae_end"),
+         0.02),
+        ("routine reliability MAE, CivicWorkOS", 0.030, m(R, C, "machine_mae"), 0.0005),
+        ("routine reliability MAE, no learning", 0.010, m(R, NL, "machine_mae"), 0.0005),
+        ("disruption-window reliability MAE, CivicWorkOS", 0.145, m(D, C, "machine_mae_window"), 0.0005),
+        ("disruption-window reliability MAE, non-learning", 0.403, m(D, NL, "machine_mae_window"), 0.0005),
+        ("disruption-window reliability MAE, static", 0.403, m(D, ST, "machine_mae_window"), 0.0005),
+    ]
+    for label, printed, computed, tol in acc:
+        s.add(label, printed, computed, tol=tol, site="sec:simresults")
+    out.append(s)
+
+    exp_path = DATA_DIR / "exploratory.json"
+    s = Section("Exploratory analyses quoted in prose (data/exploratory.json)")
+    X = json.loads(exp_path.read_text(encoding="utf-8"))
+    oo, sens = X["outcome_only"], X["sensitivity"]
+    expl = [
+        ("outcome-only routine completion %", 87.0, 100 * oo[R]["completion_rate"]["b_mean"], 0.05),
+        ("full routine completion %", 97.8, 100 * oo[R]["completion_rate"]["a_mean"], 0.05),
+        ("outcome-only overload %", 7.74, 100 * oo[R]["overload_share"]["b_mean"], 0.005),
+        ("outcome-only: fewer current practitioners", 6.2, oo[R]["current_end"]["diff"], 0.05),
+        ("outcome-only window takeover success", 0.366, oo[D]["takeover_success_window"]["b_mean"], 0.0005),
+        ("full window takeover success", 0.812, oo[D]["takeover_success_window"]["a_mean"], 0.0005),
+        ("outcome-only proficiency MAE end", 0.096, oo[R]["proficiency_mae_end"]["b_mean"], 0.0005),
+        ("outcome-only window incidents", 2.3, oo[D]["incidents_per_1000_window"]["b_mean"], 0.05),
+        ("full window incidents", 5.0, oo[D]["incidents_per_1000_window"]["a_mean"], 0.05),
+        ("sensitivity: min current-share advantage", 0.35,
+         min(sens[v]["current_share_end"]["diff"] for v in sens), 0.005),
+        ("sensitivity: max current-share advantage", 0.46,
+         max(sens[v]["current_share_end"]["diff"] for v in sens), 0.005),
+        ("sensitivity: min completion penalty (points)", 1.0,
+         -100 * max(sens[v]["completion_rate"]["diff"] for v in sens), 0.05),
+        ("sensitivity: max completion penalty (points)", 1.8,
+         -100 * min(sens[v]["completion_rate"]["diff"] for v in sens), 0.05),
+        ("cost index, machine prices x3", 144.3, sens["machine_price_x3"]["cost_index"]["mean"], 0.05),
+        ("cost index, baseline (exploratory recompute)", 173.4, sens["base"]["cost_index"]["mean"], 0.05),
+    ]
+    for label, printed, computed, tol in expl:
+        s.add(label, printed, computed, tol=tol, site="sec:simresults, exploratory")
+    out.append(s)
     return out
 
 

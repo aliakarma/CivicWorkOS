@@ -24,8 +24,9 @@ paper's thirteen metrics (sec:protocol):
       what AllocationEngine already tracks internally, displacement
       Delta_g, service-equity dispersion, and contestability throughput.
 
-Nothing this engine produces should be cited as reproducing the paper's
-(nonexistent) evaluation results -- see docs/reproducibility.md.
+Nothing this engine produces is an article result. The article's evaluation
+protocol is executed by sim/protocol (scripts/run_protocol.py) -- see
+docs/reproducibility.md.
 """
 
 from __future__ import annotations

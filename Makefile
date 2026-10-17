@@ -1,4 +1,4 @@
-.PHONY: install install-dev verify test test-unit test-integration test-smoke lint format typecheck clean run-allocation run-rebalance run-simulation sensitivity docker-build docker-run
+.PHONY: install install-dev verify test test-unit test-integration test-smoke lint format typecheck clean run-allocation run-rebalance run-simulation protocol protocol-dev exploratory sensitivity docker-build docker-run
 
 install:
 	pip install -e .
@@ -45,6 +45,21 @@ run-rebalance:
 
 run-simulation:
 	python scripts/run_simulation.py 200 42
+
+# The article's reference execution: 450 runs on reporting seeds 0-29,
+# outputs copied to Paper/Frontiers/data/ (10 to 13 minutes on 12 cores).
+protocol:
+	python scripts/run_protocol.py --paper
+	cd Paper/Frontiers && python make_sim_tables.py --splice && python audit_numbers.py --quiet
+
+# Exploratory analyses added in revision (outcome-only learning ablation,
+# sensitivity to tau_ret and machine prices); not in the pre-specified family.
+exploratory:
+	python scripts/run_exploratory.py
+
+# Development seeds only; never used for reported numbers.
+protocol-dev:
+	python scripts/run_protocol.py --seeds 1000 1009 --out results/protocol_dev
 
 sensitivity:
 	python scripts/sensitivity_sweep.py 2000 0.2

@@ -204,6 +204,7 @@ class PolicyFlags:
     workload_guard: bool
     oversight: bool
     readiness_takeover: bool
+    multimodal: bool = True   # skill probes, telemetry, physiological workload
 
 
 POLICY_FLAGS: dict[str, PolicyFlags] = {
@@ -212,6 +213,9 @@ POLICY_FLAGS: dict[str, PolicyFlags] = {
     "civicworkos": PolicyFlags(True, True, True, True, True, True),
     "civicworkos_nolearn": PolicyFlags(False, True, True, True, True, True),
     "civicworkos_noretention": PolicyFlags(True, True, False, True, True, True),
+    # exploratory ablation added in revision (not in the pre-specified family):
+    # learning from task outcomes only, with every multimodal channel removed
+    "civicworkos_outcomeonly": PolicyFlags(True, True, True, True, True, True, multimodal=False),
 }
 
 

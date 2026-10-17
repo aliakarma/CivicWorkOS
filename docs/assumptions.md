@@ -250,3 +250,24 @@ change it later.**
   `task_delta_resilience` both validate the execution-mode family and ignore the
   roster suffix — so a staffed-mode decision variable needs no further
   plumbing there.
+
+## A13 — Reference testbed simplifications (`sim/protocol`)
+
+- **Missing:** The article specifies the online rule with the nine-term
+  Sustainable Civic Value (eq:scv) and dual prices from a periodic program
+  (eq:aug); a three-domain synthetic testbed has neither a debt estimator for
+  every staffed mode nor a periodic program to supply duals.
+- **Decision:** Both learning policies score a staffed mode by its immediate
+  expected value, `10 (0.5 + 0.5 crit) p_hat - cost - 30 * 0.15 * risk * (1 - p_hat)`,
+  a three-term instance of eq:scv; capability preservation enters only through
+  constraints. The budget is enforced by the staged catch-up test (eq:catchup)
+  instead of a dual. Consequential decisions are a per-task flag drawn at the
+  domain's consequential share, standing in for `crit_i * auth_i >= q^Z3`.
+  The retention clock uses the nominal learning curve on the logged practice
+  record; the learned estimate decides currency.
+- **Why reasonable:** Proposition 3 shows that at the default weights the
+  constraints, not the debt weight, decide the allocation, so removing the debt
+  term isolates the mechanism the evaluation is about. The article states all
+  four simplifications in Section 5.2.
+- **How to change:** Implement a per-mode debt estimator and a periodic
+  rebalance inside `Run.run`, and pass the resulting duals to `choose`.

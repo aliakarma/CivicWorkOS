@@ -1,25 +1,24 @@
 # CivicWorkOS
 
-**A Capability-Preserving, Policy-Aware Multi-Agent Framework for Human–AI–Robot Work Allocation and Distributional Accountability in the AI City**
+**Capability-Preserving Adaptive Task Allocation Among Humans, AI Agents, and Robots in Municipal Services**
 
-Author reference implementation of the theoretical framework by Toqeer Ali Syed, Ali Akarma, Raghda M. Alqurashi, Muhammad Tayyab Naqash, and Abdulaziz Alqurashi (*Frontiers*, Hypothesis and Theory).
+Author reference implementation and reproducible evaluation testbed for the article by Toqeer Ali Syed, Ali Akarma, Raghda M. Alqurashi, Muhammad Tayyab Naqash, and Abdulaziz Alqurashi (*Frontiers in Neurorobotics*, Methods; Research Topic *Data-driven Neurorobotics: Multimodal Learning, Adaptive Intelligence, and Reproducible Human–Robot Interaction*).
 
 [![CI](https://img.shields.io/badge/CI-passing-brightgreen)](.github/workflows/ci.yml)
 [![Python 3.10 | 3.11 | 3.12](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue)](pyproject.toml)
-[![Tests](https://img.shields.io/badge/Tests-196%20passed-success)](tests/)
-[![Type Checking: mypy](https://img.shields.io/badge/Type%20Checking-mypy%20clean-blue)](pyproject.toml)
+[![Tests](https://img.shields.io/badge/Tests-220%20passed-success)](tests/)
 [![Linting: ruff](https://img.shields.io/badge/Linting-ruff-black)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Article: Frontiers](https://img.shields.io/badge/Frontiers-Hypothesis%20%26%20Theory-red)](CITATION.cff)
+[![Article: Frontiers in Neurorobotics](https://img.shields.io/badge/Frontiers%20in%20Neurorobotics-Methods-red)](CITATION.cff)
 
 > [!IMPORTANT]
-> **Author-provided reference implementation.** This repository is maintained by **Ali Akarma**, a co-author of the manuscript, to translate the theoretical mathematics, the mixed-integer programming (MIP) formulation, and the online Lagrangian allocation rule of *CivicWorkOS* into an executable, independently verifiable research software package.
+> **Author-provided reference implementation.** This repository is maintained by **Ali Akarma**, a co-author of the manuscript. It implements the CivicWorkOS framework (staffed modes, the capability-preservation constraints, the online allocation rule), its **adaptive learning mechanism** (Gaussian beliefs over task requirements, practitioner proficiency, machine reliability, and workload response, updated from outcomes and optional multimodal observations), its **proficiency model** (learning with credited practice, decay without human-led work), and its **readiness-constrained control transfer**, together with the **reproducible evaluation protocol** the article reports.
 >
-> As stated in the manuscript's Data Availability Statement, this *Hypothesis and Theory* article presents a normative theoretical architecture and reports **no dataset and no measured empirical result**. This repository recomputes every checkable number the article publishes — the worked bridge-inspection allocation of sec:worked and the per-component debt trajectory of sec:cadmodel / fig:cad-trend — and reports the agreement explicitly, check by check, in [Verification Against the Published Worked Example](#verification-against-the-published-worked-example). Every manuscript value used in those checks is imported from a single definition, never restated here.
+> **What the article's numbers rest on.** Two kinds of evidence, both regenerated here:
+> 1. *Exact arithmetic*: the worked bridge-inspection allocation, its sensitivity frontier, and its parameter shocks. `python Paper/Frontiers/audit_numbers.py` recomputes every such number.
+> 2. *A synthetic reference execution* of the evaluation protocol: three service domains, five policies, three scenarios, 30 paired seeds, eight hypotheses fixed in [`configs/protocol/hypotheses.yaml`](configs/protocol/hypotheses.yaml) before any code existed. `python scripts/run_protocol.py --paper` regenerates every simulation number in the article.
 >
-> Everything under [`sim/`](sim/) runs on **clearly labelled synthetic demonstration data**. It exercises the protocol's software shape and must never be cited as empirical municipal validation. See [docs/reproducibility.md](docs/reproducibility.md).
->
-> **The evaluation protocol specified in the article has not been executed.** The article specifies it in full — six sectors, a ten-year horizon, thirty paired seeds, six strategies, and ten hypotheses with refutation criteria — so that the evaluation is fixed in advance and auditable. No outcome of it is reported anywhere, in the article or here. The article's evidence is the worked bridge-inspection allocation, its sensitivity frontier, its two parameter shocks, and the debt trajectory, all of which are exact arithmetic reproducible from the published values. The article cites this repository for that reproduction and for nothing else.
+> The testbed is **synthetic**. Its parameters are illustrative modeling choices and its practitioners are simulated, so its results are evidence about how the mechanisms behave, **not measurements of any municipality**, and must never be cited as such.
 
 ---
 
@@ -48,7 +47,10 @@ Author reference implementation of the theoretical framework by Toqeer Ali Syed,
   - [Declarative YAML Artifacts](#declarative-yaml-artifacts)
   - [The UNSET Sentinel](#the-unset-sentinel)
   - [Environment Variables](#environment-variables)
-- [Simulation Testbed](#simulation-testbed)
+- [Reference Evaluation Protocol](#reference-evaluation-protocol)
+  - [Running It](#running-it)
+  - [Results of the Reference Execution](#results-of-the-reference-execution)
+- [Legacy Demonstration Engine](#legacy-demonstration-engine)
   - [Dispatch Strategies](#dispatch-strategies)
   - [Multi-Seed Results](#multi-seed-results)
   - [Stress Scenario Catalogue](#stress-scenario-catalogue)
@@ -704,10 +706,59 @@ CivicWorkOS requires **no runtime secrets** — it is a library and a set of scr
 
 ---
 
-## Simulation Testbed
+## Reference Evaluation Protocol
+
+[`sim/protocol/`](sim/protocol/) is the evaluation protocol of the article (Section "Evaluation Protocol"), executed. It is a day-stepped synthetic municipal testbed run for three years of 250 working days.
+
+| Component | File | What it implements |
+| :--- | :--- | :--- |
+| Proficiency model | [`skill.py`](sim/protocol/skill.py) | Learning curve (eq:learncurve), decay without human-led work (eq:decay), recency interval (Proposition 1) |
+| Adaptive learning | [`estimation.py`](sim/protocol/estimation.py) | Assumed-density-filtering outcome update (eq:adf), Kalman update for multimodal observations (eq:kalman) |
+| Testbed and policies | [`engine.py`](sim/protocol/engine.py) | Three domains, five policies, takeover with readiness set (eq:ready) and minimal-risk stop |
+| Parameters | [`config.py`](sim/protocol/config.py) | Every testbed parameter; written to `config.json` with each execution |
+| Statistics | [`analysis.py`](sim/protocol/analysis.py) | 95% t-intervals, paired Wilcoxon signed-rank tests, Holm–Bonferroni, rank-biserial effect sizes |
+| Pre-specified hypotheses | [`configs/protocol/hypotheses.yaml`](configs/protocol/hypotheses.yaml) | H1–H8 with thresholds and decision rules, fixed before the code was written |
+
+**Domains**: robot-assisted structural inspection, street maintenance and sanitation with robot fleets, and citizen-service casework with AI agents. **Policies**: *static* (fixed allocation table, no learning), *efficiency-focused* (same learned beliefs, immediate expected value only), *CivicWorkOS*, and two ablations (*no learning*, *no retention*). **Scenarios**: routine operations, a 30-day demand surge (2× arrivals), and a silent 20-day automation disruption (reliability 0.45, fault rate 0.25, half capacity). **Metrics**: task completion, service cost, workload overload, skill retention, takeover performance.
+
+### Running It
+
+```bash
+# The article's reference execution: 450 runs on reporting seeds 0-29 (10-13 min on 12 cores)
+python scripts/run_protocol.py --paper
+cd Paper/Frontiers && python make_sim_tables.py --splice && python audit_numbers.py --quiet
+
+# Exploratory analyses (outcome-only learning ablation; sensitivity to tau_ret and machine prices)
+python scripts/run_exploratory.py
+
+# Development seeds only (never used for reported numbers)
+python scripts/run_protocol.py --seeds 1000 1009 --out results/protocol_dev
+```
+
+Each seed fixes every exogenous draw (arrivals, requirements, outcome and fault draws, sensor noise, attrition, machine reliability), so policies are compared on common random numbers. Outputs (`runs.jsonl`, `config.json`, `summary.json`, `hypotheses.json`, trajectories) go to `results/protocol/`; `--paper` copies the summaries into [`Paper/Frontiers/data/`](Paper/Frontiers/data/), from which the article's tables and Figure 4 are generated.
+
+### Results of the Reference Execution
+
+Means over 30 seeds, routine operations unless stated (full table with 95% intervals: Supplementary Tables S2–S4):
+
+| Metric | Static | Efficiency | CivicWorkOS | No learning | No retention |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| Task completion (%) | 99.4 | 99.3 | 97.8 | 99.5 | 96.2 |
+| Service cost index (efficiency = 100) | 123.6 | 100.0 | 173.4 | 180.2 | 159.0 |
+| Overloaded practitioner-days (%) | 0.11 | 4.18 | 0.04 | 6.49 | 0.04 |
+| Current practitioners at end (of 32 at start) | 14.2 | 9.6 | 27.5 | 28.4 | 14.1 |
+| Certifications over three years | 2.8 | 0.0 | 10.9 | 12.3 | 10.9 |
+| Disruption-window completion (%) | 76.4 | 26.8 | 71.9 | 93.5 | 52.4 |
+| Disruption-window incidents per 1,000 tasks | 35.8 | 3.8 | 5.0 | 31.0 | 3.6 |
+
+Four of the eight pre-specified hypotheses are supported (H1 retention, H2 formation, H6 workload, H8 periodic human-led tasks). Four are not: H3 (takeover success, below the 0.10 threshold), H4 (cost, 173% against a 115% margin), H5 (completion non-inferiority), and H7, where learning *lowers* disruption-window completion while cutting incidents about sixfold. The article reports all eight.
+
+---
+
+## Legacy Demonstration Engine
 
 > [!WARNING]
-> The testbed in [`sim/`](sim/) is a **reduced-scope demonstration**, not the manuscript's evaluation study. It is a time-stepped sequential task processor rather than a priority-queue discrete-event engine; it runs over a short synthetic horizon rather than six sectors and ten simulated years; and it computes five of the protocol's thirteen metrics. Its numbers are not comparable to anything the manuscript reports, because the manuscript reports nothing from this study. See [docs/reproducibility.md](docs/reproducibility.md) and [docs/assumptions.md](docs/assumptions.md), A10.
+> The engine in [`sim/des/`](sim/des/) predates the reference evaluation protocol and is kept for the worked-example tooling. It is a **reduced-scope demonstration**, not the article's evaluation study, which is [`sim/protocol/`](sim/protocol/). It is a time-stepped sequential task processor rather than a priority-queue discrete-event engine; it runs over a short synthetic horizon rather than six sectors and ten simulated years; and it computes five of the protocol's thirteen metrics. Its numbers are not comparable to anything the manuscript reports, because the manuscript reports nothing from this study. See [docs/reproducibility.md](docs/reproducibility.md) and [docs/assumptions.md](docs/assumptions.md), A10.
 
 ### Dispatch Strategies
 
@@ -861,15 +912,17 @@ CivicWorkOS/
 │   ├── solver/                    # PuLP/CBC integration and dual extraction
 │   ├── twin/                      # Urban Task Digital Twin (eq:task and eq:ell)
 │   └── zones/                     # Adaptive oversight zones Z1-Z4
-├── sim/                           # Discrete-event testbed (synthetic demonstration data)
+├── sim/                           # Synthetic testbeds
+│   ├── protocol/                  # Reference evaluation protocol: proficiency model, adaptive learning, policies, statistics
 │   ├── calibration/               # Open-data metadata catalogue, synthetic task generator
-│   ├── des/                       # Simulation engine and metric computation
+│   ├── des/                       # Legacy demonstration engine and metric computation
 │   ├── strategies/                # Five baseline dispatch strategies
 │   └── stress/                    # Stress scenario injectors
 ├── configs/                       # Versioned declarative governance artifacts
 │   ├── domains/                   # Per-domain HCPB, access, transition parameters
 │   ├── groups/                    # Protected worker group taxonomy
 │   ├── policy/                    # Statutory rule provenance metadata
+│   ├── protocol/                  # Pre-specified hypotheses H1-H8 of the evaluation protocol
 │   ├── scenarios/                 # Stress scenario definitions
 │   ├── services/                  # 3R Reserve parameters per critical service
 │   └── weights/                   # Panel-ratified objective and debt weight vectors
@@ -877,12 +930,10 @@ CivicWorkOS/
 │   ├── verify_worked_example.py   # Ground-truth oracle (CI gate 1)
 │   ├── run_allocation.py          # Single-task online allocation + audit record
 │   ├── run_rebalance.py           # City-wide MIP solve and dual price extraction
-│   ├── run_simulation.py          # Multi-seed, multi-strategy benchmark
+│   ├── run_simulation.py          # Legacy multi-seed demonstration
+│   ├── run_protocol.py            # Reference execution of the evaluation protocol (article results)
 │   └── sensitivity_sweep.py       # Monte Carlo weight perturbation sweep
-├── tests/                         # 196 automated tests
-│   ├── unit/                      # 125 tests
-│   ├── integration/               # 14 tests
-│   └── smoke/                     # 25 tests
+├── tests/                         # 220 automated tests (unit, integration, smoke)
 ├── docs/                          # Architecture and operations documentation
 ├── .github/workflows/ci.yml       # CI: lint, typecheck, ground truth, tests (3.10-3.12)
 ├── .env.example                   # Optional runtime overrides (no secrets required)
@@ -924,7 +975,7 @@ CivicWorkOS/
 
 ### Software Reproducibility versus Scientific Reproduction
 
-The manuscript itself insists on this distinction, and so does this repository. **Software-pipeline reproducibility** — this code runs the same way every time, and its arithmetic matches the published worked example — is a different claim from **scientific result reproduction**, which is not available here because the article reports no measured results.
+The manuscript insists on this distinction, and so does this repository. **Software-pipeline reproducibility** — this code runs the same way every time, its arithmetic matches the published worked example, and the reference execution regenerates every simulation number in the article — is a different claim from **empirical validation**, which is not available here because the article reports no measured municipal data.
 
 | Dimension | Scope in the manuscript | Status in this repository |
 | :--- | :--- | :--- |
@@ -932,8 +983,9 @@ The manuscript itself insists on this distinction, and so does this repository. 
 | **MIP formulation (eq:program)** | City-wide periodic program | Implemented and solved via CBC in [`solver/`](src/civicworkos/solver/) |
 | **Online rule (eq:aug, eq:admis and eq:argmax)** | Lagrangian augmented dispatch | Implemented with active duals in [`online/`](src/civicworkos/online/) |
 | **Worked example (sec:worked)** | Analytical worked example | Reproduced within per-check tolerance by [`verify_worked_example.py`](scripts/verify_worked_example.py) |
-| **Analytic debt model (sec:cadmodel)** | Closed form, eq:cadmodel | Reproduced exactly for all five fig:cad-trend parameter sets |
-| **Evaluation study (sec:protocol)** | Six sectors, ten years, ≥30 seeds, 13 metrics — *not built* | Reduced-scope synthetic demonstration only, in [`sim/`](sim/) |
+| **Analytic debt model (Supplementary S4)** | Closed form, eq:cadmodel | Reproduced exactly for all fig:cad-trend parameter sets |
+| **Proficiency model and learning (Sections 3.3–3.4)** | eq:learncurve, eq:decay, eq:adf, eq:kalman, Proposition 1 | Implemented and unit-tested in [`sim/protocol/`](sim/protocol/) |
+| **Evaluation protocol (sec:protocol)** | Three domains, five policies, three scenarios, 30 seeds, H1–H8 | Executed on a synthetic testbed by [`run_protocol.py`](scripts/run_protocol.py); every reported number regenerates |
 | **Empirical municipal data** | None collected | None collected here either; source metadata documented only |
 
 The manuscript names seven intended open-data sources and states explicitly that no data from them has been retrieved or analysed. [`sim/calibration/sources.py`](sim/calibration/sources.py) documents them as metadata; it does not retrieve them.
@@ -1042,21 +1094,21 @@ If you use this reference implementation or the theoretical framework, please ci
 
 ### Article
 
-> Toqeer Ali Syed, Ali Akarma, Shahid Kamal, Salman Jan, Ahmad B. Alkhodre, and Arshad Jamal. **CivicWorkOS: A Capability-Preserving, Policy-Aware Multi-Agent Framework for Human-AI-Robot Work Allocation and Distributional Accountability in the AI City.** *Frontiers* (Hypothesis and Theory article). Submitted to the Research Topic *"Robots at Work: Who Wins, Who Loses in the AI City."*
+> Toqeer Ali Syed, Ali Akarma, Raghda M. Alqurashi, Muhammad Tayyab Naqash, and Abdulaziz Alqurashi. **CivicWorkOS: Capability-Preserving Adaptive Task Allocation Among Humans, AI Agents, and Robots in Municipal Services.** *Frontiers in Neurorobotics* (Methods article; under review). Research Topic: *Data-driven Neurorobotics: Multimodal Learning, Adaptive Intelligence, and Reproducible Human–Robot Interaction.*
 
 ### BibTeX
 
 ```bibtex
 @article{syed2026civicworkos,
-  title   = {CivicWorkOS: A Capability-Preserving, Policy-Aware Multi-Agent Framework
-             for Human-AI-Robot Work Allocation and Distributional Accountability
-             in the AI City},
-  author  = {Syed, Toqeer Ali and Akarma, Ali and Kamal, Shahid and Jan, Salman
-             and Alkhodre, Ahmad B. and Jamal, Arshad},
-  journal = {Frontiers in Robotics and AI},
-  note    = {Hypothesis and Theory article. Research Topic: Robots at Work:
-             Who Wins, Who Loses in the AI City.
-             Corresponding author: Shahid Kamal (shahid.kamal@mmu.edu.my)},
+  title   = {{CivicWorkOS}: Capability-Preserving Adaptive Task Allocation Among
+             Humans, {AI} Agents, and Robots in Municipal Services},
+  author  = {Syed, Toqeer Ali and Akarma, Ali and Alqurashi, Raghda M. and
+             Naqash, Muhammad Tayyab and Alqurashi, Abdulaziz},
+  journal = {Frontiers in Neurorobotics},
+  note    = {Methods article, under review. Research Topic: Data-driven
+             Neurorobotics: Multimodal Learning, Adaptive Intelligence, and
+             Reproducible Human-Robot Interaction.
+             Corresponding author: Raghda M. Alqurashi (rmqurashi@uqu.edu.sa)},
   year    = {2026}
 }
 ```
@@ -1073,7 +1125,7 @@ Contributions are welcome, subject to one rule that overrides normal software pr
 2. **Verification.** Every pull request must pass `pytest tests/ -v`, `ruff check src/ sim/ scripts/ tests/`, and `mypy src/civicworkos`. Run `python scripts/verify_worked_example.py` before *and* after your change; breaking it is a regression regardless of what else improves.
 3. **Disclosure.** Label every invention. Any computation the manuscript does not specify must be marked `[INVENTED]` or `[REC]` in its docstring and catalogued in [docs/assumptions.md](docs/assumptions.md). An invented default must never read as though it came from the manuscript.
 4. **Governance artifacts.** Changing a file under `configs/weights/` or `configs/domains/` means bumping its `version` and `effective_date`, not editing in place — these are modelled as signed policy acts.
-5. **Scope.** This is a research reference implementation. Please do not add a database, message broker, web framework, or machine-learning model that the framework does not require, and never extend `sim/` in a way that implies it reproduces an evaluation study that was never run.
+5. **Scope.** This is a research reference implementation. Please do not add a database, message broker, web framework, or machine-learning model that the framework does not require. Changes to `sim/protocol/` that alter reported numbers must be followed by a full rerun (`make protocol`), and any change to a hypothesis or threshold must be recorded under `DEVIATIONS` in `configs/protocol/hypotheses.yaml`.
 
 Reference the specific section or equation your change touches (for example, "eq:access", "sec:online") in the pull request description. Full guidelines are in [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md); security disclosures follow [SECURITY.md](SECURITY.md).
 

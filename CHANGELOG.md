@@ -3,6 +3,48 @@
 All notable changes to this repository are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0] - 2026-10-16
+
+Retargeting to *Frontiers in Neurorobotics* (Methods article, Research Topic
+"Data-driven Neurorobotics: Multimodal Learning, Adaptive Intelligence, and
+Reproducible Human-Robot Interaction") under the new title *CivicWorkOS:
+Capability-Preserving Adaptive Task Allocation Among Humans, AI Agents, and
+Robots in Municipal Services*.
+
+### Added
+
+- `sim/protocol/`: the article's evaluation protocol, executed. A day-stepped
+  synthetic testbed with three service domains, five policies (static,
+  efficiency-focused, CivicWorkOS, and two ablations), three scenarios
+  (routine, demand surge, silent automation disruption), and five metric
+  families (completion, cost, workload, skill retention, takeover).
+- `sim/protocol/skill.py`: the proficiency model (learning curve, decay
+  without human-led work, recency interval of Proposition 1).
+- `sim/protocol/estimation.py`: the adaptive learning mechanism
+  (assumed-density-filtering outcome update, Kalman update for multimodal
+  observations).
+- `configs/protocol/hypotheses.yaml`: hypotheses H1-H8, written before the
+  evaluation code.
+- `scripts/run_protocol.py` and `make protocol`: the reference execution
+  (seeds 0-29, 450 runs); `Paper/Frontiers/make_sim_tables.py` generates the
+  article's simulation tables and Figure 4 from its outputs.
+- 24 tests for the proficiency model, the learning updates, the statistics,
+  and the testbed's determinism and common random numbers.
+- `audit_numbers.py` checks every simulation number quoted in the article's
+  prose against `Paper/Frontiers/data/`.
+
+### Changed
+
+- Manuscript restructured for the new journal: adaptive learning, proficiency
+  dynamics, workload, periodic human-led tasks, uncertainty-gated oversight,
+  and readiness-constrained control transfer are now central; legal, data
+  protection, and contestability detail moved to the Supplementary Material.
+- The raster architecture and workflow figures were replaced by vector TikZ.
+- README, CITATION.cff, and docs describe the new evidence base. The README's
+  citation block previously listed an author set that did not match the
+  manuscript; it now matches.
+- Dependencies: `numpy` and `scipy` added for the testbed.
+
 ## [0.2.0] - 2026-10-07
 
 Reconciliation of this repository with the revised manuscript (Phase 3 of

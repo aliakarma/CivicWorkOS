@@ -81,9 +81,11 @@ do not add:
 - A machine-learning model. The paper contains exactly one optional,
   unspecified learned surrogate (sec:weights) and nothing else is trained —
   see `docs/training.md`.
-- Fabricated experimental results. `civicworkos.sim` runs on synthetic,
-  clearly-labeled demo data; it must never be extended to imply it
-  reproduces the paper's (nonexistent) evaluation study.
+- Fabricated experimental results. `sim/des` runs on synthetic demo data and is
+  not the article's evaluation. The article's evaluation is `sim/protocol`; a
+  change that alters its outputs requires a full rerun (`make protocol`), and
+  any change to a hypothesis or threshold must be logged under `DEVIATIONS` in
+  `configs/protocol/hypotheses.yaml`.
 
 ## Commit / PR style
 

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "civicworkos"
-version = "0.1.0"
-description = "Reference implementation of the CivicWorkOS formalism: a capability-preserving, policy-aware multi-agent framework for human-AI-robot work allocation (Frontiers Hypothesis and Theory article)."
+version = "0.3.0"
+description = "Reference implementation and reproducible evaluation testbed for CivicWorkOS: capability-preserving adaptive task allocation among humans, AI agents, and robots in municipal services (Frontiers in Neurorobotics, Methods)."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -21,6 +21,8 @@ dependencies = [
     "pydantic>=2.0,<3",
     "PyYAML>=6.0,<7",
     "PuLP>=2.7,<4",
+    "numpy>=1.24",
+    "scipy>=1.10",
 ]
 
 [project.optional-dependencies]
