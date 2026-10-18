@@ -28,7 +28,7 @@ routes, the access arithmetic (622 h against 1,344 h, a 2.16x multiplier), and
 all six fig:cad-trend trajectories under the five-component eq:cadmodel.
 
 Every manuscript input is imported from `manuscript_values`, which re-exports the
-single definition in `Paper/Frontiers/audit_numbers.py`. Neither the script nor
+single definition in `reproducibility/audit_numbers.py`. Neither the script nor
 the test suite restates a value the article states; what they hold is the
 *printed* values, because the question they answer is whether this code
 reproduces what was published.

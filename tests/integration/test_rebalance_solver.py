@@ -13,7 +13,7 @@ Phase 3 of the revision programme (finding N2). It previously scored four
 *execution* modes against an earlier draft's parameters -- h_k = 600, B_k =
 2073.6, 340 tasks, lambda_k = 0.0250 -- and asserted them. All manuscript inputs
 now come from `manuscript_values`, which re-exports the single definition in
-`Paper/Frontiers/audit_numbers.py`.
+`reproducibility/audit_numbers.py`.
 """
 
 from __future__ import annotations

@@ -218,13 +218,56 @@ POLICY_FLAGS: dict[str, PolicyFlags] = {
     "civicworkos_outcomeonly": PolicyFlags(True, True, True, True, True, True, multimodal=False),
 }
 
+# Rule-based baselines added after pre-registration (exploratory; P4). Kept in
+# a separate registry so that POLICIES, POLICY_FLAGS, the reference execution
+# of 450 runs and its configuration record are unchanged. Learning stays on, as
+# in Efficiency, so that each contrast isolates the added rule.
+EXPLORATORY_POLICY_FLAGS: dict[str, PolicyFlags] = {
+    "efficiency_quota": PolicyFlags(True, False, False, False, False, False),
+    "efficiency_recency": PolicyFlags(True, False, True, False, False, False),
+    "efficiency_quota_recency": PolicyFlags(True, False, True, False, False, False),
+}
+
+# Policies that attach the free trainee to every selected human-led task
+# (apprenticeship quota). The rule needs no random draw.
+TRAINEE_QUOTA: frozenset[str] = frozenset({"efficiency_quota", "efficiency_quota_recency"})
+
+
+def policy_flags(policy: str) -> PolicyFlags:
+    """Flags of a reference or exploratory policy."""
+    if policy in POLICY_FLAGS:
+        return POLICY_FLAGS[policy]
+    return EXPLORATORY_POLICY_FLAGS[policy]
+
+
+@dataclass(frozen=True)
+class SensorRealism:
+    """Person-specific sensor bias, added after pre-registration (exploratory; P4).
+
+    Each practitioner's physiological workload reading and skill probe carry a
+    persistent bias b_i ~ N(0, sd^2), drawn once per run from its own generator
+    ``np.random.default_rng([seed, 7919, stream])``. At the default of zero no
+    draw is made and every reading is unchanged.
+    """
+
+    workload_sensor_bias_sd: float = 0.0
+    probe_bias_sd: float = 0.0
+
+
+WORKLOAD_BIAS_STREAM = 1
+PROBE_BIAS_STREAM = 2
+
 
 @dataclass
 class RunConfig:
     params: SimParams = field(default_factory=SimParams)
     domains: tuple[DomainSpec, ...] = DOMAINS
+    sensors: SensorRealism = field(default_factory=SensorRealism)
 
     def as_dict(self) -> dict:
-        return {"params": asdict(self.params), "domains": [asdict(d) for d in self.domains],
-                "scenarios": {k: asdict(v) for k, v in SCENARIOS.items()},
-                "policies": {k: asdict(v) for k, v in POLICY_FLAGS.items()}}
+        out = {"params": asdict(self.params), "domains": [asdict(d) for d in self.domains],
+               "scenarios": {k: asdict(v) for k, v in SCENARIOS.items()},
+               "policies": {k: asdict(v) for k, v in POLICY_FLAGS.items()}}
+        if self.sensors != SensorRealism():   # recorded only when an exploratory setting is used
+            out["sensors"] = asdict(self.sensors)
+        return out

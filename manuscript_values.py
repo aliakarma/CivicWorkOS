@@ -1,7 +1,6 @@
 """The manuscript's printed values, loaded from one definition.
 
-Finding N2 of the revision programme (`Paper/Frontiers/REVISION-PROGRAMME.md`,
-Phase 3) was that `scripts/verify_worked_example.py` and
+Finding N2 of the internal revision program (Phase 3) was that `scripts/verify_worked_example.py` and
 `tests/smoke/test_worked_example.py` each carried their own copy of the worked
 example's inputs, and both copies had drifted to an earlier draft's
 parameterisation: they verified ``B_k = 2073.6`` against a manuscript that
@@ -9,7 +8,7 @@ computes ``B_k = 4976.64``, and they exited 0 while doing so. An artifact that
 passes against numbers the article does not contain is worse than no artifact,
 because it certifies the wrong paper.
 
-The fix is structural rather than numerical. `Paper/Frontiers/audit_numbers.py`
+The fix is structural rather than numerical. `reproducibility/audit_numbers.py`
 is the single source of truth for every constant the manuscript states, and it
 is the file that runs as a gate on the manuscript itself. This module loads it
 by path and re-exports what the repository's checks need, so there is exactly
@@ -39,16 +38,15 @@ from pathlib import Path
 from types import ModuleType
 
 _REPO_ROOT = Path(__file__).resolve().parent
-AUDIT_NUMBERS_PATH = _REPO_ROOT / "Paper" / "Frontiers" / "audit_numbers.py"
+AUDIT_NUMBERS_PATH = _REPO_ROOT / "reproducibility" / "audit_numbers.py"
 
 
 def _load_audit_numbers() -> ModuleType:
-    """Import `Paper/Frontiers/audit_numbers.py` by path.
+    """Import `reproducibility/audit_numbers.py` by path.
 
-    It lives beside the manuscript rather than inside the installed package,
-    because it is an instrument for auditing the article and has no place in a
-    library a third party would import. Loading it by path keeps that boundary
-    while still giving the repository's checks one definition to read from.
+    It lives in the public reproducibility artifacts rather than inside the
+    installed package. Loading it by path gives the repository's checks one
+    definition to read from without requiring the private manuscript.
     """
     if not AUDIT_NUMBERS_PATH.is_file():
         raise FileNotFoundError(

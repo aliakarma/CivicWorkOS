@@ -8,10 +8,9 @@ nothing in this file is evidence about municipal work.
 
 import json
 
+import analyze
 import numpy as np
 import pytest
-
-import analyze
 
 TASKS = [f"T{i:02d}" for i in range(1, 13)]
 GROUPS = ["competent"] * 4 + ["developing"] * 4 + ["supervisor"] * 4
@@ -28,7 +27,9 @@ def make(path, *, phi_har=0.55, learn=0.8, ratio=1.0, h_raw=1800.0, noise=0.4,
     if ethics:
         lines.append(f"# ethics-approval: {ethics}")
     lines.append("rater_id,group,round,parameter,item_id,value,rationale")
-    clip = lambda v: float(np.clip(round(v), 0, 10))
+    def clip(v):
+        return float(np.clip(round(v), 0, 10))
+
     truth = {"H+A": 0.75, "H+R": 0.70, "H+A+R": phi_har}
     for r in range(n_raters):
         rid, g = f"R{r+1:02d}", GROUPS[r % 12]

@@ -1,0 +1,303 @@
+{
+  "params": {
+    "days": 750,
+    "days_per_year": 250,
+    "avail_h": 4.5,
+    "overtime_factor": 1.3,
+    "machine_h_per_unit": 7.5,
+    "gamma": 8.0,
+    "theta_0": 0.3,
+    "theta_comp": 0.7,
+    "residual": 0.45,
+    "tau_ret": 120.0,
+    "tau_ret_cv": 0.3,
+    "rate_cv": 0.25,
+    "load_sd": 0.15,
+    "human_led_share": 0.3,
+    "omega_trainee": 0.5,
+    "workload_ceiling": 1.0,
+    "workload_margin": 0.95,
+    "machine_drift_sd": 0.004,
+    "machine_reversion": 0.95,
+    "fault_rate": 0.02,
+    "t_detect": 2.0,
+    "t_reach": 3.0,
+    "t_sa": 8.0,
+    "ootl_days": 5,
+    "ootl_factor": 0.6,
+    "overload_sa_factor": 1.5,
+    "value": 10.0,
+    "wage_certified": 1.0,
+    "wage_trainee": 0.6,
+    "incident_cost": 30.0,
+    "p_incident_failure": 0.15,
+    "p_incident_takeover_failure": 0.5,
+    "p_incident_mrc": 0.03,
+    "prior_offset_var": 0.0025,
+    "human_process_var": 0.0001,
+    "machine_prior_var": 0.0025,
+    "machine_process_var": 0.0002,
+    "requirement_prior_var": 0.0025,
+    "probe_prob": 0.3,
+    "probe_sd": 0.08,
+    "telemetry_prob": 0.5,
+    "telemetry_sd": 0.1,
+    "workload_sensor_prob": 0.7,
+    "workload_sensor_sd": 0.1,
+    "eta": 1.2,
+    "oversight_consequence": 0.6,
+    "oversight_p_sd": 0.06,
+    "readiness_z": 1.28,
+    "retention_guard": 0.5,
+    "takeover_headroom": 1.1
+  },
+  "domains": [
+    {
+      "key": "INS",
+      "label": "Structural inspection",
+      "machine_kind": "robot",
+      "arrivals_per_day": 6.0,
+      "duration_h": 4.0,
+      "learn": 0.8,
+      "risk": 0.7,
+      "crit": 0.9,
+      "consequential_share": 1.0,
+      "requirement": 0.62,
+      "requirement_sd": 0.04,
+      "requirement_prior_bias": -0.04,
+      "deadline_days": 5,
+      "takeover_budget_min": 15.0,
+      "n_certified": 10,
+      "n_trainee_posts": 4,
+      "h_k": 600.0,
+      "machine_units": 4,
+      "machine_reliability": 0.86,
+      "machine_cost_per_h": 0.5,
+      "attrition_per_year": 0.12,
+      "modes": [
+        {
+          "name": "H",
+          "phi": 1.0,
+          "machine": false,
+          "duration_mult": 1.2,
+          "machine_bonus": 0.0,
+          "demand": 0.85
+        },
+        {
+          "name": "H+R",
+          "phi": 0.7,
+          "machine": true,
+          "duration_mult": 1.0,
+          "machine_bonus": 0.0,
+          "demand": 0.7
+        },
+        {
+          "name": "H+A+R",
+          "phi": 0.55,
+          "machine": true,
+          "duration_mult": 0.8,
+          "machine_bonus": 0.05,
+          "demand": 0.6
+        }
+      ],
+      "static_mode": "H+A+R"
+    },
+    {
+      "key": "SAN",
+      "label": "Street maintenance and sanitation",
+      "machine_kind": "robot",
+      "arrivals_per_day": 20.0,
+      "duration_h": 2.0,
+      "learn": 0.5,
+      "risk": 0.5,
+      "crit": 0.6,
+      "consequential_share": 0.1,
+      "requirement": 0.55,
+      "requirement_sd": 0.05,
+      "requirement_prior_bias": -0.04,
+      "deadline_days": 1,
+      "takeover_budget_min": 20.0,
+      "n_certified": 12,
+      "n_trainee_posts": 4,
+      "h_k": 500.0,
+      "machine_units": 7,
+      "machine_reliability": 0.82,
+      "machine_cost_per_h": 0.3,
+      "attrition_per_year": 0.12,
+      "modes": [
+        {
+          "name": "H",
+          "phi": 1.0,
+          "machine": false,
+          "duration_mult": 1.0,
+          "machine_bonus": 0.0,
+          "demand": 1.0
+        },
+        {
+          "name": "H+R",
+          "phi": 0.6,
+          "machine": true,
+          "duration_mult": 1.0,
+          "machine_bonus": 0.0,
+          "demand": 0.7
+        },
+        {
+          "name": "R",
+          "phi": 0.0,
+          "machine": true,
+          "duration_mult": 1.0,
+          "machine_bonus": 0.0,
+          "demand": 0.0
+        }
+      ],
+      "static_mode": "R"
+    },
+    {
+      "key": "CAS",
+      "label": "Citizen-service casework",
+      "machine_kind": "AI agent",
+      "arrivals_per_day": 40.0,
+      "duration_h": 1.0,
+      "learn": 0.6,
+      "risk": 0.3,
+      "crit": 0.7,
+      "consequential_share": 0.3,
+      "requirement": 0.58,
+      "requirement_sd": 0.05,
+      "requirement_prior_bias": -0.04,
+      "deadline_days": 2,
+      "takeover_budget_min": 45.0,
+      "n_certified": 10,
+      "n_trainee_posts": 4,
+      "h_k": 400.0,
+      "machine_units": 12,
+      "machine_reliability": 0.88,
+      "machine_cost_per_h": 0.08,
+      "attrition_per_year": 0.12,
+      "modes": [
+        {
+          "name": "H",
+          "phi": 1.0,
+          "machine": false,
+          "duration_mult": 1.0,
+          "machine_bonus": 0.0,
+          "demand": 1.0
+        },
+        {
+          "name": "H+A",
+          "phi": 0.6,
+          "machine": true,
+          "duration_mult": 1.0,
+          "machine_bonus": 0.0,
+          "demand": 0.7
+        },
+        {
+          "name": "A",
+          "phi": 0.0,
+          "machine": true,
+          "duration_mult": 1.0,
+          "machine_bonus": 0.0,
+          "demand": 0.0
+        }
+      ],
+      "static_mode": "A"
+    }
+  ],
+  "scenarios": {
+    "routine": {
+      "name": "routine",
+      "surge_start": -1,
+      "surge_days": 0,
+      "surge_factor": 1.0,
+      "disruption_start": -1,
+      "disruption_days": 0,
+      "disruption_reliability": 0.45,
+      "disruption_fault_rate": 0.25,
+      "disruption_capacity": 0.5
+    },
+    "surge": {
+      "name": "surge",
+      "surge_start": 400,
+      "surge_days": 30,
+      "surge_factor": 2.0,
+      "disruption_start": -1,
+      "disruption_days": 0,
+      "disruption_reliability": 0.45,
+      "disruption_fault_rate": 0.25,
+      "disruption_capacity": 0.5
+    },
+    "disruption": {
+      "name": "disruption",
+      "surge_start": -1,
+      "surge_days": 0,
+      "surge_factor": 1.0,
+      "disruption_start": 500,
+      "disruption_days": 20,
+      "disruption_reliability": 0.45,
+      "disruption_fault_rate": 0.25,
+      "disruption_capacity": 0.5
+    }
+  },
+  "policies": {
+    "static": {
+      "learning": false,
+      "capability_terms": false,
+      "retention": false,
+      "workload_guard": false,
+      "oversight": false,
+      "readiness_takeover": false,
+      "multimodal": true
+    },
+    "efficiency": {
+      "learning": true,
+      "capability_terms": false,
+      "retention": false,
+      "workload_guard": false,
+      "oversight": false,
+      "readiness_takeover": false,
+      "multimodal": true
+    },
+    "civicworkos": {
+      "learning": true,
+      "capability_terms": true,
+      "retention": true,
+      "workload_guard": true,
+      "oversight": true,
+      "readiness_takeover": true,
+      "multimodal": true
+    },
+    "civicworkos_nolearn": {
+      "learning": false,
+      "capability_terms": true,
+      "retention": true,
+      "workload_guard": true,
+      "oversight": true,
+      "readiness_takeover": true,
+      "multimodal": true
+    },
+    "civicworkos_noretention": {
+      "learning": true,
+      "capability_terms": true,
+      "retention": false,
+      "workload_guard": true,
+      "oversight": true,
+      "readiness_takeover": true,
+      "multimodal": true
+    },
+    "civicworkos_outcomeonly": {
+      "learning": true,
+      "capability_terms": true,
+      "retention": true,
+      "workload_guard": true,
+      "oversight": true,
+      "readiness_takeover": true,
+      "multimodal": false
+    }
+  },
+  "seeds": [
+    0,
+    29
+  ],
+  "runs": 450,
+  "wall_seconds": 618.7
+}

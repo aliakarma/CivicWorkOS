@@ -9,7 +9,7 @@ something in `civicworkos.scoring`, `civicworkos.constraints.hcpb` or
 blocker.
 
 Every manuscript value is imported from `manuscript_values`, which re-exports
-the single definition in `Paper/Frontiers/audit_numbers.py`. This file does not
+the single definition in `reproducibility/audit_numbers.py`. This file does not
 restate a single input the article states. It holds only the *printed* values --
 what a reader sees on the page -- because the question it exists to answer is
 whether the library reproduces what was published.

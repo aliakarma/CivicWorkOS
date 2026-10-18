@@ -6,7 +6,6 @@ and the solver, not the table, is the first suspect to check.
 """
 
 import pytest
-
 from model import Inputs, psi_from_ratio, solve
 
 

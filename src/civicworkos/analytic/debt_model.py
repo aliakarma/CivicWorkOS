@@ -52,7 +52,7 @@ is.
 
 The tab:cadparams values themselves are NOT duplicated in this module. They are
 manuscript values, and the repository keeps exactly one copy of those, in
-`Paper/Frontiers/audit_numbers.py`, reachable through `manuscript_values`. This
+`reproducibility/audit_numbers.py`, reachable through `manuscript_values`. This
 module implements the equation; see `tests/unit/test_analytic_debt_model.py` for
 its mathematical properties and `tests/smoke/test_worked_example.py` for the
 reproduction of fig:cad-trend.

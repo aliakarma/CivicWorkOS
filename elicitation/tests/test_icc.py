@@ -1,9 +1,8 @@
 """ICC against the published worked example, not against itself."""
 
+import icc
 import numpy as np
 import pytest
-
-import icc
 
 # Shrout & Fleiss (1979), the published six-target, four-judge example.
 SF = np.array([

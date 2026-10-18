@@ -6,7 +6,7 @@ Author reference implementation and reproducible evaluation testbed for the arti
 
 [![CI](https://img.shields.io/badge/CI-passing-brightgreen)](.github/workflows/ci.yml)
 [![Python 3.10 | 3.11 | 3.12](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue)](pyproject.toml)
-[![Tests](https://img.shields.io/badge/Tests-220%20passed-success)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-231%20passed-success)](tests/)
 [![Linting: ruff](https://img.shields.io/badge/Linting-ruff-black)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Article: Frontiers in Neurorobotics](https://img.shields.io/badge/Frontiers%20in%20Neurorobotics-Methods-red)](CITATION.cff)
@@ -15,7 +15,7 @@ Author reference implementation and reproducible evaluation testbed for the arti
 > **Author-provided reference implementation.** This repository is maintained by **Ali Akarma**, a co-author of the manuscript. It implements the CivicWorkOS framework (staffed modes, the capability-preservation constraints, the online allocation rule), its **adaptive learning mechanism** (Gaussian beliefs over task requirements, practitioner proficiency, machine reliability, and workload response, updated from outcomes and optional multimodal observations), its **proficiency model** (learning with credited practice, decay without human-led work), and its **readiness-constrained control transfer**, together with the **reproducible evaluation protocol** the article reports.
 >
 > **What the article's numbers rest on.** Two kinds of evidence, both regenerated here:
-> 1. *Exact arithmetic*: the worked bridge-inspection allocation, its sensitivity frontier, and its parameter shocks. `python Paper/Frontiers/audit_numbers.py` recomputes every such number.
+> 1. *Exact arithmetic*: the worked bridge-inspection allocation, its sensitivity frontier, and its parameter shocks. `python reproducibility/audit_numbers.py` recomputes every such number.
 > 2. *A synthetic reference execution* of the evaluation protocol: three service domains, five policies, three scenarios, 30 paired seeds, eight hypotheses fixed in [`configs/protocol/hypotheses.yaml`](configs/protocol/hypotheses.yaml) before any code existed. `python scripts/run_protocol.py --paper` regenerates every simulation number in the article.
 >
 > The testbed is **synthetic**. Its parameters are illustrative modeling choices and its practitioners are simulated, so its results are evidence about how the mechanisms behave, **not measurements of any municipality**, and must never be cited as such.
@@ -230,7 +230,7 @@ python scripts/verify_worked_example.py
 It prints 82 checks and a one-line verdict. Tolerances are set **per check**, not globally: structural quantities that should be exact are checked at $10^{-6}$, values the article prints to four decimals at $10^{-4}$, and annual aggregates in objective units at $0.05$.
 
 > [!NOTE]
-> **Every manuscript input comes from one definition.** The script and the test suite import from [`manuscript_values.py`](manuscript_values.py), which re-exports the constants in `Paper/Frontiers/audit_numbers.py` — the same file that gates the manuscript's own arithmetic. Earlier releases kept a second copy here, the article moved, and the copy did not: the oracle verified `B_k = 2073.6` against a paper that computes `4976.64`, and exited 0 while doing so. There is now exactly one place where a manuscript value is written down.
+> **Every manuscript input comes from one definition.** The script and the test suite import from [`manuscript_values.py`](manuscript_values.py), which re-exports the constants in `reproducibility/audit_numbers.py` — the same file that gates the manuscript's own arithmetic. Earlier releases kept a second copy here, the article moved, and the copy did not: the oracle verified `B_k = 2073.6` against a paper that computes `4976.64`, and exited 0 while doing so. There is now exactly one place where a manuscript value is written down.
 
 #### sec:worked — the eight staffed modes (tab:worked-terms)
 
@@ -726,16 +726,19 @@ CivicWorkOS requires **no runtime secrets** — it is a library and a set of scr
 ```bash
 # The article's reference execution: 450 runs on reporting seeds 0-29 (10-13 min on 12 cores)
 python scripts/run_protocol.py --paper
-cd Paper/Frontiers && python make_sim_tables.py --splice && python audit_numbers.py --quiet
+python reproducibility/make_sim_tables.py && python reproducibility/audit_numbers.py --quiet
 
-# Exploratory analyses (outcome-only learning ablation; sensitivity to tau_ret and machine prices)
+# Exploratory analyses (outcome-only learning ablation; sensitivity to tau_ret and machine prices;
+# and, added after pre-registration, rule-based baselines, sensor realism, takeover sweep,
+# model sensitivity, derived metrics -- see configs/protocol/exploratory_p4.yaml)
 python scripts/run_exploratory.py
+python scripts/run_exploratory.py --blocks baselines sensor_realism   # selected blocks only
 
 # Development seeds only (never used for reported numbers)
 python scripts/run_protocol.py --seeds 1000 1009 --out results/protocol_dev
 ```
 
-Each seed fixes every exogenous draw (arrivals, requirements, outcome and fault draws, sensor noise, attrition, machine reliability), so policies are compared on common random numbers. Outputs (`runs.jsonl`, `config.json`, `summary.json`, `hypotheses.json`, trajectories) go to `results/protocol/`; `--paper` copies the summaries into [`Paper/Frontiers/data/`](Paper/Frontiers/data/), from which the article's tables and Figure 4 are generated.
+Each seed fixes every exogenous draw (arrivals, requirements, outcome and fault draws, sensor noise, attrition, machine reliability), so policies are compared on common random numbers. Outputs (`runs.jsonl`, `config.json`, `summary.json`, `hypotheses.json`, trajectories) go to `results/protocol/`; `--paper` copies the summaries into [`reproducibility/data/`](reproducibility/data/), from which the article's tables and Figure 4 are generated.
 
 ### Results of the Reference Execution
 
@@ -933,7 +936,7 @@ CivicWorkOS/
 │   ├── run_simulation.py          # Legacy multi-seed demonstration
 │   ├── run_protocol.py            # Reference execution of the evaluation protocol (article results)
 │   └── sensitivity_sweep.py       # Monte Carlo weight perturbation sweep
-├── tests/                         # 220 automated tests (unit, integration, smoke)
+├── tests/                         # 231 automated tests (unit, integration, smoke)
 ├── docs/                          # Architecture and operations documentation
 ├── .github/workflows/ci.yml       # CI: lint, typecheck, ground truth, tests (3.10-3.12)
 ├── .env.example                   # Optional runtime overrides (no secrets required)

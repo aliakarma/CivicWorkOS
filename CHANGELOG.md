@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- Add exploratory analyses that were added after pre-registration, as submission phase P4. They are defined in `configs/protocol/exploratory_p4.yaml` before any of them was run, and `scripts/run_exploratory.py --blocks ...` produces them. The new blocks in `reproducibility/data/exploratory.json` are `baselines`, `sensor_realism`, `takeover_sweep`, `model_sensitivity`, `derived`, and `p4_meta`, and the existing `outcome_only` and `sensitivity` blocks are byte-identical. None of them enters the Holm family.
+- Add three rule-based baselines in a separate registry (`EXPLORATORY_POLICY_FLAGS`): `efficiency_quota`, `efficiency_recency`, and `efficiency_quota_recency`. `POLICIES`, `POLICY_FLAGS`, and the 450-run reference execution are unchanged.
+- Add person-specific sensor bias (`SensorRealism`, default zero) drawn from separate generators `[seed, 7919, 1]` and `[seed, 7919, 2]`, and read-only stop-cause, incident-free-completion, and workload-estimate counters returned only by `run_one(..., counters=True)`. See `docs/sensor_realism.md`.
+- Generate the manuscript blocks for the P4 evidence: Panel C of the exploratory table (`EXPTABLE`), the sensor-realism figure (`SENSORFIG`), and five supplementary tables (`SUPPBASELINES`, `SUPPSENSOR`, `SUPPTAKEOVER`, `SUPPMODEL`, `SUPPDERIVED`). Extend `reproducibility/audit_numbers.py` with 67 checks of the new numbers quoted in prose (390 PASS / 0 FAIL).
+- Append per-point 95% t-interval columns (`<policy>_curr_lo/_hi`) to `trajectory_*.dat` and draw them as bands in `fig:trajectories`. The original columns are unchanged. All 450 reporting runs, `summary.json`, and `hypotheses.json` reproduce byte for byte.
+
+- Move the manuscript audit, table generator, six frozen data files, and eight generated LaTeX blocks into public `reproducibility/`. Keep the manuscript private.
+- Repoint the shared manuscript constants, protocol and exploratory writers, Makefile, tests, and documentation to the public paths. `make protocol` now runs without manuscript sources. Private splicing remains available with `python reproducibility/make_sim_tables.py --splice`.
+- Preserve every stored result and generated block. The public audit requires no manuscript source. Git attributes preserve the frozen data and generated-block bytes across checkouts.
+
 All notable changes to this repository are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 

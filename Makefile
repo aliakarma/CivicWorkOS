@@ -47,13 +47,14 @@ run-simulation:
 	python scripts/run_simulation.py 200 42
 
 # The article's reference execution: 450 runs on reporting seeds 0-29,
-# outputs copied to Paper/Frontiers/data/ (10 to 13 minutes on 12 cores).
+# outputs copied to reproducibility/data/ (10 to 13 minutes on 12 cores).
 protocol:
 	python scripts/run_protocol.py --paper
-	cd Paper/Frontiers && python make_sim_tables.py --splice && python audit_numbers.py --quiet
+	python reproducibility/make_sim_tables.py && python reproducibility/audit_numbers.py --quiet
 
 # Exploratory analyses added in revision (outcome-only learning ablation,
-# sensitivity to tau_ret and machine prices); not in the pre-specified family.
+# sensitivity to tau_ret and machine prices) and after pre-registration (P4:
+# configs/protocol/exploratory_p4.yaml); none is in the pre-specified family.
 exploratory:
 	python scripts/run_exploratory.py
 

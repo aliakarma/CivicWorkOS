@@ -30,8 +30,8 @@ never by section or equation number. Labels are stable across revisions;
 numbers are not. The repository twice ended up documenting a paper that no
 longer existed because section and equation numbers had moved underneath it, so
 numbered citations are now treated as a defect. Every label cited here resolves
-in `Paper/Frontiers/CivicWorkOS.tex`, and `Paper/Frontiers/check.sh` fails the
-build if one does not.
+in the private manuscript source, whose submission gates check these labels.
+Public numerical checks run with `python reproducibility/audit_numbers.py`.
 
 References to **"the pre-release audit"** mean an internal review of this
 implementation against the manuscript, conducted before release. It is not

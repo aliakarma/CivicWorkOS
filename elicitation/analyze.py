@@ -175,7 +175,9 @@ def aggregate(tab, raters, worked_item):
 
 def to_inputs(agg, only=None):
     """Model inputs from aggregate values; `only` restricts to some parameters."""
-    use = lambda k: only is None or k in only
+    def use(k):
+        return only is None or k in only
+
     phi = {m: agg[f"phi_{m}"] for m in HYBRID
            if use(f"phi_{m}") and np.isfinite(agg[f"phi_{m}"])}
     return Inputs.make(

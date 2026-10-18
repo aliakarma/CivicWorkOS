@@ -1,0 +1,155 @@
+# Exploratory analyses added after pre-registration (submission phase P4).
+#
+# None of these analyses is part of the pre-specified family in
+# hypotheses.yaml: no test below enters the Holm family of 12 contrasts, and
+# no verdict of H1-H8 changes. Every comparison and decision rule here was
+# written down before any P4 exploratory run was executed. It is versioned
+# with the code that implements it, so git does not prove that ordering.
+#
+# Shared rules
+#   seeds:        reporting seeds 0-29, paired (common random numbers)
+#   interval:     two-sided 95% t-interval of the paired per-seed difference
+#                 (sim.protocol.analysis.mean_ci); runs with an undefined value
+#                 for a metric are dropped from that metric only, and n is
+#                 reported with every interval
+#   p-values:     unadjusted two-sided Wilcoxon signed-rank, descriptive only
+#   new randomness: only from np.random.default_rng([seed, 7919, stream_id]);
+#                 stream ids are listed under random_streams
+#   defaults:     every new option is zero or off by default; at the defaults
+#                 the 450 reporting runs must reproduce byte for byte
+
+label: "added after pre-registration; exploratory"
+seeds: [0, 29]
+
+random_streams:
+  1: per-practitioner bias of the physiological workload channel (workload_sensor_bias_sd)
+  2: per-practitioner bias of the skill-probe channel (probe_bias_sd)
+
+baselines:                       # task 4a
+  policies:
+    efficiency_quota: >-
+      Efficiency, then, when the selected candidate has a human lead and no
+      second person, switch to the candidate with the same mode and lead plus
+      the free trainee that the existing roster rule offers (fewest hours today,
+      then lowest slot; the mechanism Static uses). The switch happens only if
+      that candidate passed the same success floor. No random draws.
+    efficiency_recency: "PolicyFlags(learning=True, capability_terms=False, retention=True, workload_guard=False, oversight=False, readiness_takeover=False)"
+    efficiency_quota_recency: both rules; quota applied to the retention-stage pick as well
+  learning: on in all three (isolates the rule; R1 Q1 asked for no learning, not run)
+  scenarios: [routine, surge, disruption]
+  contrasts: CivicWorkOS minus each baseline, and each baseline minus Efficiency, per scenario
+
+sensor_realism:                  # task 4b
+  policy: civicworkos
+  scenarios: [routine, disruption]
+  bias_model: >-
+    each practitioner's physiological reading is iota_w + b_i + e_t with
+    b_i ~ N(0, workload_sensor_bias_sd^2) fixed for the run (stream 1) and
+    e_t ~ N(0, workload_sensor_sd^2). The allocator's filter knows the noise
+    s.d. but not b_i. Probe bias is analogous (stream 2).
+  settings:                      # one at a time on the physiological channel, then combined
+    baseline: {}                 # stored reference runs
+    bias_0.05: {workload_sensor_bias_sd: 0.05}
+    bias_0.10: {workload_sensor_bias_sd: 0.10}
+    bias_0.15: {workload_sensor_bias_sd: 0.15}
+    noise_0.20: {workload_sensor_sd: 0.20}
+    noise_0.30: {workload_sensor_sd: 0.30}
+    avail_0.35: {workload_sensor_prob: 0.35}
+    combined:                    # every multimodal channel degraded at once
+      workload_sensor_bias_sd: 0.10
+      workload_sensor_sd: 0.20
+      workload_sensor_prob: 0.35
+      probe_bias_sd: 0.05
+      probe_sd: 0.16             # 2 x 0.08
+      probe_prob: 0.15           # 0.5 x 0.30
+      telemetry_sd: 0.20         # 2 x 0.10
+      telemetry_prob: 0.25       # 0.5 x 0.50
+  references:
+    no_learning: stored civicworkos_nolearn runs (uses no channel, so unaffected by any setting)
+    efficiency: >-
+      stored efficiency runs for the physiological-only settings (Efficiency has no
+      workload guard and no readiness test, so the physiological channel never enters
+      a decision); Efficiency is re-run at the combined setting because it does use
+      probes and telemetry
+    invariance_checks: efficiency at bias_0.15 and No-learning at combined, both scenarios, must equal the stored records exactly
+  metrics: [overload_share, proficiency_mae_end, current_end, takeover_success_window]
+  break_even_rule: >-
+    For each scenario and each one-at-a-time axis (bias, noise, availability),
+    ordered by increasing degradation, and for the combined setting:
+    d = overload_share(CivicWorkOS at setting) - overload_share(No-learning), paired.
+    The overload advantage holds while the 95% CI upper bound of d is below 0.
+    The break-even point is the first setting on an axis at which the upper
+    bound reaches 0 or above. If no setting on an axis reaches it, the result is
+    "no break-even within the grid" for that axis. A point estimate of d >= 0 is
+    reported separately as a reversal.
+
+takeover_sweep:                  # task 4c
+  policies: [civicworkos, static]
+  scenario: disruption
+  settings:
+    baseline: {}                 # counter replay of the reference configuration
+    ootl_0.3: {ootl_factor: 0.3}
+    ootl_1.0: {ootl_factor: 1.0}
+    t_sa_6: {t_sa: 6.0}
+    t_sa_10: {t_sa: 10.0}
+    ins_budget_20: {INS.takeover_budget_min: 20.0}
+  stop_counters: >-
+    Read-only; computed from state only, never alter a decision or consume a
+    draw. A minimal-risk stop (MRC) occurs when a machine-only task faults and
+    pick_takeover returns no practitioner. Each stop is classified:
+    (a) no_certified: no active certified practitioner;
+    (b) exclusive sequential cause, in the code's filter order: the set is empty
+        after the competence test -> competence; else empty after the workload
+        test -> workload; else -> time_budget. (a)+(b) partition all stops.
+    (c) overlapping binding indicators: test X binds if some certified
+        practitioner fails X and passes the other two tests (relaxing X alone
+        would have produced a ready practitioner). A stop may have several
+        binding tests or none (jointly blocked).
+    (d) out-of-loop: the stop is attributable to out-of-loop timing if some
+        practitioner passes competence and workload, fails the time test, and
+        would pass it with the out-of-loop multiplier removed. Share =
+        out-of-loop stops / all stops with an empty readiness set (denominator
+        excludes no_certified stops, which no readiness parameter can change).
+    Counted over the whole run and within the scenario window.
+  metrics: [takeover_success_window, mrc, mrc_window, incidents_per_1000_window, completion_rate_window]
+
+model_sensitivity:               # task 4d
+  policies: [civicworkos, efficiency]
+  scenario: routine
+  settings:
+    phi_hybrid_minus_0.10: every hybrid mode phi_m - 0.10 (INS H+R, INS H+A+R, SAN H+R, CAS H+A)
+    phi_hybrid_plus_0.10: every hybrid mode phi_m + 0.10
+    gamma_6: {gamma: 6.0}        # world and learner share gamma
+    gamma_10: {gamma: 10.0}
+    fault_0.01: {fault_rate: 0.01}
+    fault_0.04: {fault_rate: 0.04}
+  format: Table 9B (current share, completion points, cost index) plus overload and certifications
+
+derived:                         # task 4e
+  cost_per_current:
+    numerator: >-
+      total service cost over the 750-day horizon in model cost units
+      (1 unit = one certified practitioner-hour of wage), reconstructed per run
+      as cost_per_completed x completion_rate x arrived (wages, machine hours,
+      takeover wages and incident costs)
+    denominator: current practitioners at the end of the run (current_end)
+    zero_rule: a run with current_end = 0 has no defined value and is dropped from that contrast; the count of dropped runs is reported
+    primary: per-run ratio, paired difference CivicWorkOS minus comparator with a 95% t-interval
+    secondary: >-
+      incremental cost per additional current practitioner = mean paired cost
+      difference / mean paired current difference (a ratio of paired means,
+      stated as such), 95% percentile bootstrap over seeds, 10,000 resamples,
+      analysis generator np.random.default_rng([0, 7919, 101])
+    comparators: [efficiency, static, civicworkos_nolearn, efficiency_quota, efficiency_recency, efficiency_quota_recency]
+  joint_safety_completion:
+    definition: >-
+      incident-free window completion = window-arrived tasks completed with no
+      incident on any attempt / window-arrived tasks, disruption scenario.
+      Uses a read-only per-task incident flag; no task outcome is inferred
+      from run-level rates.
+    primary_contrast: civicworkos minus civicworkos_nolearn (H7's comparison)
+    also: civicworkos minus efficiency and minus static
+    note: H7's pre-specified verdict is unchanged whatever this shows
+
+figure4_bands:                   # task 4f
+  interval: per point, 95% t-interval of the current-practitioner count over the 30 seeds

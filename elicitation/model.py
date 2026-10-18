@@ -7,7 +7,7 @@ estimated ones" step of Phase 9a. It is the same linear programme as
 three structural parameters the sensitivity sweep varies (`r_k`, `eta_k`).
 
 Nothing is restated here. Every baseline constant is read from
-`manuscript_values`, which re-exports `Paper/Frontiers/audit_numbers.py`, so
+`manuscript_values`, which re-exports `reproducibility/audit_numbers.py`, so
 this module cannot drift from the manuscript the way finding N2 did. Its
 correctness is established by `tests/test_model.py`, which requires it to
 reproduce, from the model alone, the baseline (lambda_k = 0.045353, 4.34%,

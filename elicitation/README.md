@@ -27,7 +27,7 @@ The file must declare `# provenance: real` and `# ethics-approval: <reference>`
 * Synthetic ratings are refused unless `--allow-synthetic`; their outputs are
   prefixed `SYNTHETIC-`, git-ignored, and their LaTeX fragments begin with a
   `\PackageError`, so a build that includes one fails.
-* `Paper/Frontiers/check.sh` fails if either manuscript source mentions a
+* The private manuscript submission check fails if either manuscript source mentions a
   synthetic output, and fails if the manuscript still says the protocol "has not
   been run" once a real `out/results.json` exists (or the reverse).
 

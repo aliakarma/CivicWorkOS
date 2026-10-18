@@ -13,8 +13,7 @@ Run it first, before anything else, after cloning:
     python scripts/verify_worked_example.py
 
 Exit code 0 iff every check passes. Wired into CI as the first gate
-(.github/workflows/ci.yml) and into the manuscript's own gate script
-(Paper/Frontiers/check.sh).
+(.github/workflows/ci.yml) and into the private manuscript submission gates.
 
 Why this file was rewritten (finding N2, revision programme Phase 3). Until
 Phase 3 this script verified an earlier draft: it asserted ``B_k = 2073.6``
@@ -31,14 +30,14 @@ The cause was duplication: this script kept its own copy of the manuscript's
 constants, the article moved, and nothing forced the two back into agreement.
 So the fix is structural. Every manuscript value below is imported from
 `manuscript_values`, which re-exports the single definition in
-`Paper/Frontiers/audit_numbers.py`. Nothing in this file restates a number the
+`reproducibility/audit_numbers.py`. Nothing in this file restates a number the
 article states. What this file *does* hold is the printed values themselves --
 the figures a reader sees on the page -- because the question it exists to
 answer is whether the library's output matches what was published.
 
 The division of labour between the repository's two gates:
 
-* `Paper/Frontiers/audit_numbers.py` asks whether the *manuscript* is
+* `reproducibility/audit_numbers.py` asks whether the *manuscript* is
   internally consistent -- whether each printed number follows from the inputs
   the article states. It caught the defect class that dominated the peer review:
   prose that misreported a correct table.

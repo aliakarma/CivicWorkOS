@@ -3,7 +3,7 @@
 Runs a shortened horizon so the suite stays fast. These tests check the
 properties the protocol's validity rests on -- determinism, common random
 numbers across policies, and the qualitative behavior of each mechanism --
-not the reported numbers, which ``Paper/Frontiers/audit_numbers.py`` checks.
+not the reported numbers, which ``reproducibility/audit_numbers.py`` checks.
 """
 
 from __future__ import annotations

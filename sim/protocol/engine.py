@@ -39,7 +39,19 @@ from typing import Any
 
 import numpy as np
 
-from .config import POLICY_FLAGS, SCENARIOS, DomainSpec, ModeSpec, PolicyFlags, RunConfig, Scenario, SimParams
+from .config import (
+    PROBE_BIAS_STREAM,
+    SCENARIOS,
+    TRAINEE_QUOTA,
+    WORKLOAD_BIAS_STREAM,
+    DomainSpec,
+    ModeSpec,
+    PolicyFlags,
+    RunConfig,
+    Scenario,
+    SimParams,
+    policy_flags,
+)
 from .estimation import adf_bernoulli, kalman_scalar, lower_confidence_success, predictive_success, sigmoid
 from .skill import asymptotic_proficiency, current_proficiency, recency_interval
 
@@ -69,6 +81,9 @@ class World:
     pool: list[list[dict]]      # per-domain practitioner pool attributes
     sensor_u: np.ndarray        # (n_domains, POOL, days) uniforms
     sensor_z: np.ndarray        # (n_domains, POOL, days) normals
+    # exploratory (P4): persistent per-practitioner sensor biases, None when off
+    sensor_bias: np.ndarray | None = None   # (n_domains, POOL) physiological workload channel
+    probe_bias: np.ndarray | None = None    # (n_domains, POOL) skill-probe channel
 
 
 def make_world(seed: int, scenario: Scenario, cfg: RunConfig) -> World:
@@ -116,8 +131,19 @@ def make_world(seed: int, scenario: Scenario, cfg: RunConfig) -> World:
         pool.append(members)
     sensor_u = rng.random((len(D), POOL_PER_DOMAIN, days))
     sensor_z = rng.standard_normal((len(D), POOL_PER_DOMAIN, days))
+    # Exploratory sensor biases come from their own generators and are drawn
+    # only when switched on, so the stream above is never touched.
+    S = cfg.sensors
+    sensor_bias = probe_bias = None
+    if S.workload_sensor_bias_sd > 0.0:
+        brng = np.random.default_rng([seed, 7919, WORKLOAD_BIAS_STREAM])
+        sensor_bias = S.workload_sensor_bias_sd * brng.standard_normal((len(D), POOL_PER_DOMAIN))
+    if S.probe_bias_sd > 0.0:
+        brng = np.random.default_rng([seed, 7919, PROBE_BIAS_STREAM])
+        probe_bias = S.probe_bias_sd * brng.standard_normal((len(D), POOL_PER_DOMAIN))
     return World(seed, scenario, np.array(t_day), np.array(t_dom), np.array(t_req), np.array(t_cons, dtype=bool),
-                 task_u, task_z, machine_rel, telemetry_ok, telemetry_z, pool, sensor_u, sensor_z)
+                 task_u, task_z, machine_rel, telemetry_ok, telemetry_z, pool, sensor_u, sensor_z,
+                 sensor_bias, probe_bias)
 
 
 # --------------------------------------------------------------------------
@@ -176,6 +202,23 @@ class Metrics:
     trajectory: list = field(default_factory=list)
 
 
+# Read-only counters added after pre-registration (P4). They are kept apart
+# from ``Metrics`` and from the reference run record, never enter a decision
+# and consume no random draw. See configs/protocol/exploratory_p4.yaml.
+STOP_CAUSES = ("no_certified", "seq_competence", "seq_workload", "seq_time",
+               "bind_competence", "bind_workload", "bind_time", "bind_none", "ootl")
+
+
+def _new_counters() -> dict[str, int]:
+    c = {"mrc": 0, "mrc_w": 0}
+    for cause in STOP_CAUSES:
+        c[cause] = 0
+        c[cause + "_w"] = 0
+    c.update({"completed_clean": 0, "completed_w_clean": 0,
+              "quota_human_picks": 0, "quota_switches": 0, "quota_already_paired": 0, "quota_unavailable": 0})
+    return c
+
+
 class Run:
     """One policy on one world."""
 
@@ -183,7 +226,8 @@ class Run:
         self.w, self.policy, self.cfg = world, policy, cfg
         self.P: SimParams = cfg.params
         self.D: tuple[DomainSpec, ...] = cfg.domains
-        self.F: PolicyFlags = POLICY_FLAGS[policy]
+        self.F: PolicyFlags = policy_flags(policy)
+        self.quota = policy in TRAINEE_QUOTA
         P = self.P
         self.pract: list[list[Practitioner]] = []
         self.next_slot: list[int] = []
@@ -201,6 +245,8 @@ class Run:
         self.M = Metrics()
         self.attempts = np.zeros(len(world.task_day), dtype=np.int16)
         self.mach_left = [0.0 for _ in self.D]
+        self.C = _new_counters()
+        self.task_incident = np.zeros(len(world.task_day), dtype=bool)
 
     # ---- people -----------------------------------------------------------
     def _hire(self, k: int, slot: int, certified_day: int | None) -> Practitioner:
@@ -425,8 +471,34 @@ class Run:
                     self.M.retention_reservations += 1
                 if i == len(stages) - 1 and len(stages) > 1:
                     self.M.relaxations += 1
+                if self.quota:
+                    pick = self._apply_quota(k, pick, admissible)
                 return pick
         return None
+
+    def _apply_quota(self, k: int, pick: dict, admissible: list[dict]) -> dict:
+        """Apprenticeship quota (exploratory baselines): attach the free trainee.
+
+        When the chosen candidate has a human lead and no second person, switch
+        to the admissible candidate with the same mode and lead plus the trainee
+        the roster rule offered (the free trainee with the fewest hours today,
+        as Static uses). That candidate already passed the success floor; if it
+        did not, the pick stands. No random draw is made.
+        """
+        C = self.C
+        if pick["lead"] is None:
+            return pick
+        C["quota_human_picks"] += 1
+        if pick["tr"] is not None:
+            C["quota_already_paired"] += 1
+            return pick
+        for c in admissible:
+            if (c["mode"] is pick["mode"] and c["lead"] is pick["lead"] and c["tr"] is not None
+                    and not self.certified(k, c["tr"])):
+                C["quota_switches"] += 1
+                return c
+        C["quota_unavailable"] += 1
+        return pick
 
     # ---- takeover ---------------------------------------------------------
     def sa_multiplier(self, k: int, p: Practitioner, extra_demand: float, true: bool) -> float:
@@ -465,6 +537,47 @@ class Run:
         if not ready:
             return None
         return max(ready, key=lambda p: (sigmoid(P.gamma * (self.theta_est(k, p) - b)), -p.slot))
+
+    def _count_stop(self, k: int, hours: float, window: bool) -> None:
+        """Classify a minimal-risk stop by cause (read-only; see exploratory_p4.yaml).
+
+        Re-evaluates the three readiness tests of ``pick_takeover`` on the same
+        state, without short-circuiting, so that every certified practitioner's
+        result on each test is known. Changes no state used by a decision.
+        """
+        P, spec, C = self.P, self.D[k], self.C
+        hit = ["mrc"]
+        certs = [p for p in self.pract[k] if self.certified(k, p)]
+        if not certs or self.policy == "static" or not self.F.readiness_takeover:
+            hit.append("no_certified")   # without the readiness test a stop means nobody certified
+        else:
+            demand = hours * 1.5
+            tests = []
+            ootl_any = False
+            for p in certs:
+                fc = self.theta_est(k, p) - P.readiness_z * math.sqrt(p.off_v) < P.theta_comp
+                fw = (p.demand + demand) * self.load_est(p) > P.takeover_headroom * P.workload_ceiling * P.avail_h
+                mult = self.sa_multiplier(k, p, demand, true=False)
+                ft = P.t_detect + P.t_reach + P.t_sa * mult > spec.takeover_budget_min
+                tests.append((fc, fw, ft))
+                if not fc and not fw and ft and p.gap > P.ootl_days:
+                    t_in_loop = P.t_detect + P.t_reach + P.t_sa * mult / (1.0 + P.ootl_factor)
+                    ootl_any = ootl_any or t_in_loop <= spec.takeover_budget_min
+            if all(fc for fc, _, _ in tests):
+                hit.append("seq_competence")
+            elif all(fw for fc, fw, _ in tests if not fc):
+                hit.append("seq_workload")
+            else:
+                hit.append("seq_time")
+            binds = [name for j, name in enumerate(("bind_competence", "bind_workload", "bind_time"))
+                     if any(t[j] and sum(t) == 1 for t in tests)]
+            hit.extend(binds or ["bind_none"])
+            if ootl_any:
+                hit.append("ootl")
+        for key in hit:
+            C[key] += 1
+            if window:
+                C[key + "_w"] += 1
 
     # ---- execution --------------------------------------------------------
     def execute(self, k: int, ti: int, day: int, pick: dict, window: bool) -> bool:
@@ -527,6 +640,7 @@ class Run:
                 t_reach = P.t_reach
                 sa = self.sa_multiplier(k, taker, hours * 0.75, true=True) if taker is not None else 0.0
             if taker is None:
+                self._count_stop(k, hours, window)
                 M.mrc += 1
                 if u[U_INCIDENT] < P.p_incident_mrc * spec.risk:
                     M.incidents += 1
@@ -581,11 +695,15 @@ class Run:
             for idx, p in enumerate((lead, tr)):
                 if p is not None:
                     obs = self.theta_true(k, p) + P.probe_sd * zs[idx]
+                    if self.w.probe_bias is not None:
+                        obs += self.w.probe_bias[k, p.slot]
                     m_new, v_new = kalman_scalar(p.off_m, p.off_v, obs - self.theta_nominal(k, p), P.probe_sd ** 2)
                     p.off_m, p.off_v = m_new, v_new
         M.cost += cost
         if window:
             M.incidents_w += M.incidents - incidents_before
+        if M.incidents > incidents_before:   # read-only per-task flag (P4)
+            self.task_incident[ti] = True
         return success
 
     # ---- main loop --------------------------------------------------------
@@ -644,6 +762,10 @@ class Run:
                     M.completed += 1
                     if arrived_in_win:
                         M.completed_w += 1
+                    if not self.task_incident[ti]:   # read-only (P4): completed with no incident on any attempt
+                        self.C["completed_clean"] += 1
+                        if arrived_in_win:
+                            self.C["completed_w_clean"] += 1
                 elif day < w.task_day[ti] + D[k].deadline_days and self.attempts[ti] < MAX_ATTEMPTS:
                     pending.append(ti)
             queue = pending
@@ -661,6 +783,8 @@ class Run:
                     if (F.learning and F.multimodal and p.demand > 0.5
                             and w.sensor_u[k, p.slot, day] < P.workload_sensor_prob):
                         obs = p.load_mult + P.workload_sensor_sd * w.sensor_z[k, p.slot, day]
+                        if w.sensor_bias is not None:
+                            obs += w.sensor_bias[k, p.slot]
                         p.load_m, p.load_v = kalman_scalar(p.load_m, p.load_v, obs, P.workload_sensor_sd ** 2)
                     p.gap = 0.0 if p.led_today else p.gap + 1.0
                     if p.certified_day is None and p.c >= spec.h_k:
@@ -695,13 +819,16 @@ class Run:
         return n_cert, n_curr, (prof / n_cert if n_cert else float("nan"))
 
 
-def run_one(seed: int, scenario_name: str, policy: str, cfg: RunConfig | None = None) -> dict:
+def run_one(seed: int, scenario_name: str, policy: str, cfg: RunConfig | None = None,
+            counters: bool = False) -> dict:
+    """One run's record. ``counters=True`` adds the read-only P4 counters under
+    the separate key ``p4_counters``; every other field is unaffected by it."""
     cfg = cfg or RunConfig()
     world = make_world(seed, SCENARIOS[scenario_name], cfg)
     r = Run(world, policy, cfg)
     M = r.run()
     n_cert, n_curr, prof = r.snapshot()
-    return {
+    record = {
         "seed": seed, "scenario": scenario_name, "policy": policy,
         "completion_rate": M.completed / max(M.arrived, 1),
         "completion_rate_window": (M.completed_w / M.arrived_w) if M.arrived_w else float("nan"),
@@ -732,3 +859,9 @@ def run_one(seed: int, scenario_name: str, policy: str, cfg: RunConfig | None = 
         "arrived": M.arrived,
         "trajectory": M.trajectory,
     }
+    if counters:
+        load_errs = [abs(r.load_est(p) - p.load_mult) for k in range(len(r.D)) for p in r.pract[k] if p.active]
+        record["p4_counters"] = {**r.C, "arrived_w": M.arrived_w, "completed": M.completed,
+                                 "completed_w": M.completed_w, "total_cost": M.cost,
+                                 "load_mae_end": sum(load_errs) / len(load_errs) if load_errs else float("nan")}
+    return record

@@ -9,11 +9,13 @@ Writes, under ``--out``:
   config.json         the resolved parameters of the execution
   summary.json        means and 95% intervals per scenario and policy
   hypotheses.json     the pre-specified tests and their verdicts
-  trajectory_*.dat    seed-averaged capability trajectories (pgfplots input)
+  trajectory_*.dat    seed-averaged capability trajectories (pgfplots input), with
+                      per-point 95% t-interval columns <policy>_curr_lo/_hi of the
+                      current count over the seeds appended after the original columns
 
 Pass ``--paper`` to also copy the summary, verdicts and trajectories into
-``Paper/Frontiers/data/``, from which the article's tables and figure are
-built and against which ``Paper/Frontiers/audit_numbers.py`` checks every
+``reproducibility/data/``, from which the article's tables and figure are
+built and against which ``reproducibility/audit_numbers.py`` checks every
 reported value.
 """
 
@@ -33,7 +35,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from sim.protocol.analysis import evaluate, summarize  # noqa: E402
+from sim.protocol.analysis import evaluate, mean_ci, summarize  # noqa: E402
 from sim.protocol.config import POLICIES, SCENARIOS, RunConfig  # noqa: E402
 from sim.protocol.engine import run_one  # noqa: E402
 
@@ -56,7 +58,7 @@ def main() -> int:
     ap.add_argument("--seeds", nargs=2, type=int, default=[0, 29], metavar=("FIRST", "LAST"))
     ap.add_argument("--workers", type=int, default=None)
     ap.add_argument("--out", default=str(ROOT / "results" / "protocol"))
-    ap.add_argument("--paper", action="store_true", help="copy outputs into Paper/Frontiers/data/")
+    ap.add_argument("--paper", action="store_true", help="copy outputs into reproducibility/data/")
     ap.add_argument("--from-runs", action="store_true",
                     help="rebuild summary.json and hypotheses.json from an existing runs.jsonl without simulating")
     a = ap.parse_args()
@@ -91,15 +93,20 @@ def main() -> int:
     (out / "hypotheses.json").write_text(json.dumps(tests, indent=2), encoding="utf-8")
 
     for scenario in ("routine", "disruption") if trajectories else ():
-        cols = []
+        cols, bands = [], []
         for policy in POLICIES:
             arr = np.array(trajectories[(scenario, policy)], dtype=float)   # seeds x points x 4
             cols.append(arr.mean(axis=0))
+            # per-point 95% t-interval of the current count over seeds (bands of fig:trajectories)
+            bands.append([mean_ci(list(arr[:, i, 2]))[1:3] for i in range(arr.shape[1])])
         days = cols[0][:, 0]
         with open(out / f"trajectory_{scenario}.dat", "w", encoding="utf-8") as f:
-            f.write("day " + " ".join(f"{p}_cert {p}_curr" for p in POLICIES) + "\n")
+            # the original columns come first, unchanged; the interval columns are appended
+            f.write("day " + " ".join(f"{p}_cert {p}_curr" for p in POLICIES) + " "
+                    + " ".join(f"{p}_curr_lo {p}_curr_hi" for p in POLICIES) + "\n")
             for i, d in enumerate(days):
-                f.write(f"{int(d)} " + " ".join(f"{c[i, 1]:.3f} {c[i, 2]:.3f}" for c in cols) + "\n")
+                f.write(f"{int(d)} " + " ".join(f"{c[i, 1]:.3f} {c[i, 2]:.3f}" for c in cols) + " "
+                        + " ".join(f"{b[i][0]:.3f} {b[i][1]:.3f}" for b in bands) + "\n")
 
     print(f"{len(rows)} runs in {elapsed:.0f} s -> {out}")
     for t in tests:
@@ -108,7 +115,7 @@ def main() -> int:
               f"[{t['ci_low']:+.4f},{t['ci_high']:+.4f}] p_holm={t['p_holm']:.2e} r={t['effect_r']:+.2f} {verdict}")
 
     if a.paper:
-        dest = ROOT / "Paper" / "Frontiers" / "data"
+        dest = ROOT / "reproducibility" / "data"
         dest.mkdir(parents=True, exist_ok=True)
         for name in ("summary.json", "hypotheses.json", "config.json",
                      "trajectory_routine.dat", "trajectory_disruption.dat"):
