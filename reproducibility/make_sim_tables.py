@@ -222,7 +222,7 @@ def exp_table(exp) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Exploratory blocks added after pre-registration (P4 data, P5 tables)
+# Exploratory blocks added after internal pre-specification (P4 data, P5 tables)
 # ---------------------------------------------------------------------------
 
 BASE_NAMES = {"efficiency": "Efficiency", "efficiency_quota": "Efficiency + quota",
@@ -451,7 +451,7 @@ def main() -> int:
     }
     p4_main, p4_supp = [], []
     if all(k in exp for k in ("baselines", "sensor_realism", "takeover_sweep", "model_sensitivity", "derived")):
-        # exploratory blocks added after pre-registration (P4)
+        # exploratory blocks added after internal pre-specification (P4)
         frags["SENSORFIG"] = sensor_figure(exp)
         frags["SUPPBASELINES"] = supp_baselines(exp)
         frags["SUPPSENSOR"] = supp_sensor(exp)

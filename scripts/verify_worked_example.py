@@ -2,11 +2,10 @@
 """Verify that THIS CODE reproduces the numbers the manuscript prints.
 
 Scope: the worked bridge-inspection allocation of Paper sec:worked and its
-subsections, and the debt trajectory of sec:cadmodel / fig:cad-trend. That is
-the whole of the article's quantitative content. The article reports no dataset
-and no measured empirical result, and the evaluation protocol it specifies
-(sec:protocol, Appendix app:protocol) has not been executed, so there is nothing
-else here with a ground truth to check against.
+subsections, and the debt trajectory of sec:cadmodel / fig:cad-trend. The article
+reports no dataset and no measured empirical result. The simulated reference
+execution of sec:protocol and the exploratory analyses are checked separately by
+reproducibility/audit_numbers.py.
 
 Run it first, before anything else, after cloning:
 
@@ -333,9 +332,9 @@ def main() -> int:
         f"tolerance."
     )
     print(
-        "Scope: sec:worked and sec:cadmodel only. The article reports no dataset "
-        "and no measured result, and the protocol of sec:protocol has not been "
-        "executed, so nothing else in it has a ground truth to check."
+        "Scope: sec:worked and sec:cadmodel only. The reference execution of "
+        "sec:protocol and the printed numbers of the exploratory analyses are "
+        "checked by reproducibility/audit_numbers.py."
     )
     return 0
 

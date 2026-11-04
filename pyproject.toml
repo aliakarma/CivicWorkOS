@@ -52,6 +52,10 @@ select = ["E", "F", "I", "UP"]
 # importing civicworkos, since they are meant to run standalone without
 # requiring an editable install first.
 "scripts/*.py" = ["E402"]
+# engine.py is hash-checked against the stored runs, so it cannot be reformatted.
+"sim/protocol/engine.py" = ["E501"]
+"scripts/run_revision.py" = ["E402", "E501"]
+"scripts/weights_sensitivity.py" = ["E402", "E501"]
 
 [tool.mypy]
 python_version = "3.10"

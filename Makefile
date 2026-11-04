@@ -53,7 +53,7 @@ protocol:
 	python reproducibility/make_sim_tables.py && python reproducibility/audit_numbers.py --quiet
 
 # Exploratory analyses added in revision (outcome-only learning ablation,
-# sensitivity to tau_ret and machine prices) and after pre-registration (P4:
+# sensitivity to tau_ret and machine prices) and after internal pre-specification (P4:
 # configs/protocol/exploratory_p4.yaml); none is in the pre-specified family.
 exploratory:
 	python scripts/run_exploratory.py

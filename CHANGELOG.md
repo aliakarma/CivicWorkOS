@@ -1,11 +1,20 @@
 # Changelog
 
+## [Unreleased]
+
+Housekeeping after the tagged release, with no change to the simulator, its results, or the hash-checked files.
+
+- Record the Zenodo DOI of `v1.0-submission` (10.5281/zenodo.23953172) in `CITATION.cff`.
+- Correct the scope message of `scripts/verify_worked_example.py` and the docstring of `sim/__init__.py`, which still said the protocol had not been executed.
+- Replace "pre-registration" with "internal pre-specification" in comments and docstrings outside the hash-checked files.
+- Ignore line length for three files in ruff, including `sim/protocol/engine.py`, which cannot be reformatted without invalidating the stored runs.
+
 ## [1.0.0] - 2026-11-03
 
 Release `v1.0-submission`, archived with the revised manuscript.
 
 - Add the exploratory analyses of the peer-review revision, defined in `configs/protocol/exploratory_r1.yaml` and produced by `make revision` (`scripts/run_revision.py`, `scripts/weights_sensitivity.py`, `reproducibility/make_revision_tables.py`). New engine options (`WorldModel`, add-one and drop-one policies, read-only revision counters) are off by default, and a replay reproduced all 630 stored reference and baseline records. None enters the Holm family. The article's "pre-registration" wording becomes "internally pre-specified".
-- Add exploratory analyses that were added after pre-registration, as submission phase P4. They are defined in `configs/protocol/exploratory_p4.yaml` before any of them was run, and `scripts/run_exploratory.py --blocks ...` produces them. The new blocks in `reproducibility/data/exploratory.json` are `baselines`, `sensor_realism`, `takeover_sweep`, `model_sensitivity`, `derived`, and `p4_meta`, and the existing `outcome_only` and `sensitivity` blocks are byte-identical. None of them enters the Holm family.
+- Add exploratory analyses that were added after internal pre-specification, as submission phase P4. They are defined in `configs/protocol/exploratory_p4.yaml` before any of them was run, and `scripts/run_exploratory.py --blocks ...` produces them. The new blocks in `reproducibility/data/exploratory.json` are `baselines`, `sensor_realism`, `takeover_sweep`, `model_sensitivity`, `derived`, and `p4_meta`, and the existing `outcome_only` and `sensitivity` blocks are byte-identical. None of them enters the Holm family.
 - Add three rule-based baselines in a separate registry (`EXPLORATORY_POLICY_FLAGS`): `efficiency_quota`, `efficiency_recency`, and `efficiency_quota_recency`. `POLICIES`, `POLICY_FLAGS`, and the 450-run reference execution are unchanged.
 - Add person-specific sensor bias (`SensorRealism`, default zero) drawn from separate generators `[seed, 7919, 1]` and `[seed, 7919, 2]`, and read-only stop-cause, incident-free-completion, and workload-estimate counters returned only by `run_one(..., counters=True)`. See `docs/sensor_realism.md`.
 - Generate the manuscript blocks for the P4 evidence: Panel C of the exploratory table (`EXPTABLE`), the sensor-realism figure (`SENSORFIG`), and five supplementary tables (`SUPPBASELINES`, `SUPPSENSOR`, `SUPPTAKEOVER`, `SUPPMODEL`, `SUPPDERIVED`). Extend `reproducibility/audit_numbers.py` with 67 checks of the new numbers quoted in prose (390 PASS / 0 FAIL).
