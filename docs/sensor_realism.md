@@ -1,6 +1,6 @@
 # Sensor-realism grid: rationale and limits
 
-Exploratory analysis added after pre-registration (submission phase P4). The
+Exploratory analysis added after internal pre-specification (submission phase P4). The
 definitions, settings and decision rule are fixed in
 `configs/protocol/exploratory_p4.yaml`; results are in the `sensor_realism`
 block of `reproducibility/data/exploratory.json`.

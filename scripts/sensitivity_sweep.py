@@ -13,7 +13,7 @@ fraction of a fixed candidate set whose argmax mode changes relative to
 the paper's default weights.
 
 This is REPORT SEC. 22's proposed experiment E1, run here at reduced
-scale as a demonstration of the harness, not as the full pre-registered
+scale as a demonstration of the harness, not as the full internally pre-specified
 study the paper's own sec:protocol never conducted. Nothing this script prints
 should be read as a claim about the real framework's stability -- only
 about the stability of the worked example's four tab:worked-terms candidates

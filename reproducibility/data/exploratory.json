@@ -884,7 +884,7 @@
     }
   },
   "baselines": {
-    "label": "added after pre-registration; exploratory (configs/protocol/exploratory_p4.yaml)",
+    "label": "added after internal pre-specification; exploratory (configs/protocol/exploratory_p4.yaml)",
     "learning": "on in every baseline (isolates the rule)",
     "scenarios": {
       "routine": {
@@ -6512,7 +6512,7 @@
     }
   },
   "sensor_realism": {
-    "label": "added after pre-registration; exploratory (configs/protocol/exploratory_p4.yaml)",
+    "label": "added after internal pre-specification; exploratory (configs/protocol/exploratory_p4.yaml)",
     "policy": "civicworkos",
     "settings": {
       "bias_0.05": {
@@ -11924,7 +11924,7 @@
     }
   },
   "takeover_sweep": {
-    "label": "added after pre-registration; exploratory (configs/protocol/exploratory_p4.yaml)",
+    "label": "added after internal pre-specification; exploratory (configs/protocol/exploratory_p4.yaml)",
     "scenario": "disruption",
     "settings": {
       "ootl_0.3": {
@@ -15122,7 +15122,7 @@
     }
   },
   "model_sensitivity": {
-    "label": "added after pre-registration; exploratory (configs/protocol/exploratory_p4.yaml)",
+    "label": "added after internal pre-specification; exploratory (configs/protocol/exploratory_p4.yaml)",
     "scenario": "routine",
     "format": "CivicWorkOS minus Efficiency (Table 9B)",
     "settings": {
@@ -15761,7 +15761,7 @@
     }
   },
   "derived": {
-    "label": "added after pre-registration; exploratory (configs/protocol/exploratory_p4.yaml)",
+    "label": "added after internal pre-specification; exploratory (configs/protocol/exploratory_p4.yaml)",
     "cost_per_current": {
       "routine": {
         "units": "model cost units (1 = one certified practitioner-hour) per current practitioner at end",
@@ -16800,7 +16800,7 @@
     "cost_reconstruction_max_abs_error": 1.4551915228366852e-11
   },
   "p4_meta": {
-    "label": "added after pre-registration; exploratory (configs/protocol/exploratory_p4.yaml)",
+    "label": "added after internal pre-specification; exploratory (configs/protocol/exploratory_p4.yaml)",
     "seeds": [
       0,
       29

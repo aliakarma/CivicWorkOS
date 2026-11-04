@@ -1,0 +1,168 @@
+# Exploratory analyses added in revision, in response to peer review (R1).
+#
+# None of these analyses is part of the internally pre-specified family in
+# hypotheses.yaml: no test below enters the Holm family of 12 contrasts, and no
+# verdict of H1-H8 changes. This file was written before any run below on a
+# reporting seed. It is versioned with the code, so git does not prove that order.
+#
+# Shared rules
+#   seeds:        reporting seeds 0-29, paired (common random numbers), except
+#                 fresh_seeds (100-129) and the multi-parameter sweep (0-4)
+#   interval:     two-sided 95% t-interval of the per-seed value or paired
+#                 difference (sim.protocol.analysis.mean_ci), unadjusted
+#   new randomness: only np.random.default_rng([seed, 7919, stream_id]);
+#                 stream 3 = log momentary workload state; the sweep's design
+#                 uses np.random.default_rng([0, 7919, 103])
+#   defaults:     every new option is off by default; the replay block must
+#                 reproduce the stored reference records field for field
+#   allocator:    under a world variant the allocator keeps Equations (7) and
+#                 (13), its ledger and its learner; only the simulated truth moves
+
+label: "added in revision; exploratory"
+
+replay:
+  policies: [static, efficiency, civicworkos, civicworkos_nolearn, civicworkos_noretention,
+             efficiency_recency, efficiency_quota_recency]
+  scenarios: [routine, surge, disruption]
+  counters: >-
+    read-only: per-domain results; budget attainment (Lambda_k and B_k closed at
+    each year end); wages, machine and incident cost; payroll person-days;
+    fault-injection test; belief interval coverage; hours and machine capacity
+    against their caps
+  identity_check: every original field equals the stored reference record
+
+misspecified_world:              # R1 comment 1, and comment 3 for the workload variants
+  policies: [civicworkos, efficiency, efficiency_quota_recency]
+  scenarios: routine for every variant; also disruption for power, partial_0.50, cauchit, combined
+  extra: civicworkos_nolearn, routine, for the four variants that change workload
+  variants:
+    power: {forgetting: power}   # (1 + gap / tau) ** (-1 / ln 2), equal to the exponential at gap = tau
+    partial_0.50: {restoration: 0.50}   # a human-led day removes half the gap
+    partial_0.25: {restoration: 0.25}
+    cloglog: {link: cloglog}     # asymmetric, value 0.5 and slope 0.25 at zero
+    cauchit: {link: cauchit}     # heavy-tailed, value 0.5 and slope 0.25 at zero
+    load_ar_0.15: {load_ar_sd: 0.15, load_decoder_tracking: 1.0}
+    load_ar_0.30: {load_ar_sd: 0.30, load_decoder_tracking: 1.0}
+    load_ar_0.30_t0.5: {load_ar_sd: 0.30, load_decoder_tracking: 0.5}
+    load_outcome: {load_outcome_penalty: 0.30}   # true predictor falls with workload index above 0.8
+    combined: {forgetting: power, restoration: 0.50, link: cloglog, load_ar_sd: 0.15, load_decoder_tracking: 0.5}
+  load_ar_model: >-
+    log momentary state x_t is a stationary AR(1), coefficient 0.9, per
+    practitioner; the true daily response is iota_w * exp(x_t - sd^2 / 2); the
+    reading centers on iota_w * exp(tracking * (x_t - sd^2 / 2)). The allocator
+    still assumes a constant trait.
+
+restoration:                     # R1 comment 4
+  policies: [civicworkos, efficiency, efficiency_quota_recency]
+  scenario: routine
+  truth_only:                    # the allocator still believes phi^led = 0.30
+    led_true_0.50: {led_threshold_true: 0.50}
+    led_true_0.60: {led_threshold_true: 0.60}
+    led_true_0.70: {led_threshold_true: 0.70}
+    led_true_1.00: {led_threshold_true: 1.00}
+    graded_linear: {graded: linear}        # a day removes a share of the gap equal to its largest human share
+    graded_quadratic: {graded: quadratic}  # the square of that share
+  allocator_informed:            # truth and allocator share the threshold
+    led_both_0.50: {human_led_share: 0.50}
+    led_both_0.60: {human_led_share: 0.60}
+    led_both_0.70: {human_led_share: 0.70}
+    led_both_1.00: {human_led_share: 1.00}
+  note: >-
+    The largest value of phi_m * omega_{a,w} below 1.0 is 0.70, so any threshold
+    above 0.70 up to 1.0 selects the same set of tasks (solo H) and is not run separately.
+
+add_one:                         # R1 comment 2, R2 comment 6
+  scenarios: [routine, disruption]
+  base: efficiency_quota_recency
+  add_one: {eqr_floor: lower-bound safety floor, eqr_gate: consequence and uncertainty gate,
+            eqr_ceiling: workload ceiling, eqr_ready: readiness-gated takeover,
+            eqr_budget: capability-budget catch-up stage, eqr_all: all five}
+  drop_one: {cw_nofloor: floor on the posterior mean, cw_nogate: no gate, cw_noceiling: no ceiling,
+             cw_noready: no readiness test, cw_nobudget: no budget stage}
+  uncertainty: {cw_nouncertainty: >-
+    decisions on belief means only: floor on the mean, predictive success at zero
+    variance, no uncertainty test in the gate (the consequence test stays), and
+    a readiness test without its margin. The filter still tracks variances.}
+
+takeover_exposure:               # R1 comment 5
+  scenario: disruption and routine, from the replay runs
+  common_exposure: recovered, unrecovered and stopped faults per 1,000 arrived tasks
+  fault_injection: >-
+    one hypothetical machine fault per domain, at the start of each day (before
+    that day's queue, no workload yet) and at the end (after the queue, full day's
+    workload), passed through the policy's own takeover rule on its own state.
+    Recorded in expectation with no state change and no draw. Requirement: domain
+    mean. Incident hazard: 0.50 risk_k on the failed share of attempts.
+  deferral_hazard: >-
+    accounting on the recorded counts; decisions are unchanged. Hazard-adjusted
+    incidents per 1,000 window tasks = (incidents_w + h_def * sum_k risk_k * missed_w_k
+    + (h_stop - 0.03) * sum_k risk_k * mrc_w_k) / arrived_w * 1000.
+  h_def: [0.0, 0.03, 0.05, 0.10, 0.15, 0.30, 0.50]
+  h_stop: [0.03, 0.15, 0.50]
+
+fixed_payroll:                   # R1 comment 6
+  scenarios: [routine, surge, disruption]
+  model: >-
+    every active practitioner is paid for the hours given to the task stream each
+    working day (avail_h = 4.5) at their wage, hours above that are paid at the same
+    wage, and machine and incident costs are unchanged. Index: efficiency = 100 on
+    the same seed. Sensitivity: a full 8-hour paid day with no overtime.
+
+fresh_seeds:                     # checklist item c (statistical methods)
+  seeds: [100, 129]              # never used before this analysis
+  policies: [static, efficiency, civicworkos, civicworkos_nolearn, civicworkos_noretention, efficiency_quota_recency]
+  scenarios: [routine, surge, disruption]
+  analysis: the pre-specified evaluate() of hypotheses.yaml on the fresh seeds, reported as a replication, not a new family
+  interval_check: 10,000 percentile bootstrap resamples over seeds against the t-intervals, generator [0, 7919, 104]
+
+multi_parameter_sweep:           # R1 comment 7
+  design: Latin hypercube, 40 draws, generator [0, 7919, 103]
+  seeds: [0, 4]
+  policies: [civicworkos, efficiency, efficiency_quota_recency]
+  scenarios: [routine, disruption]
+  bounds:                        # low, high; authors' judgment, each spanning the reference value
+    gamma: [6.0, 10.0]
+    tau_ret: [60.0, 240.0]
+    tau_ret_cv: [0.15, 0.45]
+    rate_cv: [0.10, 0.40]
+    load_sd: [0.10, 0.25]
+    theta_comp: [0.65, 0.75]
+    residual: [0.35, 0.55]
+    human_led_share: [0.30, 0.60]
+    omega_trainee: [0.40, 0.60]
+    avail_h: [4.0, 5.0]
+    overtime_factor: [1.1, 1.5]
+    workload_margin: [0.85, 1.00]
+    takeover_headroom: [1.00, 1.20]
+    machine_drift_sd: [0.002, 0.008]
+    fault_rate: [0.01, 0.04]
+    t_detect: [1.0, 3.0]
+    t_reach: [2.0, 5.0]
+    t_sa: [6.0, 10.0]
+    ootl_factor: [0.3, 1.0]
+    overload_sa_factor: [1.2, 1.8]
+    value: [5.0, 20.0]
+    wage_trainee: [0.4, 0.8]
+    incident_cost: [15.0, 60.0]
+    p_incident_failure: [0.10, 0.20]
+    p_incident_takeover_failure: [0.30, 0.70]
+    p_incident_mrc: [0.01, 0.10]
+    variance_scale: [0.5, 2.0]   # multiplies the prior and process variances together
+    probe_prob: [0.15, 0.45]
+    probe_sd: [0.04, 0.16]
+    telemetry_prob: [0.25, 0.75]
+    telemetry_sd: [0.05, 0.20]
+    workload_sensor_prob: [0.35, 0.90]
+    workload_sensor_sd: [0.05, 0.20]
+    eta: [0.8, 1.6]
+    oversight_p_sd: [0.03, 0.12]
+    readiness_z: [0.84, 1.96]
+    retention_guard: [0.3, 0.8]
+    supervision_recovery: [0.50, 0.90]
+    attrition: [0.06, 0.18]      # every domain
+    machine_price_mult: [1.0, 3.0]   # every domain
+    hybrid_phi_shift: [-0.10, 0.10]  # every hybrid mode
+  not_swept: >-
+    the wage of a certified practitioner (the cost numeraire), novice proficiency
+    theta_0, the horizon, and the domain table
+  report: per-draw means over seeds; range and share of draws with the sign of each contrast; Spearman correlations

@@ -1,0 +1,208 @@
+{
+  "label": "added in revision; exact arithmetic on the worked allocation",
+  "required_credited_share": 0.2962285714285714,
+  "n_draws": 100000,
+  "named": {
+    "default": {
+      "weights": {
+        "Q": 0.15,
+        "S": 0.18,
+        "P": 0.14,
+        "Eq": 0.1,
+        "Tr": 0.05,
+        "Cost": 0.08,
+        "En": 0.03,
+        "Pr": 0.05,
+        "CAD": 0.22
+      },
+      "unconstrained": "H+A+R/a0",
+      "unconstrained_value": 0.342612,
+      "optimum_value": 0.3277497081904762,
+      "optimum": [
+        "H+A+R/a1",
+        "H+R/a1"
+      ],
+      "a1_share": 1.0,
+      "hr_share": 0.2830476190476185,
+      "cost_percent": 4.337936735877263
+    },
+    "equal": {
+      "weights": {
+        "Q": 0.1111111111111111,
+        "S": 0.1111111111111111,
+        "P": 0.1111111111111111,
+        "Eq": 0.1111111111111111,
+        "Tr": 0.1111111111111111,
+        "Cost": 0.1111111111111111,
+        "En": 0.1111111111111111,
+        "Pr": 0.1111111111111111,
+        "CAD": 0.1111111111111111
+      },
+      "unconstrained": "H+A+R/a0",
+      "unconstrained_value": 0.2415555555555555,
+      "optimum_value": 0.2182217142857142,
+      "optimum": [
+        "H+A+R/a1",
+        "H+R/a1"
+      ],
+      "a1_share": 1.0,
+      "hr_share": 0.2830476190476185,
+      "cost_percent": 9.659823892758583
+    },
+    "rank_order_centroid": {
+      "weights": {
+        "Q": 0.147663139329806,
+        "S": 0.20321869488536154,
+        "P": 0.11062610229276897,
+        "Eq": 0.08284832451499119,
+        "Tr": 0.0341710758377425,
+        "Cost": 0.06062610229276896,
+        "En": 0.012345679012345678,
+        "Pr": 0.0341710758377425,
+        "CAD": 0.31432980599647264
+      },
+      "unconstrained": "H+A+R/a1",
+      "unconstrained_value": 0.27064386169900057,
+      "optimum_value": 0.2661833205520562,
+      "optimum": [
+        "H+A+R/a1",
+        "H+R/a1"
+      ],
+      "a1_share": 1.0,
+      "hr_share": 0.2830476190476185,
+      "cost_percent": 1.6481220445728135
+    },
+    "debt_free": {
+      "weights": {
+        "Q": 0.1923076923076923,
+        "S": 0.23076923076923075,
+        "P": 0.1794871794871795,
+        "Eq": 0.12820512820512822,
+        "Tr": 0.06410256410256411,
+        "Cost": 0.10256410256410256,
+        "En": 0.03846153846153846,
+        "Pr": 0.06410256410256411,
+        "CAD": 0.0
+      },
+      "unconstrained": "H+A+R/a0",
+      "unconstrained_value": 0.5803846153846154,
+      "optimum_value": 0.5319962881562881,
+      "optimum": [
+        "H+A+R/a1",
+        "H+R/a1"
+      ],
+      "a1_share": 1.0,
+      "hr_share": 0.2830476190476185,
+      "cost_percent": 8.337286334900663
+    },
+    "safety_doubled": {
+      "weights": {
+        "Q": 0.1271186440677966,
+        "S": 0.3050847457627119,
+        "P": 0.11864406779661019,
+        "Eq": 0.08474576271186442,
+        "Tr": 0.04237288135593221,
+        "Cost": 0.06779661016949153,
+        "En": 0.025423728813559324,
+        "Pr": 0.04237288135593221,
+        "CAD": 0.1864406779661017
+      },
+      "unconstrained": "H+A+R/a0",
+      "unconstrained_value": 0.4276372881355932,
+      "optimum_value": 0.41112774301856336,
+      "optimum": [
+        "H+A+R/a1",
+        "H+R/a1"
+      ],
+      "a1_share": 1.0,
+      "hr_share": 0.2830476190476185,
+      "cost_percent": 3.8606420850267567
+    },
+    "cost_doubled": {
+      "weights": {
+        "Q": 0.13888888888888887,
+        "S": 0.16666666666666666,
+        "P": 0.12962962962962962,
+        "Eq": 0.09259259259259259,
+        "Tr": 0.046296296296296294,
+        "Cost": 0.14814814814814814,
+        "En": 0.027777777777777776,
+        "Pr": 0.046296296296296294,
+        "CAD": 0.2037037037037037
+      },
+      "unconstrained": "H+A+R/a0",
+      "unconstrained_value": 0.28019629629629633,
+      "optimum_value": 0.25735018835978835,
+      "optimum": [
+        "H+A+R/a1",
+        "H+R/a1"
+      ],
+      "a1_share": 1.0,
+      "hr_share": 0.2830476190476185,
+      "cost_percent": 8.153608109205393
+    }
+  },
+  "distributions": {
+    "dirichlet_c20": {
+      "n": 100000,
+      "unconstrained_winner_shares": {
+        "H+R/a0": 0.00785,
+        "H+R/a1": 0.07948,
+        "H+A+R/a0": 0.72613,
+        "H+A+R/a1": 0.18654
+      },
+      "share_unconstrained_lead_only": 0.73398,
+      "share_baseline_mix": 0.90035,
+      "a1_share_min": 0.8463673469387755,
+      "a1_share_median": 1.0,
+      "hr_share_median": 0.2830476190476185,
+      "cost_percent": {
+        "p2.5": 0.0,
+        "median": 4.340445663849099,
+        "p97.5": 17.7130313931263,
+        "max": 13884.920686037307
+      }
+    },
+    "dirichlet_c50": {
+      "n": 100000,
+      "unconstrained_winner_shares": {
+        "H+R/a0": 0.00025,
+        "H+R/a1": 0.01679,
+        "H+A+R/a0": 0.81724,
+        "H+A+R/a1": 0.16572
+      },
+      "share_unconstrained_lead_only": 0.81749,
+      "share_baseline_mix": 0.98051,
+      "a1_share_min": 0.8463673469387755,
+      "a1_share_median": 1.0,
+      "hr_share_median": 0.2830476190476185,
+      "cost_percent": {
+        "p2.5": 0.32074884546017973,
+        "median": 4.318789067290826,
+        "p97.5": 10.443156214356387,
+        "max": 653.0705725692043
+      }
+    },
+    "uniform_simplex": {
+      "n": 100000,
+      "unconstrained_winner_shares": {
+        "H+R/a0": 0.18782,
+        "H+R/a1": 0.07048,
+        "H+A+R/a0": 0.71726,
+        "H+A+R/a1": 0.02444
+      },
+      "share_unconstrained_lead_only": 0.90508,
+      "share_baseline_mix": 0.67357,
+      "a1_share_min": 0.8463673469387755,
+      "a1_share_median": 1.0,
+      "hr_share_median": 0.2830476190476185,
+      "cost_percent": {
+        "p2.5": 0.0,
+        "median": 8.129858676451283,
+        "p97.5": 152.54114458931178,
+        "max": 186558.0583156904
+      }
+    }
+  },
+  "a1_share_lower_bound_from_constraint": 0.8463673469387755
+}

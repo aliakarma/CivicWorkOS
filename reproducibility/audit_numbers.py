@@ -27,6 +27,7 @@ how finding N2 arose.
 from __future__ import annotations
 
 import argparse
+import json
 import math
 import sys
 from dataclasses import dataclass, field
@@ -1075,13 +1076,107 @@ def build_neurorobotics() -> list:
     out.append(s)
     if "baselines" in X:
         out.append(_exploratory_p4(X, R, D))
+    revision = DATA_DIR / "revision.json"
+    if revision.exists():
+        out.append(_revision(json.loads(revision.read_text(encoding="utf-8"))))
     return out
+
+
+def _revision(V: dict) -> Section:
+    """Numbers quoted in the abstract, sec:revision, and the Conclusions from the analyses added in revision."""
+    s = Section("Analyses added in revision (data/revision.json)")
+    W, X = V["world"], V["restoration"]
+    wr, A, U = {k: W[k]["routine"] for k in W}, V["add_one"], V["uncertainty"]
+    pay, bud, dom = V["payroll"]["routine"], V["budget"]["civicworkos"], V["per_domain"]["routine"]
+    T, L, F = V["takeover"], V["lhs"]["outcomes"], V["fresh_seeds"]
+    hz = T["fault_injection"]["disruption"]
+    eqr = "efficiency_quota_recency"
+    share = [wr[k]["minus_efficiency"]["current_share_end"]["diff"] for k in wr]
+    cert = [wr[k]["minus_efficiency"]["certified_end"]["diff"] for k in wr]
+
+    def equal_stop(phase):
+        cw = hz["civicworkos"][phase]["hazard_per_1000"]
+        lo, hi = cw["0.03"]["mean"], cw["0.5"]["mean"]
+        return 0.03 + (hz["efficiency"][phase]["hazard_per_1000"]["0.03"]["mean"] - lo) * 0.47 / (hi - lo)
+
+    rows = [
+        ("records replayed", 630, V["replay_identity"]["records_compared"], 0),
+        ("replay mismatches", 0, V["replay_identity"]["mismatches"], 0),
+        ("planned hours never over the cap", 0.0, max(0.0, V["proposition_resources"]["max_planned_hours_over_cap"]), 0),
+        ("largest takeover excess over the cap (h)", 6.15, V["proposition_resources"]["max_total_hours_over_cap"], 0.005),
+        ("smallest share advantage, worlds", 0.30, min(share), 0.005), ("largest share advantage, worlds", 0.44, max(share), 0.005),
+        ("smallest certified advantage, worlds", 7.1, min(cert), 0.05), ("largest certified advantage, worlds", 10.4, max(cert), 0.05),
+        ("current share, heavy-tailed link", 0.61, wr["cauchit"]["civicworkos"]["current_share_end"]["mean"], 0.005),
+        ("completion, heavy-tailed link", 88.9, 100 * wr["cauchit"]["civicworkos"]["completion_rate"]["mean"], 0.05),
+        ("overload, momentary 0.15", 4.04, 100 * wr["load_ar_0.15"]["civicworkos"]["overload_share"]["mean"], 0.005),
+        ("efficiency overload, momentary 0.15", 4.42, 100 * wr["load_ar_0.15"]["efficiency"]["overload_share"]["mean"], 0.005),
+        ("overload, momentary 0.30", 7.07, 100 * wr["load_ar_0.30"]["civicworkos"]["overload_share"]["mean"], 0.005),
+        ("efficiency overload, momentary 0.30", 4.63, 100 * wr["load_ar_0.30"]["efficiency"]["overload_share"]["mean"], 0.005),
+        ("no-learning overload, momentary 0.30", 9.78, 100 * wr["load_ar_0.30"]["no_learning"]["overload_share"]["mean"], 0.005),
+        ("share, true threshold 0.50", 0.80, X["truth_only"]["led_true_0.50"]["civicworkos"]["current_share_end"]["mean"], 0.005),
+        ("share, true threshold 0.60", 0.39, X["truth_only"]["led_true_0.60"]["civicworkos"]["current_share_end"]["mean"], 0.005),
+        ("efficiency share, true threshold 0.60", 0.20, X["truth_only"]["led_true_0.60"]["efficiency"]["current_share_end"]["mean"], 0.005),
+        ("share, true threshold 0.70", 0.14, X["truth_only"]["led_true_0.70"]["civicworkos"]["current_share_end"]["mean"], 0.005),
+        ("share, true threshold 1.00", 0.14, X["truth_only"]["led_true_1.00"]["civicworkos"]["current_share_end"]["mean"], 0.005),
+        ("share, informed threshold 0.70", 0.26, X["allocator_informed"]["led_both_0.70"]["civicworkos"]["current_share_end"]["mean"], 0.005),
+        ("efficiency share, informed threshold 0.70", 0.15, X["allocator_informed"]["led_both_0.70"]["efficiency"]["current_share_end"]["mean"], 0.005),
+        ("share, graded linear", 0.78, X["truth_only"]["graded_linear"]["civicworkos"]["current_share_end"]["mean"], 0.005),
+        ("share, graded quadratic", 0.71, X["truth_only"]["graded_quadratic"]["civicworkos"]["current_share_end"]["mean"], 0.005),
+        ("base overload", 5.75, 100 * A["routine"]["base"]["overload_share"]["mean"], 0.005),
+        ("ceiling overload", 0.18, 100 * A["routine"]["add_one"]["eqr_ceiling"]["levels"]["overload_share"]["mean"], 0.005),
+        ("base window takeover", 0.710, A["disruption"]["base"]["takeover_success_window"]["mean"], 0.0005),
+        ("ceiling window takeover", 0.850, A["disruption"]["add_one"]["eqr_ceiling"]["levels"]["takeover_success_window"]["mean"], 0.0005),
+        ("ceiling cost index", 127.5, A["routine"]["add_one"]["eqr_ceiling"]["levels"]["cost_index"]["mean"], 0.05),
+        ("ceiling certifications", 4.9, A["routine"]["add_one"]["eqr_ceiling"]["levels"]["graduations"]["mean"], 0.05),
+        ("budget-stage certifications", 13.4, A["routine"]["add_one"]["eqr_budget"]["levels"]["graduations"]["mean"], 0.05),
+        ("budget-stage cost index", 170.8, A["routine"]["add_one"]["eqr_budget"]["levels"]["cost_index"]["mean"], 0.05),
+        ("no budget stage, certifications", 0.0, A["routine"]["drop_one"]["cw_nobudget"]["levels"]["graduations"]["mean"], 0.05),
+        ("floor window incidents", 6.1, A["disruption"]["add_one"]["eqr_floor"]["levels"]["incidents_per_1000_window"]["mean"], 0.05),
+        ("floor window completion", 70.8, 100 * A["disruption"]["add_one"]["eqr_floor"]["levels"]["completion_rate_window"]["mean"], 0.05),
+        ("readiness window takeover", 0.372, A["disruption"]["add_one"]["eqr_ready"]["levels"]["takeover_success_window"]["mean"], 0.0005),
+        ("belief means, window incidents", 8.08, U["disruption"]["levels"]["incidents_per_1000_window"]["mean"], 0.005),
+        ("belief means, window completion", 86.6, 100 * U["disruption"]["levels"]["completion_rate_window"]["mean"], 0.05),
+        ("machine interval coverage", 94.0, 100 * U["coverage"]["machine_1.96"]["mean"], 0.05),
+        ("machine interval coverage, window", 29.6, 100 * U["coverage"]["machine_1.96_disruption_window"]["mean"], 0.05),
+        ("proficiency interval coverage", 94.8, 100 * U["coverage"]["proficiency_1.28"]["mean"], 0.05),
+        ("equal stop hazard, start", 0.04, equal_stop("start"), 0.005), ("equal stop hazard, end", 0.45, equal_stop("end"), 0.005),
+        ("equal deferral hazard, efficiency", 0.009, T["deferral_breakeven_h_stop_0.03"]["efficiency"]["h_def_where_equal"], 0.0005),
+        ("equal deferral hazard, E+Q+R", 0.043, T["deferral_breakeven_h_stop_0.03"][eqr]["h_def_where_equal"], 0.0005),
+        ("fixed payroll index", 106.7, pay["civicworkos"]["fixed_payroll_index"]["mean"], 0.05),
+        ("fixed payroll lower", 106.0, pay["civicworkos"]["fixed_payroll_index"]["ci_low"], 0.05),
+        ("fixed payroll upper", 107.4, pay["civicworkos"]["fixed_payroll_index"]["ci_high"], 0.05),
+        ("fixed payroll, E+Q+R", 108.8, pay[eqr]["fixed_payroll_index"]["mean"], 0.05),
+        ("trainee credit", 1961, bud["all"]["lambda_total"]["mean"], 0.5), ("mean budget", 2186, bud["all"]["budget_total"]["mean"], 0.5),
+        ("attainment", 0.90, bud["all"]["attainment"]["mean"], 0.005),
+        ("attainment lower", 0.86, bud["all"]["attainment"]["ci_low"], 0.005), ("attainment upper", 0.94, bud["all"]["attainment"]["ci_high"], 0.005),
+        ("inspection years met (%)", 20, 100 * bud["INS"]["share_of_years_met"], 0.5),
+        ("inspection completion, CivicWorkOS", 78.6, 100 * dom["civicworkos"]["INS"]["completion"]["mean"], 0.05),
+        ("inspection completion, efficiency", 97.9, 100 * dom["efficiency"]["INS"]["completion"]["mean"], 0.05),
+        ("sweep share advantage, minimum", -0.16, L["routine_share_minus_eff"]["min"], 0.005),
+        ("sweep share advantage, maximum", 0.50, L["routine_share_minus_eff"]["max"], 0.005),
+        ("sweep share positive (%)", 75, 100 * L["routine_share_minus_eff"]["share_positive"], 0.5),
+        ("sweep median against E+Q+R", -0.02, L["routine_share_minus_eqr"]["median"], 0.005),
+        ("sweep overload below efficiency in every draw", 0, 100 * L["routine_overload_minus_eff"]["share_positive"], 0),
+        ("sweep overload below E+Q+R in every draw", 0, 100 * L["routine_overload_minus_eqr"]["share_positive"], 0),
+        ("sweep completion below efficiency in every draw", 0, 100 * L["routine_completion_minus_eff"]["share_positive"], 0),
+        ("sweep completion below E+Q+R in every draw", 0, 100 * L["routine_completion_minus_eqr"]["share_positive"], 0),
+        ("sweep completion median, efficiency", -6.6, L["routine_completion_minus_eff"]["median"], 0.05),
+        ("sweep completion median, E+Q+R", -6.9, L["routine_completion_minus_eqr"]["median"], 0.05),
+        ("sweep cost index, minimum", 94.6, L["routine_cost_index_cw"]["min"], 0.05), ("sweep cost index, maximum", 206.9, L["routine_cost_index_cw"]["max"], 0.05),
+        ("sweep fixed payroll, minimum", 96.4, L["routine_fixed_payroll_index_cw"]["min"], 0.05),
+        ("sweep fixed payroll, maximum", 119.9, L["routine_fixed_payroll_index_cw"]["max"], 0.05),
+        ("fresh-seed verdicts that repeat", 11, sum(a["supported"] == b["supported"] for a, b in zip(F["tests_reference"], F["tests_fresh"])), 0),
+        ("fresh-seed H3 against efficiency", 0.112, next(t["estimate"] for t in F["tests_fresh"] if t["id"] == "H3" and t["comparison"] == "efficiency"), 0.0005),
+    ]
+    for label, printed, computed, tol in rows:
+        s.add(label, printed, computed, tol=tol, site="sec:revision")
+    return s
 
 
 def _exploratory_p4(X: dict, R: str, D: str) -> Section:
     """Numbers quoted in prose (abstract, sec:policies, sec:simresults, Discussion, Conclusions)
-    from the analyses added after pre-registration (exploratory.json, P4 blocks)."""
-    s = Section("Exploratory analyses added after pre-registration (data/exploratory.json, P4 blocks)")
+    from the analyses added after internal pre-specification (exploratory.json, P4 blocks)."""
+    s = Section("Exploratory analyses added after internal pre-specification (data/exploratory.json, P4 blocks)")
     B, SR = X["baselines"]["scenarios"], X["sensor_realism"]["scenarios"]
     TS, MS, DV = X["takeover_sweep"]["disruption"], X["model_sensitivity"]["variants"], X["derived"]
     LR, LD = B[R]["levels"], B[D]["levels"]

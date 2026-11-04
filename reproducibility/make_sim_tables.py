@@ -256,7 +256,7 @@ def baselines_panel(exp) -> str:
     b = exp["baselines"]["scenarios"]["routine"]
     out = [r"\midrule",
            r"\multicolumn{4}{@{}l}{\textit{C. Rule-based baselines, routine operations "
-           r"(added after pre-registration; learning on in all)}}\\",
+           r"(added after internal pre-specification; learning on in all)}}\\",
            r"\textbf{Policy} & \textbf{Current share, end} & \textbf{Overloaded days (\%)} & "
            r"\textbf{Cost index (efficiency $=100$)}\\",
            r"\midrule"]
@@ -463,12 +463,12 @@ def main() -> int:
     for k, v in frags.items():
         (OUT / f"{k}.tex").write_text(v + "\n", encoding="utf-8")
     if "--splice" in sys.argv:
-        # --splice is a private mode for Paper/Frontiers manuscript sources.
-        private = HERE.parent / "Paper" / "Frontiers"
+        # --splice is a private mode for the Paper/ manuscript sources.
+        private = HERE.parent / "Paper"
         main_tex = private / "CivicWorkOS.tex"
         supp_tex = private / "CivicWorkOS_supplementary.tex"
         if not main_tex.is_file() or not supp_tex.is_file():
-            raise SystemExit("--splice requires both private manuscript sources in Paper/Frontiers; "
+            raise SystemExit("--splice requires both private manuscript sources in Paper/; "
                              "public fragments have been generated without splicing")
         for k in ("SIMTABLE", "HYPTABLE", "TRAJROUTINE", "TRAJDISRUPTION", "EXPTABLE", *p4_main):
             splice(main_tex, k, frags[k])

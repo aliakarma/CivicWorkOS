@@ -40,9 +40,16 @@ from typing import Any
 import numpy as np
 
 from .config import (
+    BUDGET_STAGE_OFF,
+    BUDGET_STAGE_ON,
+    LCB_FLOOR_OFF,
+    LCB_FLOOR_ON,
+    MOMENTARY_LOAD_STREAM,
+    POINT_ESTIMATE,
     PROBE_BIAS_STREAM,
     SCENARIOS,
     TRAINEE_QUOTA,
+    TRAINEE_QUOTA_ADD_ONE,
     WORKLOAD_BIAS_STREAM,
     DomainSpec,
     ModeSpec,
@@ -52,10 +59,17 @@ from .config import (
     SimParams,
     policy_flags,
 )
-from .estimation import adf_bernoulli, kalman_scalar, lower_confidence_success, predictive_success, sigmoid
-from .skill import asymptotic_proficiency, current_proficiency, recency_interval
+from .estimation import (
+    adf_bernoulli,
+    cauchit_link,
+    cloglog_link,
+    kalman_scalar,
+    lower_confidence_success,
+    predictive_success,
+    sigmoid,
+)
+from .skill import asymptotic_proficiency, current_proficiency, current_proficiency_power, recency_interval
 
-SUPERVISION_RECOVERY = 0.75   # share of the lead--trainee proficiency gap a supervising lead recovers
 MAX_ATTEMPTS = 8
 POOL_PER_DOMAIN = 64
 U_OUTCOME, U_FAULT, U_TAKEOVER, U_INCIDENT, U_PROBE = range(5)
@@ -84,6 +98,8 @@ class World:
     # exploratory (P4): persistent per-practitioner sensor biases, None when off
     sensor_bias: np.ndarray | None = None   # (n_domains, POOL) physiological workload channel
     probe_bias: np.ndarray | None = None    # (n_domains, POOL) skill-probe channel
+    # exploratory (R1): log momentary workload state, None when off
+    momentary_load: np.ndarray | None = None   # (n_domains, POOL, days)
 
 
 def make_world(seed: int, scenario: Scenario, cfg: RunConfig) -> World:
@@ -141,9 +157,18 @@ def make_world(seed: int, scenario: Scenario, cfg: RunConfig) -> World:
     if S.probe_bias_sd > 0.0:
         brng = np.random.default_rng([seed, 7919, PROBE_BIAS_STREAM])
         probe_bias = S.probe_bias_sd * brng.standard_normal((len(D), POOL_PER_DOMAIN))
+    momentary = None
+    if cfg.world.load_ar_sd > 0.0:
+        brng = np.random.default_rng([seed, 7919, MOMENTARY_LOAD_STREAM])
+        z = brng.standard_normal((len(D), POOL_PER_DOMAIN, days))
+        rho, sd = cfg.world.load_ar_rho, cfg.world.load_ar_sd
+        momentary = np.empty_like(z)
+        momentary[:, :, 0] = sd * z[:, :, 0]
+        for d in range(1, days):
+            momentary[:, :, d] = rho * momentary[:, :, d - 1] + sd * math.sqrt(1.0 - rho * rho) * z[:, :, d]
     return World(seed, scenario, np.array(t_day), np.array(t_dom), np.array(t_req), np.array(t_cons, dtype=bool),
                  task_u, task_z, machine_rel, telemetry_ok, telemetry_z, pool, sensor_u, sensor_z,
-                 sensor_bias, probe_bias)
+                 sensor_bias, probe_bias, momentary)
 
 
 # --------------------------------------------------------------------------
@@ -168,6 +193,9 @@ class Practitioner:
     hours: float = 0.0
     demand: float = 0.0
     led_today: bool = False
+    gap_true: float = 0.0       # the truth's recency gap; differs from ``gap`` only under a WorldModel variant
+    share_today: float = 0.0    # largest human share of the day's tasks
+    takeover_hours: float = 0.0  # unplanned hours today (read-only, R1)
 
 
 @dataclass
@@ -219,6 +247,30 @@ def _new_counters() -> dict[str, int]:
     return c
 
 
+# Read-only per-domain counters added in revision (R1). As with the P4 counters,
+# they never enter a decision and consume no random draw.
+REV_PER_DOMAIN = ("arrived", "completed", "arrived_w", "completed_w", "cost", "machine_cost", "incidents", "incidents_w",
+                  "requests", "recovered", "requests_w", "recovered_w", "mrc", "mrc_w", "human_days", "overload_days",
+                  "load_sum", "cert_days", "trainee_days", "payroll", "overtime", "graduations", "certified_end",
+                  "current_end", "prof_n", "prof_cov_128", "prof_cov_196", "gate_uncertainty_blocks",
+                  "mach_days", "mach_cov_196", "mach_days_w", "mach_cov_196_w")
+FAULT_STATS = ("n", "stop", "attempted", "recovered_p")
+
+
+def _new_rev(n_domains: int) -> dict[str, Any]:
+    r: dict[str, Any] = {key: [0.0] * n_domains for key in REV_PER_DOMAIN}
+    for phase in ("start", "end"):
+        for window in ("", "_w"):
+            for stat in FAULT_STATS:
+                r[f"fi_{phase}{window}_{stat}"] = [0.0] * n_domains
+    r["lam_year"] = [[] for _ in range(n_domains)]
+    r["budget_year"] = [[] for _ in range(n_domains)]
+    r["max_planned_hours_over_cap"] = float("-inf")
+    r["max_total_hours_over_cap"] = float("-inf")
+    r["min_machine_hours_left"] = float("inf")
+    return r
+
+
 class Run:
     """One policy on one world."""
 
@@ -227,7 +279,15 @@ class Run:
         self.P: SimParams = cfg.params
         self.D: tuple[DomainSpec, ...] = cfg.domains
         self.F: PolicyFlags = policy_flags(policy)
-        self.quota = policy in TRAINEE_QUOTA
+        self.quota = policy in TRAINEE_QUOTA or policy in TRAINEE_QUOTA_ADD_ONE
+        self.WM = cfg.world
+        self.lcb = (self.F.capability_terms and policy not in LCB_FLOOR_OFF) or policy in LCB_FLOOR_ON
+        self.budget = (self.F.capability_terms and policy not in BUDGET_STAGE_OFF) or policy in BUDGET_STAGE_ON
+        self.point = policy in POINT_ESTIMATE
+        self.true_link = {"logistic": sigmoid, "cloglog": cloglog_link, "cauchit": cauchit_link}[cfg.world.link]
+        self.day = 0
+        self.rev = False            # set by run_one: read-only revision counters and the fault-injection test
+        self.R = _new_rev(len(cfg.domains))
         P = self.P
         self.pract: list[list[Practitioner]] = []
         self.next_slot: list[int] = []
@@ -253,7 +313,7 @@ class Run:
         a = self.w.pool[k][slot]
         return Practitioner(slot=slot, c=a["c"], gap=a["gap"], rate_mult=a["rate_mult"], tau=a["tau"],
                             load_mult=a["load_mult"], exit_after=a["exit_after"], certified_day=certified_day,
-                            off_v=self.P.prior_offset_var, load_v=self.P.load_sd ** 2)
+                            off_v=self.P.prior_offset_var, load_v=self.P.load_sd ** 2, gap_true=a["gap"])
 
     def certified(self, k: int, p: Practitioner) -> bool:
         return p.active and p.c >= self.D[k].h_k
@@ -261,7 +321,37 @@ class Run:
     def theta_true(self, k: int, p: Practitioner) -> float:
         P = self.P
         inf = asymptotic_proficiency(p.c, self.D[k].h_k, P.theta_0, P.theta_comp, p.rate_mult)
-        return current_proficiency(inf, p.gap, p.tau, P.residual)
+        if self.WM.forgetting == "power":
+            return current_proficiency_power(inf, p.gap_true, p.tau, P.residual)
+        return current_proficiency(inf, p.gap_true, p.tau, P.residual)
+
+    def load_true(self, k: int, p: Practitioner) -> float:
+        """True workload response today: the person's trait, times the momentary state where modeled."""
+        m = self.w.momentary_load
+        if m is None:
+            return p.load_mult
+        sd = self.WM.load_ar_sd
+        return p.load_mult * math.exp(m[k, p.slot, self.day] - 0.5 * sd * sd)
+
+    def load_reading(self, k: int, p: Practitioner) -> float:
+        """What the physiological channel centers on: the trait plus the tracked share of the momentary state."""
+        m = self.w.momentary_load
+        if m is None:
+            return p.load_mult
+        sd = self.WM.load_ar_sd
+        return p.load_mult * math.exp(self.WM.load_decoder_tracking * (m[k, p.slot, self.day] - 0.5 * sd * sd))
+
+    def true_gap(self, p: Practitioner) -> float:
+        """The truth's recency gap after today. Equals ``gap`` in the reference world."""
+        WM = self.WM
+        if WM.graded == "linear":
+            g = p.share_today
+        elif WM.graded == "quadratic":
+            g = p.share_today ** 2
+        else:
+            threshold = self.P.human_led_share if WM.led_threshold_true is None else WM.led_threshold_true
+            g = WM.restoration if p.share_today >= threshold else 0.0
+        return 0.0 if g >= 1.0 else (p.gap_true + 1.0) * (1.0 - g)
 
     def theta_nominal(self, k: int, p: Practitioner) -> float:
         P = self.P
@@ -304,7 +394,7 @@ class Run:
         """Weights of lead and trainee proficiency in the team's human proficiency."""
         if not trainee:
             return 1.0, 0.0
-        wt = self.P.omega_trainee * (1.0 - SUPERVISION_RECOVERY)
+        wt = self.P.omega_trainee * (1.0 - self.WM.supervision_recovery)
         return 1.0 - wt, wt
 
     def predict(self, k: int, mode: ModeSpec, lead: Practitioner | None, tr: Practitioner | None):
@@ -344,6 +434,10 @@ class Run:
             z += phi * th
         if mode.machine:
             z += (1.0 - phi) * (self.w.machine_rel[k, day] + mode.machine_bonus)
+        if self.WM.load_outcome_penalty > 0.0:
+            for p in (lead, tr):
+                if p is not None:
+                    z -= self.WM.load_outcome_penalty * max(0.0, p.demand * self.load_true(k, p) / self.P.avail_h - 0.8)
         return z
 
     # ---- decision ---------------------------------------------------------
@@ -368,7 +462,7 @@ class Run:
         trajectory = budget * (year_day + 1) / P.days_per_year
         remaining = max(1.0, spec.arrivals_per_day * (P.days_per_year - year_day))
         catchup = max(0.0, budget - self.lam[k]) / remaining
-        behind = F.capability_terms and self.lam[k] < trajectory
+        behind = self.budget and self.lam[k] < trajectory
 
         cands: list[dict[str, Any]] = []
         rosters: list[tuple[Practitioner | None, Practitioner | None]]
@@ -409,8 +503,10 @@ class Run:
                         rosters.append((lead, ref))
             for lead, tr in rosters:
                 m, v, *_ = self.predict(k, mode, lead, tr)
+                if self.point:   # decisions see the belief means only (uncertainty ablation)
+                    v = 0.0
                 p_hat = predictive_success(m, v, P.gamma)
-                p_chk = lower_confidence_success(m, v, P.gamma) if F.capability_terms else p_hat
+                p_chk = lower_confidence_success(m, v, P.gamma) if self.lcb else p_hat
                 if self.policy == "static":
                     p_chk = p_hat
                 if p_chk < p_min:
@@ -420,6 +516,8 @@ class Run:
                     p_sd = p_hat * (1.0 - p_hat) * P.gamma * math.sqrt(v)
                     if self.w.task_cons[ti] or p_sd > P.oversight_p_sd:
                         oversight_block = True
+                        if self.rev and not self.w.task_cons[ti]:
+                            self.R["gate_uncertainty_blocks"][k] += 1
                 wage = 0.0
                 if lead is not None:
                     wage += hours * P.wage_certified
@@ -455,7 +553,7 @@ class Run:
         if F.oversight and any(c["oversight_block"] for c in cands):
             self.M.oversight_routings += 1
         stages = [admissible]
-        if F.capability_terms and behind and any(c["credit"] > 0.0 for c in admissible):
+        if self.budget and behind and any(c["credit"] > 0.0 for c in admissible):
             cap_ok = [c for c in admissible if c["credit"] >= catchup - 1e-12]
             stages.insert(0, cap_ok)
         if F.retention:
@@ -504,9 +602,9 @@ class Run:
     def sa_multiplier(self, k: int, p: Practitioner, extra_demand: float, true: bool) -> float:
         P = self.P
         th = self.theta_true(k, p) if true else self.theta_est(k, p)
-        lm = p.load_mult if true else self.load_est(p)
+        lm = self.load_true(k, p) if true else self.load_est(p)
         mult = 1.0 + 3.0 * max(0.0, 0.9 - th)
-        if p.gap > P.ootl_days:
+        if (p.gap_true if true else p.gap) > P.ootl_days:
             mult *= 1.0 + P.ootl_factor
         if (p.demand + extra_demand) * lm / P.avail_h > 0.9:
             mult *= P.overload_sa_factor
@@ -526,7 +624,7 @@ class Run:
         ready = []
         for p in certs:
             sd = math.sqrt(p.off_v)
-            if self.theta_est(k, p) - P.readiness_z * sd < P.theta_comp:
+            if self.theta_est(k, p) - (0.0 if self.point else P.readiness_z) * sd < P.theta_comp:
                 continue
             if (p.demand + demand) * self.load_est(p) > P.takeover_headroom * P.workload_ceiling * P.avail_h:
                 continue
@@ -555,7 +653,7 @@ class Run:
             tests = []
             ootl_any = False
             for p in certs:
-                fc = self.theta_est(k, p) - P.readiness_z * math.sqrt(p.off_v) < P.theta_comp
+                fc = self.theta_est(k, p) - (0.0 if self.point else P.readiness_z) * math.sqrt(p.off_v) < P.theta_comp
                 fw = (p.demand + demand) * self.load_est(p) > P.takeover_headroom * P.workload_ceiling * P.avail_h
                 mult = self.sa_multiplier(k, p, demand, true=False)
                 ft = P.t_detect + P.t_reach + P.t_sa * mult > spec.takeover_budget_min
@@ -610,6 +708,7 @@ class Run:
         psi = P.omega_trainee if tr is not None else 0.0
         if lead is not None:
             lead.c += ell * mode.phi * (1.0 - psi)
+            lead.share_today = max(lead.share_today, mode.phi * (1.0 - psi))
             if mode.phi * (1.0 - psi) >= P.human_led_share:
                 lead.led_today = True
         if tr is not None:
@@ -617,6 +716,7 @@ class Run:
                 self.lam[k] += ell * mode.phi * psi
                 M.trainee_credit += ell * mode.phi * psi
             tr.c += ell * mode.phi * psi
+            tr.share_today = max(tr.share_today, mode.phi * psi)
             if mode.phi * psi >= P.human_led_share:
                 tr.led_today = True
 
@@ -624,10 +724,13 @@ class Run:
                          < self.w.scenario.disruption_start + self.w.scenario.disruption_days)
         fault_rate = self.w.scenario.disruption_fault_rate if in_disruption else P.fault_rate
         success = False
+        R = self.R
         if mode.machine and u[U_FAULT] < fault_rate:
             M.takeover_requests += 1
+            R["requests"][k] += 1
             if window:
                 M.takeover_requests_w += 1
+                R["requests_w"][k] += 1
             if F.learning:   # a fault is evidence about the fleet
                 mm, vv = adf_bernoulli([self.mach_m[k]], [self.mach_v[k]], [1.0],
                                        mode.machine_bonus - self.req_m[k], False, P.gamma)
@@ -642,6 +745,9 @@ class Run:
             if taker is None:
                 self._count_stop(k, hours, window)
                 M.mrc += 1
+                R["mrc"][k] += 1
+                if window:
+                    R["mrc_w"][k] += 1
                 if u[U_INCIDENT] < P.p_incident_mrc * spec.risk:
                     M.incidents += 1
                     cost += P.incident_cost
@@ -651,11 +757,13 @@ class Run:
                     taker.hours += 0.5 * hours
                     taker.demand += 0.75 * hours
                     taker.led_today = True
+                    taker.share_today = 1.0
+                    taker.takeover_hours += 0.5 * hours
                     taker.c += ell * 0.5
                     cost += 0.5 * hours * P.wage_certified
                 th = self.theta_true(k, taker)
-                overloaded = taker.demand * taker.load_mult / P.avail_h > P.workload_ceiling
-                p_to = sigmoid(P.gamma * (th - req)) * (0.7 if overloaded else 1.0)
+                overloaded = taker.demand * self.load_true(k, taker) / P.avail_h > P.workload_ceiling
+                p_to = self.true_link(P.gamma * (th - req)) * (0.7 if overloaded else 1.0)
                 ok = t <= spec.takeover_budget_min and u[U_TAKEOVER] < p_to
                 M.takeover_time_sum += t
                 M.takeover_time_n += 1
@@ -667,14 +775,16 @@ class Run:
                 if ok:
                     success = True
                     M.takeover_success += 1
+                    R["recovered"][k] += 1
                     if window:
                         M.takeover_success_w += 1
+                        R["recovered_w"][k] += 1
                 elif u[U_INCIDENT] < P.p_incident_takeover_failure * spec.risk:
                     M.incidents += 1
                     cost += P.incident_cost
         else:
             z = self.true_z(k, mode, lead, tr, day, req)
-            success = u[U_OUTCOME] < sigmoid(P.gamma * z)
+            success = u[U_OUTCOME] < self.true_link(P.gamma * z)
             if not success and u[U_INCIDENT] < P.p_incident_failure * spec.risk:
                 M.incidents += 1
                 cost += P.incident_cost
@@ -700,8 +810,13 @@ class Run:
                     m_new, v_new = kalman_scalar(p.off_m, p.off_v, obs - self.theta_nominal(k, p), P.probe_sd ** 2)
                     p.off_m, p.off_v = m_new, v_new
         M.cost += cost
+        R["cost"][k] += cost
+        R["incidents"][k] += M.incidents - incidents_before
+        if mode.machine:
+            R["machine_cost"][k] += hours * spec.machine_cost_per_h
         if window:
             M.incidents_w += M.incidents - incidents_before
+            R["incidents_w"][k] += M.incidents - incidents_before
         if M.incidents > incidents_before:   # read-only per-task flag (P4)
             self.task_incident[ti] = True
         return success
@@ -716,6 +831,7 @@ class Run:
         queue: list[int] = []
         n_tasks = len(w.task_day)
         for day in range(P.days):
+            self.day = day
             # machines: capacity, belief prediction, telemetry
             in_disruption = sc.disruption_start <= day < sc.disruption_start + sc.disruption_days
             for k, spec in enumerate(D):
@@ -734,11 +850,16 @@ class Run:
                 if win and win[0] <= day < win[1]:
                     M.mach_err_w_sum += err
                     M.mach_err_w_n += 1
+                if self.rev:
+                    self._mach_coverage(k, day, bool(win and win[0] <= day < win[1]))
                 if day % P.days_per_year == 0:
+                    if day > 0:
+                        self._close_budget_year(k)
                     self.lam[k] = 0.0
                 for p in self.pract[k]:
                     p.hours = p.demand = 0.0
                     p.led_today = False
+                    p.share_today = p.takeover_hours = 0.0
                     if F.learning:
                         p.off_v += P.human_process_var
             # arrivals
@@ -746,10 +867,14 @@ class Run:
                 ti = int(order[ptr])
                 queue.append(ti)
                 M.arrived += 1
+                self.R["arrived"][int(w.task_dom[ti])] += 1
                 if win and win[0] <= day < win[1]:
                     M.arrived_w += 1
+                    self.R["arrived_w"][int(w.task_dom[ti])] += 1
                 ptr += 1
             queue.sort(key=lambda t: (w.task_day[t] + D[w.task_dom[t]].deadline_days, -D[w.task_dom[t]].risk, t))
+            if self.rev:
+                self._inject_faults(day, "start")
             pending = []
             for ti in queue:
                 k = int(w.task_dom[ti])
@@ -760,8 +885,10 @@ class Run:
                     done = self.execute(k, ti, day, pick, window=bool(win and win[0] <= day < win[1]))
                 if done:
                     M.completed += 1
+                    self.R["completed"][k] += 1
                     if arrived_in_win:
                         M.completed_w += 1
+                        self.R["completed_w"][k] += 1
                     if not self.task_incident[ti]:   # read-only (P4): completed with no incident on any attempt
                         self.C["completed_clean"] += 1
                         if arrived_in_win:
@@ -769,27 +896,33 @@ class Run:
                 elif day < w.task_day[ti] + D[k].deadline_days and self.attempts[ti] < MAX_ATTEMPTS:
                     pending.append(ti)
             queue = pending
+            if self.rev:
+                self._inject_faults(day, "end")
             # end of day: workload, sensors, recency, certification, attrition
             for k, spec in enumerate(D):
                 people = self.pract[k]
                 for p in people:
                     if not p.active:
                         continue
-                    index = p.demand * p.load_mult / P.avail_h
+                    index = p.demand * self.load_true(k, p) / P.avail_h
                     M.human_days += 1
                     M.load_sum += index
                     if index > P.workload_ceiling:
                         M.overload_days += 1
+                    if self.rev:
+                        self._day_counters(k, p, index)
                     if (F.learning and F.multimodal and p.demand > 0.5
                             and w.sensor_u[k, p.slot, day] < P.workload_sensor_prob):
-                        obs = p.load_mult + P.workload_sensor_sd * w.sensor_z[k, p.slot, day]
+                        obs = self.load_reading(k, p) + P.workload_sensor_sd * w.sensor_z[k, p.slot, day]
                         if w.sensor_bias is not None:
                             obs += w.sensor_bias[k, p.slot]
                         p.load_m, p.load_v = kalman_scalar(p.load_m, p.load_v, obs, P.workload_sensor_sd ** 2)
                     p.gap = 0.0 if p.led_today else p.gap + 1.0
+                    p.gap_true = self.true_gap(p)
                     if p.certified_day is None and p.c >= spec.h_k:
                         p.certified_day = day
                         M.graduations += 1
+                        self.R["graduations"][k] += 1
                         if self.next_slot[k] < POOL_PER_DOMAIN:
                             people.append(self._hire(k, self.next_slot[k], None))
                             self.next_slot[k] += 1
@@ -797,7 +930,86 @@ class Run:
                         p.active = False
             if day % 5 == 4 or day == P.days - 1:
                 M.trajectory.append((day + 1, *self.snapshot()))
+        if self.rev:
+            self._close_run()
         return M
+
+    # ---- read-only revision counters (R1); no decision, no draw ------------
+    def _close_budget_year(self, k: int) -> None:
+        spec = self.D[k]
+        n_cert = sum(self.certified(k, p) for p in self.pract[k])
+        self.R["lam_year"][k].append(self.lam[k])
+        self.R["budget_year"][k].append(self.P.eta * n_cert * spec.attrition_per_year * spec.h_k)
+
+    def _mach_coverage(self, k: int, day: int, window: bool) -> None:
+        R = self.R
+        hit = abs(self.mach_m[k] - self.w.machine_rel[k, day]) <= 1.96 * math.sqrt(self.mach_v[k])
+        R["mach_days"][k] += 1
+        R["mach_cov_196"][k] += hit
+        if window:
+            R["mach_days_w"][k] += 1
+            R["mach_cov_196_w"][k] += hit
+
+    def _day_counters(self, k: int, p: Practitioner, index: float) -> None:
+        P, R = self.P, self.R
+        R["human_days"][k] += 1
+        R["load_sum"][k] += index
+        R["overload_days"][k] += index > P.workload_ceiling
+        certified = self.certified(k, p)
+        wage = P.wage_certified if certified else P.wage_trainee
+        R["cert_days" if certified else "trainee_days"][k] += 1
+        R["payroll"][k] += P.avail_h * wage
+        R["overtime"][k] += max(0.0, p.hours - P.avail_h) * wage
+        R["max_planned_hours_over_cap"] = max(R["max_planned_hours_over_cap"],
+                                              p.hours - p.takeover_hours - self.hours_cap())
+        R["max_total_hours_over_cap"] = max(R["max_total_hours_over_cap"], p.hours - self.hours_cap())
+        R["min_machine_hours_left"] = min(R["min_machine_hours_left"], self.mach_left[k])
+
+    def _inject_faults(self, day: int, phase: str) -> None:
+        """Common fault-injection test: one hypothetical machine fault per domain, twice a day.
+
+        Every policy faces the same schedule, so exposure no longer depends on what
+        it dispatched. The fault goes through the policy's own takeover rule on its
+        own state, and the expected outcome is recorded with no state change or draw.
+        """
+        P, R = self.P, self.R
+        win = self.w.scenario.window()
+        tags = [f"fi_{phase}"] + ([f"fi_{phase}_w"] if win and win[0] <= day < win[1] else [])
+        for k, spec in enumerate(self.D):
+            hours = spec.duration_h
+            taker = self.pick_takeover(k, hours)
+            p_ok = 0.0
+            if taker is not None:
+                sa = self.sa_multiplier(k, taker, hours * 0.75, true=True)
+                t = P.t_detect + P.t_reach + P.t_sa * sa
+                if t <= spec.takeover_budget_min:
+                    index = (taker.demand + 0.75 * hours) * self.load_true(k, taker) / P.avail_h
+                    p_ok = (self.true_link(P.gamma * (self.theta_true(k, taker) - spec.requirement))
+                            * (0.7 if index > P.workload_ceiling else 1.0))
+            for tag in tags:
+                R[f"{tag}_n"][k] += 1
+                if taker is None:
+                    R[f"{tag}_stop"][k] += 1
+                else:
+                    R[f"{tag}_attempted"][k] += 1
+                    R[f"{tag}_recovered_p"][k] += p_ok
+
+    def _close_run(self) -> None:
+        P, R = self.P, self.R
+        for k in range(len(self.D)):
+            self._close_budget_year(k)
+            for p in self.pract[k]:
+                if not p.active:
+                    continue
+                th = self.theta_true(k, p)
+                err = abs(self.theta_est(k, p) - th)
+                sd = math.sqrt(p.off_v)
+                R["prof_n"][k] += 1
+                R["prof_cov_128"][k] += err <= 1.28 * sd
+                R["prof_cov_196"][k] += err <= 1.96 * sd
+                if self.certified(k, p):
+                    R["certified_end"][k] += 1
+                    R["current_end"][k] += th >= P.theta_comp
 
     def proficiency_error(self) -> float:
         """Mean absolute error of the allocator's proficiency estimate, active practitioners, end of run."""
@@ -820,12 +1032,15 @@ class Run:
 
 
 def run_one(seed: int, scenario_name: str, policy: str, cfg: RunConfig | None = None,
-            counters: bool = False) -> dict:
+            counters: bool = False, revision: bool = False) -> dict:
     """One run's record. ``counters=True`` adds the read-only P4 counters under
-    the separate key ``p4_counters``; every other field is unaffected by it."""
+    the separate key ``p4_counters``, and ``revision=True`` adds the read-only R1
+    counters and the fault-injection test under ``rev_counters``; every other
+    field is unaffected by either."""
     cfg = cfg or RunConfig()
     world = make_world(seed, SCENARIOS[scenario_name], cfg)
     r = Run(world, policy, cfg)
+    r.rev = revision
     M = r.run()
     n_cert, n_curr, prof = r.snapshot()
     record = {
@@ -864,4 +1079,6 @@ def run_one(seed: int, scenario_name: str, policy: str, cfg: RunConfig | None = 
         record["p4_counters"] = {**r.C, "arrived_w": M.arrived_w, "completed": M.completed,
                                  "completed_w": M.completed_w, "total_cost": M.cost,
                                  "load_mae_end": sum(load_errs) / len(load_errs) if load_errs else float("nan")}
+    if revision:
+        record["rev_counters"] = r.R
     return record

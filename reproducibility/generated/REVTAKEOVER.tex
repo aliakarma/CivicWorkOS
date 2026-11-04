@@ -1,0 +1,29 @@
+\multicolumn{7}{@{}l}{\textit{A. Disruption window, per 1,000 arrived window tasks (same denominator for every policy)}}\\
+\textbf{Policy} & \textbf{Recovered} & \textbf{Failed takeover} & \textbf{Stopped} & \textbf{Incidents} & \textbf{Window completion (\%)} & \\
+\midrule
+Static & 203.1 [198.1, 208.1] & 29.3 [27.5, 31.0] & 0.0 [0.0, 0.0] & 35.8 [33.9, 37.6] & 76.4 & \\
+Efficiency & 13.1 [11.9, 14.3] & 4.8 [4.1, 5.5] & 0.0 [0.0, 0.0] & 3.8 [3.1, 4.4] & 26.8 & \\
+Efficiency + recency & 11.8 [10.4, 13.1] & 4.5 [3.9, 5.1] & 0.0 [0.0, 0.0] & 7.1 [6.0, 8.1] & 90.3 & \\
+Efficiency + quota + recency & 11.9 [10.7, 13.1] & 4.8 [4.0, 5.5] & 0.0 [0.0, 0.0] & 8.3 [7.3, 9.4] & 89.1 & \\
+CivicWorkOS & 22.8 [20.0, 25.5] & 1.5 [1.1, 1.9] & 3.6 [2.7, 4.4] & 5.0 [4.3, 5.7] & 71.9 & \\
+No learning & 193.7 [183.6, 203.8] & 16.8 [15.1, 18.4] & 9.8 [1.4, 18.3] & 31.0 [29.1, 32.9] & 93.5 & \\
+\midrule
+\multicolumn{7}{@{}l}{\textit{B. Common fault-injection test, disruption scenario: expected share of injected faults}}\\
+\textbf{Policy} & \textbf{Recovered, start} & \textbf{Stopped, start} & \textbf{Recovered, end} & \textbf{Stopped, end} & \textbf{Window, end} & \textbf{Equal-hazard stop, end}\\
+\midrule
+Static & 0.622 [0.617, 0.628] & 0.000 & 0.659 [0.642, 0.676] & 0.000 & 0.329 & 0.35\\
+Efficiency & 0.943 [0.938, 0.948] & 0.000 & 0.596 [0.593, 0.599] & 0.000 & 0.452 & 0.45\\
+Efficiency + recency & 0.945 [0.940, 0.950] & 0.000 & 0.587 [0.584, 0.590] & 0.000 & 0.461 & 0.45\\
+Efficiency + quota + recency & 0.941 [0.938, 0.945] & 0.000 & 0.590 [0.588, 0.593] & 0.000 & 0.458 & 0.45\\
+CivicWorkOS & 0.658 [0.640, 0.677] & 0.314 & 0.531 [0.513, 0.549] & 0.429 & 0.203 & ---\\
+No learning & 0.636 [0.634, 0.638] & 0.333 & 0.563 [0.552, 0.574] & 0.374 & 0.280 & ---\\
+\midrule
+\multicolumn{7}{@{}l}{\textit{C. Hazard-adjusted incidents per 1,000 window tasks, by assumed hazard of a missed deadline ($h_{def}$; stop hazard 0.03)}}\\
+\textbf{Policy} & $h_{def}=0$ & 0.03 & 0.05 & 0.10 & 0.15 & 0.30\\
+\midrule
+Static & 35.8 & 38.9 & 40.9 & 46.1 & 51.3 & 66.8\\
+Efficiency & 3.8 & 11.7 & 17.0 & 30.3 & 43.6 & 83.4\\
+Efficiency + recency & 7.1 & 8.2 & 8.9 & 10.7 & 12.5 & 18.0\\
+Efficiency + quota + recency & 8.3 & 9.6 & 10.4 & 12.4 & 14.4 & 20.5\\
+CivicWorkOS & 5.0 & 8.6 & 10.9 & 16.9 & 22.8 & 40.6\\
+No learning & 31.0 & 31.7 & 32.2 & 33.4 & 34.6 & 38.3\\

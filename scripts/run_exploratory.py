@@ -16,7 +16,7 @@ Original revision blocks (unchanged jobs and computations):
    retention time constant (tau_ret x0.5 and x2) and machine prices (x3),
    routine operations.
 
-Blocks added after pre-registration (submission phase P4), defined in
+Blocks added after internal pre-specification (submission phase P4), defined in
 ``configs/protocol/exploratory_p4.yaml`` before any of them was run:
 
 3. ``baselines``: Efficiency + apprenticeship quota, + recency rule, and both.
@@ -66,7 +66,7 @@ P4_METRICS = METRICS + ["graduations", "trainee_credit_per_year", "takeover_succ
 SCENARIOS3 = ("routine", "surge", "disruption")
 LEGACY = ("outcome_only", "sensitivity")
 P4_BLOCKS = ("baselines", "sensor_realism", "takeover_sweep", "model_sensitivity", "derived")
-LABEL = "added after pre-registration; exploratory (configs/protocol/exploratory_p4.yaml)"
+LABEL = "added after internal pre-specification; exploratory (configs/protocol/exploratory_p4.yaml)"
 # SHA-256 of the 450 frozen reporting runs (P0 baseline). Pairing uses only these records.
 REFERENCE_RUNS_SHA256 = "45101231c93211204ccbaf64ba5b21d210e7168cfb3944340ee3d03cfd2e57ec"
 CODE_FILES = ("sim/protocol/engine.py", "sim/protocol/config.py", "sim/protocol/estimation.py", "sim/protocol/skill.py")

@@ -1,4 +1,4 @@
-.PHONY: install install-dev verify test test-unit test-integration test-smoke lint format typecheck clean run-allocation run-rebalance run-simulation protocol protocol-dev exploratory sensitivity docker-build docker-run
+.PHONY: install install-dev verify test test-unit test-integration test-smoke lint format typecheck clean run-allocation run-rebalance run-simulation protocol protocol-dev exploratory revision sensitivity docker-build docker-run
 
 install:
 	pip install -e .
@@ -57,6 +57,12 @@ protocol:
 # configs/protocol/exploratory_p4.yaml); none is in the pre-specified family.
 exploratory:
 	python scripts/run_exploratory.py
+
+# Exploratory analyses added in revision (configs/protocol/exploratory_r1.yaml);
+# none is in the pre-specified family.
+revision:
+	python scripts/run_revision.py
+	python scripts/weights_sensitivity.py
 
 # Development seeds only; never used for reported numbers.
 protocol-dev:

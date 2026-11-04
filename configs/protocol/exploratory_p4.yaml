@@ -1,4 +1,4 @@
-# Exploratory analyses added after pre-registration (submission phase P4).
+# Exploratory analyses added after internal pre-specification (submission phase P4).
 #
 # None of these analyses is part of the pre-specified family in
 # hypotheses.yaml: no test below enters the Holm family of 12 contrasts, and
@@ -18,7 +18,7 @@
 #   defaults:     every new option is zero or off by default; at the defaults
 #                 the 450 reporting runs must reproduce byte for byte
 
-label: "added after pre-registration; exploratory"
+label: "added after internal pre-specification; exploratory"
 seeds: [0, 29]
 
 random_streams:

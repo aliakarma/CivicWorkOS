@@ -729,7 +729,7 @@ python scripts/run_protocol.py --paper
 python reproducibility/make_sim_tables.py && python reproducibility/audit_numbers.py --quiet
 
 # Exploratory analyses (outcome-only learning ablation; sensitivity to tau_ret and machine prices;
-# and, added after pre-registration, rule-based baselines, sensor realism, takeover sweep,
+# and, added after internal pre-specification, rule-based baselines, sensor realism, takeover sweep,
 # model sensitivity, derived metrics -- see configs/protocol/exploratory_p4.yaml)
 python scripts/run_exploratory.py
 python scripts/run_exploratory.py --blocks baselines sensor_realism   # selected blocks only

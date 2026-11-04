@@ -41,6 +41,16 @@ def sigmoid(x: float) -> float:
     return e / (1.0 + e)
 
 
+def cloglog_link(x: float) -> float:
+    """Asymmetric link centered like the logistic: value 0.5 and slope 0.25 at zero (exploratory; R1)."""
+    return 1.0 - math.exp(-math.log(2.0) * math.exp(min(0.5 * x / math.log(2.0), 30.0)))
+
+
+def cauchit_link(x: float) -> float:
+    """Heavy-tailed link centered like the logistic: value 0.5 and slope 0.25 at zero (exploratory; R1)."""
+    return 0.5 + math.atan(math.pi * x / 4.0) / math.pi
+
+
 def predictive_success(mean: float, var: float, gamma: float) -> float:
     """Posterior-predictive success probability (probit-moderated logistic)."""
     return sigmoid(gamma * mean / math.sqrt(1.0 + math.pi * gamma * gamma * var / 8.0))

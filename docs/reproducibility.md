@@ -14,7 +14,8 @@ municipalities), which neither the article nor this repository claims.
 | Worked bridge-inspection allocation, sensitivity sweep, parameter shocks | Section 6.1, Supplementary S5 | `python reproducibility/audit_numbers.py` and `python scripts/verify_worked_example.py` |
 | Recency arithmetic of Proposition 1 | Section 6.1 | `audit_numbers.py`, `tests/unit/test_protocol_skill_learning.py` |
 | Reference execution of the evaluation protocol | Section 6.2, Tables 7–8, Figure 4, Supplementary Tables S2–S4 | `make protocol` |
-| Exploratory analyses (outcome-only ablation, sensitivity; and, added after pre-registration, rule-based baselines, sensor realism, takeover sweep, model sensitivity, derived metrics) | `sec:simresults`, `tab:exploratory`, `fig:sensor`, supplementary `app:explore-p4` and `tab:supp-baselines` to `tab:supp-derived` | `python scripts/run_exploratory.py`, then `python reproducibility/make_sim_tables.py` |
+| Analyses added in revision (misspecified worlds, restoration, add-one design, fault injection, fixed payroll, sweep, fresh seeds, weights) | `sec:revision`, `tab:revision`, supplementary `app:revision`, `app:weights` | `make revision`, then `python reproducibility/make_revision_tables.py` |
+| Exploratory analyses (outcome-only ablation, sensitivity; and, added after internal pre-specification, rule-based baselines, sensor realism, takeover sweep, model sensitivity, derived metrics) | `sec:simresults`, `tab:exploratory`, `fig:sensor`, supplementary `app:explore-p4` and `tab:supp-baselines` to `tab:supp-derived` | `python scripts/run_exploratory.py`, then `python reproducibility/make_sim_tables.py` |
 | Analytic debt model | Supplementary S5.3 | `civicworkos.analytic.debt_model`, `audit_numbers.py` |
 
 ## Public artifact commands
@@ -28,7 +29,7 @@ blocks, and runs the audit. `python scripts/run_exploratory.py` writes the
 exploratory summary to `reproducibility/data/exploratory.json`. With
 `--blocks`, it runs only the named blocks and leaves the others byte for byte.
 The P4 blocks (`baselines`, `sensor_realism`, `takeover_sweep`,
-`model_sensitivity`, `derived`) were added after pre-registration and are
+`model_sensitivity`, `derived`) were added after internal pre-specification and are
 specified in `configs/protocol/exploratory_p4.yaml`. Their per-run records,
 with read-only counters, go to `results/exploratory/<block>/runs.jsonl` and are
 reused only when every record's configuration and code hashes match. The P4

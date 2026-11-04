@@ -8,7 +8,7 @@ reported number can always be traced to the parameters that produced it.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 
 
 @dataclass(frozen=True)
@@ -228,9 +228,39 @@ EXPLORATORY_POLICY_FLAGS: dict[str, PolicyFlags] = {
     "efficiency_quota_recency": PolicyFlags(True, False, True, False, False, False),
 }
 
+# Add-one and drop-one designs added in revision (exploratory; R1,
+# configs/protocol/exploratory_r1.yaml). ``eqr_*`` adds one CivicWorkOS mechanism
+# to Efficiency + quota + recency; ``cw_no*`` removes one from CivicWorkOS.
+_EQR = PolicyFlags(True, False, True, False, False, False)
+_CW = PolicyFlags(True, True, True, True, True, True)
+EXPLORATORY_POLICY_FLAGS.update({
+    "eqr_floor": _EQR,                                       # lower-bound safety floor
+    "eqr_gate": replace(_EQR, oversight=True),               # consequence and uncertainty gate
+    "eqr_ceiling": replace(_EQR, workload_guard=True),       # workload ceiling
+    "eqr_ready": replace(_EQR, readiness_takeover=True),     # readiness-gated takeover
+    "eqr_budget": _EQR,                                      # capability-budget catch-up stage
+    "eqr_all": replace(_EQR, oversight=True, workload_guard=True, readiness_takeover=True),
+    "cw_nofloor": _CW,
+    "cw_nogate": replace(_CW, oversight=False),
+    "cw_noceiling": replace(_CW, workload_guard=False),
+    "cw_noready": replace(_CW, readiness_takeover=False),
+    "cw_nobudget": _CW,
+    "cw_nouncertainty": _CW,                                 # decisions on point estimates only
+})
+
 # Policies that attach the free trainee to every selected human-led task
 # (apprenticeship quota). The rule needs no random draw.
 TRAINEE_QUOTA: frozenset[str] = frozenset({"efficiency_quota", "efficiency_quota_recency"})
+TRAINEE_QUOTA_ADD_ONE: frozenset[str] = frozenset({"eqr_floor", "eqr_gate", "eqr_ceiling", "eqr_ready", "eqr_budget",
+                                                   "eqr_all"})
+
+# ``capability_terms`` bundles the lower-bound floor and the budget stage; these
+# registries separate the two for the add-one and drop-one designs only.
+LCB_FLOOR_ON: frozenset[str] = frozenset({"eqr_floor", "eqr_all"})
+LCB_FLOOR_OFF: frozenset[str] = frozenset({"cw_nofloor", "cw_nouncertainty"})
+BUDGET_STAGE_ON: frozenset[str] = frozenset({"eqr_budget", "eqr_all"})
+BUDGET_STAGE_OFF: frozenset[str] = frozenset({"cw_nobudget"})
+POINT_ESTIMATE: frozenset[str] = frozenset({"cw_nouncertainty"})
 
 
 def policy_flags(policy: str) -> PolicyFlags:
@@ -256,6 +286,28 @@ class SensorRealism:
 
 WORKLOAD_BIAS_STREAM = 1
 PROBE_BIAS_STREAM = 2
+MOMENTARY_LOAD_STREAM = 3
+
+
+@dataclass(frozen=True)
+class WorldModel:
+    """Data-generating variants added in revision (exploratory; R1).
+
+    These change the simulated truth while the allocator keeps Equations (7)
+    and (13) and its ledger, so they test the allocator on a world it does not
+    model. Defaults reproduce the reference world exactly and draw nothing.
+    """
+
+    forgetting: str = "exponential"       # or "power": (1 + gap / tau) ** (-1 / ln 2), equal at gap = tau
+    restoration: float = 1.0              # share of the gap a human-led day removes (partial restoration)
+    graded: str = "none"                  # "linear" or "quadratic": a day restores in proportion to the share
+    led_threshold_true: float | None = None  # the truth's human-led threshold; None uses the allocator's
+    link: str = "logistic"                # true outcome link: "logistic", "cloglog" or "cauchit"
+    load_ar_sd: float = 0.0               # stationary s.d. of the log momentary workload state
+    load_ar_rho: float = 0.9              # its day-to-day AR(1) coefficient
+    load_decoder_tracking: float = 1.0    # share of the momentary state the physiological reading tracks
+    load_outcome_penalty: float = 0.0     # true linear-predictor loss per unit of workload index above 0.8
+    supervision_recovery: float = 0.75    # kappa^sup (a sweep bound, known to the allocator)
 
 
 @dataclass
@@ -263,6 +315,7 @@ class RunConfig:
     params: SimParams = field(default_factory=SimParams)
     domains: tuple[DomainSpec, ...] = DOMAINS
     sensors: SensorRealism = field(default_factory=SensorRealism)
+    world: WorldModel = field(default_factory=WorldModel)
 
     def as_dict(self) -> dict:
         out = {"params": asdict(self.params), "domains": [asdict(d) for d in self.domains],
@@ -270,4 +323,6 @@ class RunConfig:
                "policies": {k: asdict(v) for k, v in POLICY_FLAGS.items()}}
         if self.sensors != SensorRealism():   # recorded only when an exploratory setting is used
             out["sensors"] = asdict(self.sensors)
+        if self.world != WorldModel():
+            out["world"] = asdict(self.world)
         return out

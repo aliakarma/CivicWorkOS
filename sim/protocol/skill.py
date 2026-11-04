@@ -50,6 +50,13 @@ def current_proficiency(theta_inf: float, gap_days: float, tau: float, residual:
     return residual + (theta_inf - residual) * math.exp(-max(gap_days, 0.0) / tau)
 
 
+def current_proficiency_power(theta_inf: float, gap_days: float, tau: float, residual: float) -> float:
+    """Power-law forgetting (exploratory; R1), equal to the exponential at ``gap_days == tau``."""
+    if theta_inf <= residual:
+        return theta_inf
+    return residual + (theta_inf - residual) * (1.0 + max(gap_days, 0.0) / tau) ** (-1.0 / math.log(2.0))
+
+
 def recency_interval(theta_inf: float, tau: float, residual: float, theta_comp: float) -> float:
     """Longest gap (working days) keeping proficiency at or above ``theta_comp``.
 

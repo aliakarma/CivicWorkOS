@@ -7,9 +7,12 @@ title: >-
   CivicWorkOS: Capability-Preserving Adaptive Task Allocation Among Humans,
   AI Agents, and Robots in Municipal Services (reference implementation and
   evaluation testbed)
+authors:
+  - family-names: Akarma
+    given-names: Ali
 type: software
-version: 0.3.0
-date-released: "2026-10-16"
+version: 1.0.0
+date-released: "2026-11-03"
 license: MIT
 keywords:
   - human-robot-AI task allocation
