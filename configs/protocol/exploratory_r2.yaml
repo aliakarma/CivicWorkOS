@@ -1,0 +1,39 @@
+# Exploratory analyses added in the second review round (Reviewer 1, round 2).
+#
+# Outside the pre-specified family of hypotheses.yaml: no verdict of H1-H8 changes.
+# Run by scripts/run_revision_r2.py; records in results/revision_r2/runs.jsonl,
+# summary in reproducibility/data/revision_r2.json. Shared rules as in
+# exploratory_r1.yaml (paired reporting seeds 0-29, 95% t-intervals, unadjusted).
+# The new policy is registered by the runner; sim/protocol is unchanged.
+
+label: "added in round 2 of review; exploratory"
+
+ceiling_plus_budget:            # comment 2
+  policy: eqr_ceiling_budget    # Efficiency + quota + recency + workload ceiling + budget stage
+  scenarios: [routine, disruption]
+  seeds: [0, 29]
+  table: every add-one variant of exploratory_r1.yaml, this pair, and CivicWorkOS
+
+restoration_by_rule:            # comment 1
+  question: why Efficiency + quota + recency falls below Efficiency once the true threshold is 0.60 or more
+  variants: [led_true_0.60, led_true_0.70]   # truth only; the allocator keeps phi^led = 0.30
+  policies:
+    efficiency_recency: recency rostering without the apprenticeship quota
+    efficiency_quota: the apprenticeship quota without recency rostering
+    cw_nobudget: CivicWorkOS without its budget stage (no trainee attached for formation)
+  scenario: routine
+  seeds: [0, 29]
+
+sweep_points:                   # comment 3
+  points:
+    sweep_reference: every swept constant at its reference value (self-check, must reproduce the replay)
+    sweep_center: every swept constant at the midpoint of its bound
+  policies: [civicworkos, efficiency, efficiency_quota_recency]
+  scenario: routine
+  seeds: [0, 4]                 # as in the sweep
+
+routine_deferral_hazard:        # comment 4; accounting on recorded counts, no new runs
+  definition: >-
+    incidents per 1,000 arrived routine tasks = (incidents + h_def * sum_k risk_k *
+    (arrived_k - completed_k)) / arrived * 1000
+  h_def: [0.0, 0.03, 0.05, 0.10, 0.15]
